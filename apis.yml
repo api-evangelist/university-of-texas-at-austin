@@ -1,0 +1,98 @@
+---
+aid: university-of-texas-at-austin
+name: University of Texas at Austin
+description: >-
+  The University of Texas at Austin is a flagship public research university in
+  Austin, Texas, United States, ranked #65 in the QS World University Rankings
+  2025. Its public, machine-readable API footprint is concentrated in its
+  library and research-data infrastructure rather than a single centralized
+  developer portal. The UT Libraries operate Texas ScholarWorks, a DSpace 8
+  institutional repository exposing a public DSpace REST API and an OAI-PMH
+  metadata-harvesting endpoint, and the university participates in the Texas
+  Data Repository, a Dataverse instance hosted by the Texas Digital Library that
+  offers a documented REST API. Enterprise integration APIs (the UT Austin API
+  Registry / Identity and Access Management services) exist but are gated behind
+  UT EID authentication and internal ServiceNow access.
+type: Index
+position: Consumer
+access: 3rd-Party
+image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+url: https://raw.githubusercontent.com/api-evangelist/university-of-texas-at-austin/refs/heads/main/apis.yml
+tags:
+  - Education
+  - Higher Education
+  - University
+  - Research
+  - Library
+  - Open Data
+  - Institutional Repository
+  - United States
+  - Texas
+created: '2026-06-03'
+modified: '2026-06-03'
+specificationVersion: '0.19'
+apis:
+  - aid: university-of-texas-at-austin:scholarworks-rest
+    name: Texas ScholarWorks DSpace REST API
+    description: >-
+      Public DSpace 8 REST API for Texas ScholarWorks, the UT Austin
+      institutional repository of theses, dissertations, faculty research, and
+      open-access scholarship. The API root reports "DSpace at UT Austin" and
+      exposes HAL+JSON resources for communities, collections, items, and
+      bitstreams. Verified live (HTTP 200) on 2026-06-03.
+    humanURL: https://repositories.lib.utexas.edu/
+    baseURL: https://repositories.lib.utexas.edu/server/api
+    tags: [ Library, Institutional Repository, Research, DSpace, Open Access ]
+    properties:
+      - type: Documentation
+        url: https://repositories.lib.utexas.edu/server/api
+  - aid: university-of-texas-at-austin:scholarworks-oai
+    name: Texas ScholarWorks OAI-PMH Endpoint
+    description: >-
+      OAI-PMH 2.0 metadata-harvesting endpoint for Texas ScholarWorks. An
+      Identify request returns repositoryName "DSpace at UT Austin" with a
+      baseURL of https://repositories.lib.utexas.edu/server/oai/request and
+      earliest datestamp 2008. Verified live (HTTP 200) on 2026-06-03.
+    humanURL: https://guides.lib.utexas.edu/metadata-basics/harvesting
+    baseURL: https://repositories.lib.utexas.edu/server/oai/request
+    tags: [ Library, OAI-PMH, Metadata, Institutional Repository, Open Access ]
+    properties:
+      - type: Documentation
+        url: https://guides.lib.utexas.edu/metadata-basics/harvesting
+  - aid: university-of-texas-at-austin:texas-data-repository
+    name: Texas Data Repository (Dataverse) API
+    description: >-
+      UT Austin publishes and archives research datasets in the Texas Data
+      Repository, a Dataverse instance hosted by the Texas Digital Library
+      (shared across Texas institutions). The Dataverse REST API was verified
+      live at version 6.10.1 (HTTP 200) on 2026-06-03; UT Austin maintains a
+      dedicated Dataverse collection. API write operations require a free
+      account and API token.
+    humanURL: https://guides.lib.utexas.edu/research-data-services/texas-data-repository
+    baseURL: https://dataverse.tdl.org/api
+    tags: [ Research, Open Data, Dataverse, Research Data, Library ]
+    properties:
+      - type: Documentation
+        url: https://guides.dataverse.org/en/latest/api/index.html
+      - type: SignUp
+        url: https://dataverse.tdl.org/
+common:
+  - type: Website
+    url: https://www.utexas.edu/
+  - type: GitHub
+    url: https://github.com/utexas
+  - type: LinkedIn
+    url: https://www.linkedin.com/school/university-of-texas-at-austin/
+  - type: DeveloperPortal
+    url: https://it.utexas.edu/services/web-publishing-software-development
+  - type: Plans
+    url: plans/university-of-texas-at-austin-plans-pricing.yml
+  - type: RateLimits
+    url: rate-limits/university-of-texas-at-austin-rate-limits.yml
+  - type: FinOps
+    url: finops/university-of-texas-at-austin-finops.yml
+  - type: Review
+    url: review.yml
+maintainers:
+  - FN: Kin Lane
+    email: kin@apievangelist.com
