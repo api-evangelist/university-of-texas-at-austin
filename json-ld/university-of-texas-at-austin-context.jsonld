@@ -1,0 +1,87 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "schema": "https://schema.org/",
+    "dc": "http://purl.org/dc/elements/1.1/",
+    "dcterms": "http://purl.org/dc/terms/",
+    "utexas": "https://www.utexas.edu/ns#",
+
+    "CollegeOrUniversity": "schema:CollegeOrUniversity",
+    "name": "schema:name",
+    "description": "schema:description",
+    "url": "schema:url",
+    "logo": "schema:logo",
+    "sameAs": "schema:sameAs",
+
+    "Dataset": "schema:Dataset",
+    "DataCatalog": "schema:DataCatalog",
+    "WebAPI": "schema:WebAPI",
+    "documentation": "schema:documentation",
+    "provider": "schema:provider",
+
+    "Community": {
+      "@id": "utexas:Community",
+      "@context": {
+        "id": "schema:identifier",
+        "uuid": "schema:identifier",
+        "handle": "dc:identifier",
+        "title": "dc:title",
+        "description": "dc:description",
+        "archivedItemsCount": "utexas:archivedItemsCount",
+        "uri": "dcterms:identifier"
+      }
+    },
+    "Collection": {
+      "@id": "utexas:Collection",
+      "@context": {
+        "id": "schema:identifier",
+        "handle": "dc:identifier",
+        "title": "dc:title",
+        "description": "dc:description"
+      }
+    },
+    "Item": {
+      "@id": "utexas:Item",
+      "@context": {
+        "id": "schema:identifier",
+        "handle": "dc:identifier",
+        "title": "dc:title",
+        "creator": "dc:creator",
+        "subject": "dc:subject",
+        "date": "dc:date",
+        "type": "dc:type",
+        "publisher": "dc:publisher",
+        "uri": "dc:identifier"
+      }
+    }
+  },
+  "@type": "CollegeOrUniversity",
+  "name": "University of Texas at Austin",
+  "url": "https://www.utexas.edu/",
+  "logo": "https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg",
+  "sameAs": [
+    "https://github.com/utexas",
+    "https://www.linkedin.com/school/university-of-texas-at-austin/"
+  ],
+  "description": "Flagship public research university in Austin, Texas, United States. Its public, machine-readable API footprint is concentrated in library and research-data infrastructure: Texas ScholarWorks (DSpace 8 REST API and OAI-PMH) and the Texas Data Repository (Dataverse).",
+  "WebAPI": [
+    {
+      "@type": "WebAPI",
+      "name": "Texas ScholarWorks DSpace REST API",
+      "url": "https://repositories.lib.utexas.edu/server/api",
+      "documentation": "https://repositories.lib.utexas.edu/"
+    },
+    {
+      "@type": "WebAPI",
+      "name": "Texas ScholarWorks OAI-PMH Endpoint",
+      "url": "https://repositories.lib.utexas.edu/server/oai/request",
+      "documentation": "https://guides.lib.utexas.edu/metadata-basics/harvesting"
+    },
+    {
+      "@type": "WebAPI",
+      "name": "Texas Data Repository (Dataverse) API",
+      "url": "https://dataverse.tdl.org/api",
+      "documentation": "https://guides.dataverse.org/en/latest/api/index.html"
+    }
+  ]
+}
