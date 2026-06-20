@@ -58,7 +58,7 @@
   "@type": "CollegeOrUniversity",
   "name": "University of Texas at Austin",
   "url": "https://www.utexas.edu/",
-  "logo": "https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg",
+  "logo": "https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg",
   "sameAs": [
     "https://github.com/utexas",
     "https://www.linkedin.com/school/university-of-texas-at-austin/"
