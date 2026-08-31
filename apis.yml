@@ -1,24 +1,34 @@
 ---
 aid: university-of-texas-at-austin
 name: University of Texas at Austin
+x-type: university
+x-category: Public Research University
 description: >-
   The University of Texas at Austin is a flagship public research university in
-  Austin, Texas, United States, ranked #65 in the QS World University Rankings
-  2025. Its public, machine-readable API footprint is concentrated in its
-  library and research-data infrastructure rather than a single centralized
-  developer portal. The UT Libraries operate Texas ScholarWorks, a DSpace 8
-  institutional repository exposing a public DSpace REST API and an OAI-PMH
-  metadata-harvesting endpoint, and the university participates in the Texas
-  Data Repository, a Dataverse instance hosted by the Texas Digital Library that
-  offers a documented REST API. Enterprise integration APIs (the UT Austin API
-  Registry / Identity and Access Management services) exist but are gated behind
-  UT EID authentication and internal ServiceNow access.
+  Austin, Texas, United States, and the largest institution in the University of
+  Texas System. It operates no central developer portal, publishes no
+  institution-wide API catalog, and its enterprise integration APIs (Identity
+  and Access Management, student and financial systems) are gated behind UT EID
+  authentication and an internal ServiceNow request process, so they are not
+  publicly readable. What UT Austin does genuinely operate and expose publicly is
+  narrower and more specific than a portal: the Tapis v3 research-computing
+  platform, designed, built and run by the Texas Advanced Computing Center — an
+  organized research unit of UT Austin — which serves five OpenAPI-described
+  services (Systems, Files, Apps, Jobs, Notifications) on its production TACC
+  tenant; an InCommon-registered Shibboleth identity provider publishing both
+  SAML 2.0 metadata and an OpenID Connect discovery document; and Texas
+  ScholarWorks, the UT Libraries DSpace repository, with a public REST API and an
+  OAI-PMH 2.0 harvesting endpoint on the university's own host. Its research-data
+  archive is a tenancy rather than an operation: UT Austin publishes into a
+  Dataverse collection on the Texas Digital Library's shared instance, and the
+  library discovery layer is Ex Libris Primo. Both are recorded here as
+  relationships, not as UT Austin engineering.
 type: Index
 deliveryModel:
   model: saas
   open_source: false
   commercial: true
-  callable_host: false
+  callable_host: true
   label: Hosted service · you call their endpoint
   confidence: medium
   source:
@@ -42,74 +52,234 @@ access: 3rd-Party
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/university-of-texas-at-austin.png
 url: https://raw.githubusercontent.com/api-evangelist/university-of-texas-at-austin/refs/heads/main/apis.yml
 tags:
-  - Education
-  - Higher Education
   - University
-  - Research
-  - Library
-  - Open Data
-  - Institutional Repository
+  - Higher Education
+  - Education
+  - Public Research University
   - United States
   - Texas
+  - Research Computing
+  - Identity Federation
+  - Institutional Repository
+  - Research Data
+  - Library
+  - Open Data
 created: '2026-06-03'
-modified: '2026-06-03'
+modified: '2026-08-30'
 specificationVersion: '0.23'
 apis:
+  - aid: university-of-texas-at-austin:tapis
+    name: Tapis v3 Research Computing Platform (TACC production tenant)
+    x-operator: institution
+    x-operator-evidence: >-
+      Judged by what the contracts say about themselves, not by where they were
+      fetched. All five OpenAPI documents carry
+      info.contact.email cicsupport@tacc.utexas.edu and
+      info.termsOfService https://tapis-project.org. The live tenants registry at
+      https://tacc.tapis.io/v3/tenants lists the `tacc` tenant with
+      owner CICSupport@tacc.utexas.edu and site_id `tacc`. TACC is an organized
+      research unit of The University of Texas at Austin, so this is
+      UT Austin engineering, not a vendor contract running under its name. Tapis
+      is NSF-funded and co-developed with the University of Hawaii, which runs a
+      separate site (uhprod.uhtapis.org) — a UH profile would record its own
+      host, not this one.
+    description: >-
+      Tapis is the API platform TACC builds and operates for programmatic access
+      to research computing: registering storage and compute systems, moving
+      files, defining applications, submitting and tracking HPC jobs, and
+      subscribing to job events. The production TACC tenant serves five
+      OpenAPI 3.0.3-described services, all verified healthy (HTTP 200 on
+      /healthcheck) on 2026-08-30. Reads and writes require a tenant-issued JWT;
+      the health-check endpoints are anonymous. This is the one surface in this
+      profile where the institution wrote the contract.
+    humanURL: https://tapis-project.org/
+    baseURL: https://tacc.tapis.io/v3
+    tags: [ Research Computing, HPC, Job Execution, File Transfer, Research ]
+    properties:
+      - type: OpenAPI
+        url: openapi/university-of-texas-at-austin-tapis-systems-openapi.yml
+      - type: OpenAPI
+        url: openapi/university-of-texas-at-austin-tapis-files-openapi.yml
+      - type: OpenAPI
+        url: openapi/university-of-texas-at-austin-tapis-apps-openapi.yml
+      - type: OpenAPI
+        url: openapi/university-of-texas-at-austin-tapis-jobs-openapi.yml
+      - type: OpenAPI
+        url: openapi/university-of-texas-at-austin-tapis-notifications-openapi.yml
+      - type: Documentation
+        url: https://tapis.readthedocs.io/en/latest/technical/index.html
+      - type: SourceCode
+        url: https://github.com/tapis-project
+      - type: Authentication
+        url: authentication/university-of-texas-at-austin-authentication.yml
+      - type: Errors
+        url: errors/university-of-texas-at-austin-errors.yml
+      - type: Lifecycle
+        url: lifecycle/university-of-texas-at-austin-lifecycle.yml
+  - aid: university-of-texas-at-austin:enterprise-idp
+    name: UT Austin Enterprise Identity Provider (SAML 2.0 + OpenID Connect)
+    x-operator: institution
+    x-operator-evidence: >-
+      Host enterprise.login.utexas.edu is under the institution's own
+      registrable domain, and the SAML metadata declares OrganizationName
+      "The University of Texas at Austin".
+    description: >-
+      UT Austin's Shibboleth identity provider, and the most under-catalogued
+      class of institutional API surface. It publishes SAML 2.0 metadata at
+      /idp/shibboleth (entityID
+      https://enterprise.login.utexas.edu/idp/shibboleth) with HTTP-POST,
+      POST-SimpleSign, HTTP-Redirect and SOAP/ECP bindings, and the same entity
+      resolves signed from the InCommon metadata query service, confirming
+      InCommon/eduGAIN participation. It also serves a full OpenID Connect
+      discovery document at /.well-known/openid-configuration advertising
+      authorization, token, userinfo, JWKS, introspection, revocation,
+      end-session and dynamic client registration endpoints, and ten scopes —
+      six of them institution-defined (utexas_profile, utexas_restrict,
+      utexas_student_extended, memberof, groups, iidasmail). Both documents are
+      anonymously readable and machine-readable; obtaining client credentials is
+      an institutional process, not self-service. Verified live (HTTP 200) on
+      2026-08-30.
+    humanURL: https://identity.utexas.edu/
+    baseURL: https://enterprise.login.utexas.edu
+    tags: [ Identity Federation, Shibboleth, SAML, OpenID Connect, InCommon, Authentication ]
+    properties:
+      - type: Authentication
+        url: authentication/university-of-texas-at-austin-authentication.yml
+      - type: Scopes
+        url: scopes/university-of-texas-at-austin-scopes.yml
+      - type: Conformance
+        url: conformance/university-of-texas-at-austin-conformance.yml
+      - type: Documentation
+        url: https://identity.utexas.edu/
+      - type: Metadata
+        url: https://enterprise.login.utexas.edu/idp/shibboleth
+      - type: OpenIDConnectDiscovery
+        url: https://enterprise.login.utexas.edu/.well-known/openid-configuration
   - aid: university-of-texas-at-austin:scholarworks-rest
     name: Texas ScholarWorks DSpace REST API
+    x-operator: institution
+    x-operator-evidence: >-
+      Host repositories.lib.utexas.edu is under the institution's own
+      registrable domain; the API root reports dspaceName "DSpace at UT Austin".
     description: >-
-      Public DSpace 8 REST API for Texas ScholarWorks, the UT Austin
-      institutional repository of theses, dissertations, faculty research, and
-      open-access scholarship. The API root reports "DSpace at UT Austin" and
-      exposes HAL+JSON resources for communities, collections, items, and
-      bitstreams. Verified live (HTTP 200) on 2026-06-03.
+      Public DSpace REST API for Texas ScholarWorks, the UT Libraries
+      institutional repository of theses, dissertations, faculty research and
+      open-access scholarship. The root document reports dspaceName
+      "DSpace at UT Austin" and dspaceVersion "DSpace 9.4-SNAPSHOT" (this repo
+      previously recorded DSpace 8), and exposes HAL+JSON resources for
+      communities, collections, items, bundles and bitstreams. Anonymous read
+      returns HTTP 200; authenticated access is advertised over Shibboleth SSO
+      and DSpace password login in the WWW-Authenticate header. The software is
+      DSpace's, but the deployment, the host and the content are UT Austin's.
+      Verified live (HTTP 200) on 2026-08-30.
     humanURL: https://repositories.lib.utexas.edu/
     baseURL: https://repositories.lib.utexas.edu/server/api
     tags: [ Library, Institutional Repository, Research, DSpace, Open Access ]
     properties:
       - type: Documentation
         url: https://repositories.lib.utexas.edu/server/api
+      - type: Authentication
+        url: authentication/university-of-texas-at-austin-authentication.yml
+      - type: Errors
+        url: errors/university-of-texas-at-austin-errors.yml
+      - type: Examples
+        url: examples/university-of-texas-at-austin-examples.yml
   - aid: university-of-texas-at-austin:scholarworks-oai
     name: Texas ScholarWorks OAI-PMH Endpoint
+    x-operator: institution
+    x-operator-evidence: >-
+      Host repositories.lib.utexas.edu is under the institution's own
+      registrable domain; the Identify response returns repositoryName
+      "DSpace at UT Austin".
     description: >-
       OAI-PMH 2.0 metadata-harvesting endpoint for Texas ScholarWorks. An
-      Identify request returns repositoryName "DSpace at UT Austin" with a
-      baseURL of https://repositories.lib.utexas.edu/server/oai/request and
-      earliest datestamp 2008. Verified live (HTTP 200) on 2026-06-03.
+      Identify request returns repositoryName "DSpace at UT Austin", baseURL
+      https://repositories.lib.utexas.edu/server/oai/request, granularity
+      YYYY-MM-DDThh:mm:ssZ, deletedRecord "transient" and earliest datestamp
+      2008-08-13. ListMetadataFormats offers thirteen prefixes including oai_dc,
+      etdms, marc, mets, mods, qdc, rioxx and xoai. This is a conformance hit
+      against the Kin Score education regime's oai-pmh standard, on the
+      institution's own host. Verified live (HTTP 200) on 2026-08-30.
     humanURL: https://guides.lib.utexas.edu/metadata-basics/harvesting
     baseURL: https://repositories.lib.utexas.edu/server/oai/request
     tags: [ Library, OAI-PMH, Metadata, Institutional Repository, Open Access ]
     properties:
       - type: Documentation
         url: https://guides.lib.utexas.edu/metadata-basics/harvesting
+      - type: Conformance
+        url: conformance/university-of-texas-at-austin-conformance.yml
+      - type: Examples
+        url: examples/university-of-texas-at-austin-examples.yml
+      - type: Lifecycle
+        url: lifecycle/university-of-texas-at-austin-lifecycle.yml
   - aid: university-of-texas-at-austin:texas-data-repository
-    name: Texas Data Repository (Dataverse) API
+    name: Texas Data Repository (Dataverse) — UT Austin collection
+    x-operator: tenant
+    x-operator-evidence: >-
+      Host dataverse.tdl.org belongs to the Texas Digital Library consortium,
+      not to utexas.edu. UT Austin's relationship to it is a named collection:
+      https://dataverse.tdl.org/api/dataverses/utexas returns HTTP 200 with name
+      "University of Texas at Austin Dataverse Collection" and affiliation
+      "The University of Texas at Austin", contact m.shensky@austin.utexas.edu.
+      The data and the DOIs are UT Austin's; the contract and the platform are
+      the Texas Digital Library's. The generic Dataverse specification is NOT
+      saved under this institution.
     description: >-
       UT Austin publishes and archives research datasets in the Texas Data
-      Repository, a Dataverse instance hosted by the Texas Digital Library
-      (shared across Texas institutions). The Dataverse REST API was verified
-      live at version 6.10.1 (HTTP 200) on 2026-06-03; UT Austin maintains a
-      dedicated Dataverse collection. API write operations require a free
-      account and API token.
-    humanURL: https://guides.lib.utexas.edu/research-data-services/texas-data-repository
+      Repository, a Dataverse instance operated by the Texas Digital Library and
+      shared across Texas institutions. The instance reported version 6.10.1
+      (HTTP 200) on 2026-08-30 and the UT Austin collection is confirmed at
+      /api/dataverses/utexas. Datasets are minted DataCite DOIs under the
+      repository's 10.18738 prefix. Recorded as a tenant relationship: it is a
+      real and significant part of UT Austin's programmable footprint, and it is
+      not UT Austin's engineering.
+    humanURL: https://dataverse.tdl.org/dataverse/utexas
     baseURL: https://dataverse.tdl.org/api
-    tags: [ Research, Open Data, Dataverse, Research Data, Library ]
+    tags: [ Research Data, Open Data, Dataverse, Research, Library ]
     properties:
       - type: Documentation
         url: https://guides.dataverse.org/en/latest/api/index.html
       - type: Signup
         url: https://dataverse.tdl.org/
+      - type: Examples
+        url: examples/university-of-texas-at-austin-examples.yml
 common:
-  - type: DomainSecurity
-    url: security/university-of-texas-at-austin-domain-security.yml
   - type: Website
     url: https://www.utexas.edu/
-  - type: GitHub
-    url: https://github.com/utexas
+  - type: ResearchComputing
+    url: https://tacc.utexas.edu/
+  - type: IdentityFederation
+    url: https://identity.utexas.edu/
+  - type: ResearchRepository
+    url: https://repositories.lib.utexas.edu/
+  - type: LibraryCatalog
+    url: https://search.lib.utexas.edu/
+  - type: CourseCatalog
+    url: https://catalog.utexas.edu/
+  - type: OpenData
+    url: https://dataverse.tdl.org/dataverse/utexas
+  - type: AIPolicy
+    url: https://ai.utexas.edu/
+  - type: Documentation
+    url: https://docs.tacc.utexas.edu/
+  - type: APIReference
+    url: https://tapis.readthedocs.io/en/latest/technical/index.html
+  - type: GitHubOrganization
+    url: https://github.com/TACC
+  - type: OpenSourceProgramOffice
+    url: https://opensource.utexas.edu/
+  - type: TermsOfService
+    url: https://www.utexas.edu/site-policies
+  - type: PrivacyPolicy
+    url: https://security.utexas.edu/policies
+  - type: Support
+    url: https://tacc.utexas.edu/about/help/
+  - type: Blog
+    url: https://news.utexas.edu/
   - type: LinkedIn
     url: https://www.linkedin.com/school/university-of-texas-at-austin/
-  - type: DeveloperPortal
-    url: https://it.utexas.edu/services/web-publishing-software-development
+  - type: DomainSecurity
+    url: security/university-of-texas-at-austin-domain-security.yml
   - type: Plans
     url: plans/university-of-texas-at-austin-plans-pricing.yml
   - type: RateLimits
@@ -118,6 +288,67 @@ common:
     url: finops/university-of-texas-at-austin-finops.yml
   - type: Review
     url: review.yml
+x-coverage:
+  state: covered
+  reason: covered
+  detail: >-
+    UT Austin operates no central developer portal and no institution-wide API
+    catalog, and its enterprise integration APIs sit behind UT EID plus an
+    internal ServiceNow request process, so they are not publicly readable. What
+    it does operate publicly was found and verified rather than assumed: five
+    OpenAPI-described Tapis v3 services on the TACC production tenant, all
+    healthy; an InCommon-registered Shibboleth IdP publishing SAML 2.0 metadata
+    and an OIDC discovery document; and the Texas ScholarWorks DSpace REST and
+    OAI-PMH endpoints on the university's own host. Two surfaces are recorded as
+    relationships rather than engineering: the Texas Data Repository Dataverse
+    collection (Texas Digital Library) and the Primo library discovery layer
+    (Ex Libris) — no vendor contract is saved under this institution. The
+    central IT site (it.utexas.edu, now 301 to tech.utexas.edu) returns 403 to
+    every non-browser client, so any API-registry documentation it may carry
+    could not be read; nothing was inferred from it. github.com/utexas was found
+    dead (HTTP 404 — five empty 2016 placeholder repos) and that pointer was
+    removed; the institution's real GitHub presence is github.com/TACC.
+  evidence:
+    - url: https://tacc.tapis.io/v3/systems/healthcheck
+      status: 200
+    - url: https://tacc.tapis.io/v3/files/healthcheck
+      status: 200
+    - url: https://tacc.tapis.io/v3/apps/healthcheck
+      status: 200
+    - url: https://tacc.tapis.io/v3/jobs/healthcheck
+      status: 200
+    - url: https://tacc.tapis.io/v3/notifications/healthcheck
+      status: 200
+    - url: https://tacc.tapis.io/v3/tenants
+      status: 200
+    - url: https://tacc.tapis.io/v3/systems
+      status: 401
+    - url: https://enterprise.login.utexas.edu/idp/shibboleth
+      status: 200
+    - url: https://enterprise.login.utexas.edu/.well-known/openid-configuration
+      status: 200
+    - url: https://mdq.incommon.org/entities/https%3A%2F%2Fenterprise.login.utexas.edu%2Fidp%2Fshibboleth
+      status: 200
+    - url: https://repositories.lib.utexas.edu/server/api
+      status: 200
+    - url: https://repositories.lib.utexas.edu/server/oai/request?verb=Identify
+      status: 200
+    - url: https://dataverse.tdl.org/api/dataverses/utexas
+      status: 200
+    - url: https://dataverse.tdl.org/api/info/version
+      status: 200
+    - url: https://tech.utexas.edu/services/api-registry
+      status: 403
+    - url: https://github.com/utexas
+      status: 404
+    - url: https://api.utexas.edu/
+      status: 0
+    - url: https://data.utexas.edu/
+      status: 0
+    - url: https://developer.utexas.edu/
+      status: 0
+  generated: '2026-08-30'
+  method: probed
 maintainers:
   - FN: Kin Lane
     email: kin@apievangelist.com
