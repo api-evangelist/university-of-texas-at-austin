@@ -205,6 +205,8 @@ apis:
   humanURL: https://tapis-project.org/
   baseURL: https://tacc.tapis.io/v3
   tags:
+  - Application
+  tags_raw:
   - Applications
   properties:
   - type: OpenAPI
@@ -318,6 +320,8 @@ apis:
   humanURL: https://tapis-project.org/
   baseURL: https://tacc.tapis.io/v3
   tags:
+  - Event
+  tags_raw:
   - Events
   properties:
   - type: OpenAPI
@@ -360,7 +364,8 @@ apis:
   description: General service health and readiness
   humanURL: https://tapis-project.org/
   baseURL: https://tacc.tapis.io/v3
-  tags:
+  tags: []
+  tags_raw:
   - General
   properties:
   - type: OpenAPI
@@ -381,6 +386,8 @@ apis:
   humanURL: https://tapis-project.org/
   baseURL: https://tacc.tapis.io/v3
   tags:
+  - Job
+  tags_raw:
   - Jobs
   properties:
   - type: OpenAPI
@@ -540,6 +547,8 @@ apis:
   humanURL: https://tapis-project.org/
   baseURL: https://tacc.tapis.io/v3
   tags:
+  - Subscription
+  tags_raw:
   - Subscriptions
   properties:
   - type: OpenAPI
@@ -579,7 +588,8 @@ apis:
   description: Support for managing a sequence of test notifications.
   humanURL: https://tapis-project.org/
   baseURL: https://tacc.tapis.io/v3
-  tags:
+  tags: []
+  tags_raw:
   - Test
   properties:
   - type: OpenAPI
