@@ -1,0 +1,70 @@
+---
+name: University of Texas at Austin — error semantics
+description: >-
+  Error shapes observed on live unauthenticated requests. Captured, not
+  documented — none of these surfaces publishes an error reference.
+generated: '2026-08-30'
+method: probed
+source: live HTTP probes 2026-08-30
+surfaces:
+  - surface: Texas ScholarWorks DSpace REST API
+    x-operator: institution
+    base_url: https://repositories.lib.utexas.edu/server/api
+    generated: '2026-08-30'
+    method: probed
+    source: https://repositories.lib.utexas.edu/server/api/core/items/00000000-0000-0000-0000-000000000000
+    format: Spring Boot JSON error body
+    machine_readable: true
+    rfc7807: false
+    fields: [ timestamp, status, error, message, path ]
+    observed:
+      - status: 404
+        body: >-
+          {"timestamp":"2026-08-30T20:39:04.541+00:00","status":404,
+          "error":"Not Found","message":"An exception has occurred",
+          "path":"/server/api/core/items/00000000-0000-0000-0000-000000000000"}
+        note: >-
+          The `message` field is generic ("An exception has occurred") and
+          carries no actionable detail. There is no error code taxonomy.
+      - status: 401
+        note: >-
+          Unauthenticated access to a protected resource returns 401 with a
+          WWW-Authenticate header naming shibboleth and password realms.
+  - surface: Tapis v3 platform — TACC production tenant
+    x-operator: institution
+    base_url: https://tacc.tapis.io/v3
+    generated: '2026-08-30'
+    method: probed
+    source: https://tacc.tapis.io/v3/systems
+    format: >-
+      Plain-text token-prefixed message on auth rejection; JSON envelope
+      (status/message/version/result/metadata) on service responses.
+    machine_readable: partial
+    rfc7807: false
+    observed:
+      - status: 401
+        content_type: text/plain
+        body: >-
+          TAPIS_SECURITY_MISSING_JWT_INFO HTTP GET request rejected due to
+          missing JSON Web Token information.
+        note: >-
+          A stable, greppable error code prefix (TAPIS_SECURITY_*), but the 401
+          is returned as text/plain rather than in the JSON envelope the
+          contracts define for success responses.
+      - status: 404
+        content_type: application/json
+        note: >-
+          Unknown paths return the JSON envelope with status "error" and a
+          message field.
+  - surface: Texas Data Repository (Dataverse)
+    x-operator: tenant
+    base_url: https://dataverse.tdl.org/api
+    generated: '2026-08-30'
+    method: probed
+    source: https://dataverse.tdl.org/api/dataverses/utexas
+    format: '{"status": "OK"|"ERROR", "message": "...", "data": {...}}'
+    machine_readable: true
+    rfc7807: false
+    note: >-
+      Dataverse's error contract, not UT Austin's. Recorded for completeness of
+      the tenant relationship only.

@@ -1,0 +1,2108 @@
+openapi: 3.2.0
+info:
+  title: Tapis Systems API
+  description: The Tapis Systems API provides for management of Tapis Systems including permissions, credentials and Scheduler Profiles.
+  version: 26Q2.0
+  termsOfService: https://tapis-project.org
+  contact:
+    name: Systems API - CICSupport
+    url: https://tapis-project.org
+    email: cicsupport@tacc.utexas.edu
+  license:
+    name: 3-Clause BSD License
+    url: https://opensource.org/licenses/BSD-3-Clause
+servers:
+- url: http://localhost:8080/
+  description: Local test environment
+  variables: {}
+- url: https://dev.develop.tapis.io/
+  description: Development environment
+  variables: {}
+tags:
+- name: Systems
+  description: Manage Tapis system resources. Create, retrieve, update, etc.
+paths:
+  /v3/systems:
+    get:
+      tags:
+      - Systems
+      description: 'Retrieve list of systems.
+
+
+        Use *listType*, *search* and *select* query parameters to limit results. Query parameter *listType* allows for
+
+        filtering results based on authorization. Please note that using *ALL* may have a significant negative impact
+
+        on performance. Options for *listType* are
+
+
+        - *OWNED* Include only items owned by requester (Default)
+
+        - *SHARED_PUBLIC* Include only items shared publicly
+
+        - *SHARED_DIRECT* Include only items shared directly with requester. Exclude publicly shared items.
+
+        - *READ_PERM* Include only items for which requester was granter READ or MODIFY permission.
+
+        - *MINE* Include items owned or shared directly with requester. Exclude publicly shared items.
+
+        - *ALL* Include all items requester is authorized to view. Includes check for READ or MODIFY permission. May impact performance.
+
+
+        Use *hasCredentials* boolean query parameter to limit results based on the presence or absence of registered credentials
+
+        for a system. Filtering is based on registered credentials for the current *defaultAuthnMethod* of a system.
+
+        Credentials for other authentication method types are ignored. For a dynamic *effectiveUserId* filtering is
+
+        based on the Tapis user making the request. If the query parameter is absent then no filtering is done.
+
+
+        Certain Tapis services or a tenant administrator may use the query parameter *impersonationId* to be used in
+
+        place of the requesting Tapis user. Tapis will use this user Id when performing authorization and resolving
+
+        the *effectiveUserId*.'
+      operationId: getSystems
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: search
+        in: query
+        description: Search conditions as a single query parameter. For example search=(id.like.MySys*)~(enabled.eq.true)
+        schema:
+          type: string
+      - name: listType
+        in: query
+        description: Determines additional filtering of results based on ownership, permissions and sharing. Default is to only show systems owned by requester.
+        schema:
+          $ref: '#/components/schemas/ListTypeEnum'
+      - name: limit
+        in: query
+        description: Limit number of items returned. For example limit=10. Use -1 for unlimited. Default is 100.
+        schema:
+          type: integer
+          default: 100
+      - name: orderBy
+        in: query
+        description: Attribute for sorting. Direction may be included. For example orderBy=id(desc). Default direction is (asc).
+        schema:
+          type: string
+      - name: skip
+        in: query
+        description: Number of items to skip. Use one of skip or startAfter. For example skip=10. Default is 0.
+        schema:
+          type: integer
+      - name: startAfter
+        in: query
+        description: Where to start when sorting. Use one of skip or startAfter. Must also specify orderBy. For example, limit=10&orderBy=id(asc)&startAfter=my.sys1
+        schema:
+          type: string
+      - name: computeTotal
+        in: query
+        description: Compute total number of results that would have been returned if unlimited. Default is false.
+        schema:
+          type: boolean
+          default: false
+      - name: select
+        in: query
+        description: List of attributes to be included as part of each result item. Keywords *allAttributes* and *summaryAttributes* are supported. For example select=id,owner,host
+        schema:
+          type: string
+          default: summaryAttributes
+      - name: showDeleted
+        in: query
+        description: Indicates if Systems marked as deleted should be shown in the results. Default is false.
+        schema:
+          type: boolean
+          default: false
+      - name: impersonationId
+        in: query
+        description: Restricted. Only certain Tapis services or a tenant administrator may impersonate a Tapis user.
+        schema:
+          type: string
+      - name: hasCredentials
+        in: query
+        description: Determines additional filtering based on credentials. If absent no filtering is done.
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSystems'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Get systems
+      x-summary-source: derived
+    post:
+      tags:
+      - Systems
+      description: 'Create a system using a request body. System name must be unique within a tenant and can be composed of
+
+        alphanumeric characters and the following special characters [-._~].
+
+        Name must begin with an alphanumeric character and can be no more than 80 characters in length.
+
+        Description is optional with a maximum length of 2048 characters.
+
+
+        The attribute *host* represents a host name, IP address, Globus Endpoint Id or Globus Collection Id.
+
+
+        The attribute *effectiveUserId* determines the host login user, the user used to access the underlying host.
+
+        The attribute can be set to a static string indicating a specific user (such as a service account) or
+
+        dynamically specified as *${apiUserId}*. For the case of *${apiUserId}*, the service resolves the variable by
+
+        extracting the identity from the request to the service (i.e. the JWT) and applying a mapping to a host login
+
+        user if such a mapping has been provided. If no mapping is provided, then the extracted identity is taken to be
+
+        the host login user.
+
+
+        If the *effectiveUserId* is static (i.e. not *${apiUserId}*) then credentials may optionally be provided in the
+
+        *authnCredential* attribute of the request body. Please note that if there is a *loginUser* field in the
+
+        credential request body, TAPIS will reject the request because the static effective user is always the login user.
+
+        The Systems service does not store the secrets in its database, they are persisted in the Security Kernel.
+
+
+        By default for LINUX and S3 type systems credentials provided are verified. Use query parameter
+
+        skipCredentialCheck=true to bypass initial verification of credentials.
+
+
+        The attribute *rootDir* serves as an effective root directory when operating on files through the Tapis
+
+        Files service. All paths are relative to this directory when using Files to list, copy, move, mkdir, etc.
+
+        Required for systems of type LINUX or IRODS. Supports the following variables which are resolved at create
+
+        time: *${apiUserId}*, *${tenant}* and *${owner}*. May not be updated. Contact support to request a change.
+
+
+        There is also a special macro available for *rootDir* that may be used under certain conditions when a system
+
+        is first created. The macro name is HOST_EVAL.
+
+        The syntax for the macro is HOST_EVAL($var), where *var* is the environment variable to be evaluated
+
+        on the system host when the create request is made.
+
+        Note that the $ character preceding the environment variable name is optional.
+
+        If after resolution the final path does not have the required leading slash (/) to make it an absolute path,
+
+        then one will be prepended.
+
+        The following conditions must be met in order to use the macro
+
+        - System must be of type LINUX
+
+        - Credentials must be provided when system is created.
+
+        - Macro HOST_EVAL() must only appear once and must be the first element of the path. Including a leading slash is optional.
+
+        - The *effectiveUserId* for the system must be static. Note that *effectiveUserId* may be set to *${owner}*.
+
+
+        Here are some examples
+
+
+        - HOST_EVAL($SCRATCH)
+
+        - HOST_EVAL($HOME)
+
+        - /HOST_EVAL(MY_ROOT_DIR)/scratch
+
+        - /HOST_EVAL($PROJECT_HOME)/projects/${tenant}/${owner}
+
+
+        Note that certain attributes in the request body (such as tenant) are allowed but ignored so that the JSON
+
+        result returned by a GET may be modified and used when making a POST request to create a system.
+
+        The attributes that are allowed but ignored are
+
+
+        - tenant
+
+        - uuid
+
+        - deleted
+
+        - created
+
+        - updated'
+      operationId: createSystem
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: skipCredentialCheck
+        in: query
+        description: Bypass initial credential validation (for LINUX and S3). Default is false.
+        schema:
+          type: boolean
+          default: false
+      requestBody:
+        required: true
+        description: A JSON object specifying information for the system to be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqPostSystem'
+      responses:
+        '201':
+          description: System created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '400':
+          description: Input error. Invalid JSON or credential validation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '409':
+          description: System already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Create system
+      x-summary-source: derived
+  /v3/systems/search:
+    get:
+      tags:
+      - Systems
+      description: 'Retrieve details for systems. Use query parameters to specify search conditions.
+
+        For example owner.eq=jdoe&port.gt=1024
+
+        Use *listType* and *select* query parameters to limit results. Query parameter *listType* allows for filtering
+
+        results based on authorization. Please note that using *ALL* may have a significant negative impact
+
+        on performance. Options for *listType* are
+
+
+        - *OWNED* Include only items owned by requester (Default)
+
+        - *SHARED_PUBLIC* Include only items shared publicly
+
+        - *SHARED_DIRECT* Include only items shared directly with requester. Exclude publicly shared items.
+
+        - *READ_PERM* Include only items for which requester was granter READ or MODIFY permission.
+
+        - *MINE* Include items owned or shared directly with requester. Exclude publicly shared items.
+
+        - *ALL* Include all items requester is authorized to view. Includes check for READ or MODIFY permission. May impact performance.
+
+
+        Use *hasCredentials* boolean query parameter to limit results based on the presence or absence of registered credentials
+
+        for a system. Filtering is based on registered credentials for the current *defaultAuthnMethod* of a system.
+
+        Credentials for other authentication method types are ignored. For a dynamic *effectiveUserId* filtering is
+
+        based on the Tapis user making the request. If the query parameter is absent then no filtering is done.'
+      operationId: searchSystemsQueryParameters
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: freeFormParameterName
+        in: query
+        description: Free form query parameters.
+        explode: true
+        allowEmptyValue: true
+        schema:
+          type: object
+          additionalProperties:
+            type: string
+        style: form
+      - name: listType
+        in: query
+        description: Determines additional filtering of results based on ownership, permissions and sharing. Default is to only see items owned by requester.
+        schema:
+          $ref: '#/components/schemas/ListTypeEnum'
+      - name: limit
+        in: query
+        description: Limit number of items returned. For example limit=10. Use -1 for unlimited. Default is 100.
+        schema:
+          type: integer
+          default: 100
+      - name: orderBy
+        in: query
+        description: Attribute for sorting. Direction may be included. For example orderBy=id(desc). Default direction is (asc).
+        schema:
+          type: string
+      - name: skip
+        in: query
+        description: Number of items to skip. Use one of skip or startAfter. For example skip=10. Default is 0.
+        schema:
+          type: integer
+      - name: startAfter
+        in: query
+        description: Where to start when sorting. Use one of skip or startAfter. Must also specify orderBy. For example, limit=10&orderBy=id(asc)&startAfter=my.sys2
+        schema:
+          type: string
+      - name: computeTotal
+        in: query
+        description: Compute total number of results that would have been returned if unlimited. Default is false.
+        schema:
+          type: boolean
+          default: false
+      - name: select
+        in: query
+        description: List of attributes to be included as part of each result item. Keywords *allAttributes* and *summaryAttributes* are supported. For example select=id,owner,host
+        schema:
+          type: string
+          default: summaryAttributes
+      - name: hasCredentials
+        in: query
+        description: Determines additional filtering based on credentials. If absent no filtering is done.
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSystems'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Search systems query parameters
+      x-summary-source: derived
+    post:
+      tags:
+      - Systems
+      description: 'Retrieve details for systems. Use request body to specify SQL-like search conditions.
+
+        Use *listType* and *select* query parameters to limit results. Query parameter *listType* allows
+
+        for filtering results based on authorization. Please note that using *ALL* may have a significant
+
+        negative impact on performance. Options for *listType* are
+
+
+        - *OWNED* Include only items owned by requester (Default)
+
+        - *SHARED_PUBLIC* Include only items shared publicly
+
+        - *ALL* Include all items requester is authorized to view. Includes check for READ or MODIFY permission. May impact performance.
+
+
+        Use *hasCredentials* boolean query parameter to limit results based on the presence or absence of registered credentials
+
+        for a system. Filtering is based on registered credentials for the current *defaultAuthnMethod* of a system.
+
+        Credentials for other authentication method types are ignored. For a dynamic *effectiveUserId* filtering is
+
+        based on the Tapis user making the request. If the query parameter is absent then no filtering is done.'
+      operationId: searchSystemsRequestBody
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: listType
+        in: query
+        description: Determines additional filtering of results based on ownership, permissions and sharing. Default is to only see items owned by requester.
+        schema:
+          $ref: '#/components/schemas/ListTypeEnum'
+      - name: limit
+        in: query
+        description: Limit number of items returned. For example limit=10. Use -1 for unlimited. Default is 100.
+        schema:
+          type: integer
+          default: 100
+      - name: orderBy
+        in: query
+        description: Attribute for sorting. Direction may be included. For example orderBy=id(desc). Default direction is (asc).
+        schema:
+          type: string
+      - name: skip
+        in: query
+        description: Number of items to skip. Use one of skip or startAfter. For example skip=10. Default is 0.
+        schema:
+          type: integer
+      - name: startAfter
+        in: query
+        description: Where to start when sorting. Use one of skip or startAfter. Must also specify orderBy. For example, limit=10&orderBy=id(asc)&startAfter=my.sys1
+        schema:
+          type: string
+      - name: computeTotal
+        in: query
+        description: Compute total number of results that would have been returned if unlimited. Default is false.
+        schema:
+          type: boolean
+          default: false
+      - name: select
+        in: query
+        description: List of attributes to be included as part of each result item. Keywords *allAttributes* and *summaryAttributes* are supported. For example select=id,owner,host
+        schema:
+          type: string
+          default: summaryAttributes
+      - name: hasCredentials
+        in: query
+        description: Determines additional filtering based on credentials. If absent no filtering is done.
+        schema:
+          type: boolean
+      requestBody:
+        required: true
+        description: A JSON object specifying SQL-like search conditions as an array of strings. Strings are concatenated to form full search query.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqSearchSystems'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSystems'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Search systems request body
+      x-summary-source: derived
+  /v3/systems/match/constraints:
+    post:
+      tags:
+      - Systems
+      description: '**WARNING** *Capability constraint matching is not yet supported.*
+
+
+        Retrieve details for systems. Use request body to specify constraint conditions as an SQL-like WHERE clause.'
+      operationId: matchConstraints
+      security:
+      - TapisJWT: []
+      requestBody:
+        required: true
+        description: A JSON object specifying SQL-like constraint conditions as an array of strings. Strings are concatenated to form full query.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqMatchConstraints'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSystems'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Match constraints
+      x-summary-source: derived
+  /v3/systems/{systemId}:
+    get:
+      tags:
+      - Systems
+      description: 'Retrieve information for a system given the system Id.
+
+
+        Use query parameter *authnMethod* to override the default authentication method.
+
+
+        Certain Tapis services or a tenant administrator may use the query parameter *impersonationId* to be used in
+
+        place of the requesting Tapis user. Tapis will use this user Id when performing authorization and resolving
+
+        the *effectiveUserId*.
+
+
+        Certain Tapis services may use the query parameter *sharedAppCtx* to indicate that the request is in a shared
+
+        application context.'
+      operationId: getSystem
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: authnMethod
+        in: query
+        description: Desired authentication method to use when fetching credentials, default method used if this is null.
+        schema:
+          type: string
+          default: ''
+      - name: requireExecPerm
+        in: query
+        description: Check for EXECUTE permission as well as READ permission.
+        schema:
+          type: boolean
+          default: false
+      - name: select
+        in: query
+        description: List of attributes to be included as part of the result item. Keywords *allAttributes* and *summaryAttributes* are supported. For example select=id,owner,host
+        schema:
+          type: string
+          default: allAttributes
+      - name: returnCredentials
+        in: query
+        description: Restricted. Only certain Tapis services are authorized to get credentials.
+        schema:
+          type: boolean
+          default: false
+      - name: impersonationId
+        in: query
+        description: Restricted. Only certain Tapis services or a tenant administrator may impersonate a Tapis user.
+        schema:
+          type: string
+      - name: sharedAppCtx
+        in: query
+        description: Restricted. Only certain Tapis services may indicate that the request is in a shared context. Must be set to the grantor who shared the application.
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      - name: resourceTenant
+        in: query
+        description: Restricted. May be used by Tapis services to set the tenant associated with the requested resource.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: System found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSystem'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Get system
+      x-summary-source: derived
+    patch:
+      tags:
+      - Systems
+      description: 'Update selected attributes of a system. Request body may only contain updatable attributes. System must exist.
+
+
+        Attributes that may not be updated via PATCH are
+
+
+        - id
+
+        - systemType
+
+        - owner
+
+        - enabled
+
+        - bucketName
+
+        - rootDir
+
+        - canExec
+
+
+        Note that the attributes owner and enabled may be modified using other endpoints.'
+      operationId: patchSystem
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      requestBody:
+        required: true
+        description: A JSON object specifying changes to be applied.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqPatchSystem'
+      responses:
+        '200':
+          description: System updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Patch system
+      x-summary-source: derived
+    put:
+      tags:
+      - Systems
+      description: 'Update all updatable attributes of a system using a request body identical to POST. System must exist.
+
+
+        Note that certain attributes in the request body (such as tenant) are allowed but ignored so that the JSON
+
+        result returned by a GET may be modified and used when making a PUT request to update a system.
+
+
+        The attributes that are allowed but ignored for both PUT and POST are
+
+        - tenant
+
+        - uuid
+
+        - deleted
+
+        - created
+
+        - updated
+
+
+        In addition for a PUT operation the following non-updatable attributes are allowed but ignored
+
+        - id
+
+        - systemType
+
+        - owner
+
+        - effectiveUserId
+
+        - authnCredential
+
+        - enabled
+
+        - bucketName
+
+        - rootDir
+
+        - canExec
+
+
+        Note that the attributes *owner*, *enabled* and *authnCredential* may be modified using other endpoints.
+
+        Attribute *effectiveUserId* may be updated using the endpoint **patchSystem**.'
+      operationId: putSystem
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: skipCredentialCheck
+        in: query
+        description: Bypass initial credential validation (for LINUX and S3). Default is false.
+        schema:
+          type: boolean
+          default: false
+      requestBody:
+        required: true
+        description: A JSON object specifying changes to be applied.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqPutSystem'
+      responses:
+        '200':
+          description: System updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '409':
+          description: System already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Put system
+      x-summary-source: derived
+  /v3/systems/{systemId}/isEnabled:
+    get:
+      tags:
+      - Systems
+      description: Check if a system is currently enabled, i.e. available for use.
+      operationId: isEnabled
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: Check successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBoolean'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Is enabled
+      x-summary-source: derived
+  /v3/systems/{systemId}/enable:
+    post:
+      tags:
+      - Systems
+      description: Mark a system available for use.
+      operationId: enableSystem
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: System enabled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Enable system
+      x-summary-source: derived
+  /v3/systems/{systemId}/disable:
+    post:
+      tags:
+      - Systems
+      description: Mark a system unavailable for use.
+      operationId: disableSystem
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: System disabled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Disable system
+      x-summary-source: derived
+  /v3/systems/{systemId}/delete:
+    post:
+      tags:
+      - Systems
+      description: Mark a system as deleted. System will not appear in queries unless explicitly requested.
+      operationId: deleteSystem
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: System deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Delete system
+      x-summary-source: derived
+  /v3/systems/{systemId}/undelete:
+    post:
+      tags:
+      - Systems
+      description: Mark a system as not deleted. System will appear in queries.
+      operationId: undeleteSystem
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: System undeleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Undelete system
+      x-summary-source: derived
+  /v3/systems/{systemId}/changeOwner/{userName}:
+    post:
+      tags:
+      - Systems
+      description: 'Change owner of a system.
+
+
+        Please note that existing permission grants and shares will remain.
+
+
+        **WARNING** Note also that no credentials are deleted during this process. So, for example, after the change
+
+        a system with a static *effectiveUserId* will retain the credentials and host access of the static
+
+        *effectiveUser*.'
+      operationId: changeSystemOwner
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: userName
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      responses:
+        '200':
+          description: System owner updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Change system owner
+      x-summary-source: derived
+  /v3/systems/{systemId}/history:
+    get:
+      tags:
+      - Systems
+      description: Retrieve history of changes for a given systemId.
+      operationId: getHistory
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: History successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSystemHistory'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Get history
+      x-summary-source: derived
+  /v3/systems/{systemId}/hostEval/{envVarName}:
+    get:
+      tags:
+      - Systems
+      description: 'Resolve environment variable by connecting to host associated with system.
+
+        Note that this is done for the current *effectiveUserId*.
+
+        Appropriate valid credentials must have already been registered.
+
+        The system must be of type LINUX.
+
+        The provided *{envVarName}* must start with an alphabetic character or underscore followed by 0 or more
+
+        alphanumeric characters or underscores.'
+      operationId: hostEval
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: envVarName
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/EnvVarNameString'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '400':
+          description: Bad request. Possibly an invalid character in envVarName.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Host eval
+      x-summary-source: derived
+components:
+  schemas:
+    ReqSearchSystems:
+      type: object
+      required:
+      - search
+      properties:
+        search:
+          type: array
+          minItems: 1
+          items:
+            type: string
+    ResultBoolean:
+      type: object
+      properties:
+        aBool:
+          type: boolean
+    EnvVarNameString:
+      type: string
+      minLength: 1
+    DescriptionString:
+      type: string
+      maxLength: 2048
+      description: Optional more verbose description.
+    SystemTypeEnum:
+      type: string
+      description: Type of system
+      enum:
+      - LINUX
+      - S3
+      - IRODS
+      - GLOBUS
+    ListTypeEnum:
+      type: string
+      default: OWNED
+      enum:
+      - OWNED
+      - SHARED_PUBLIC
+      - ALL
+    SysArgInputModeEnum:
+      type: string
+      enum:
+      - REQUIRED
+      - FIXED
+      - INCLUDE_ON_DEMAND
+      - INCLUDE_BY_DEFAULT
+      default: INCLUDE_BY_DEFAULT
+    RespName:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+        result:
+          $ref: '#/components/schemas/ResultName'
+    EffectiveUserId:
+      type: string
+      minLength: 1
+      maxLength: 60
+      default: ${apiUserId}
+      description: Username to use when accessing the system. A specific user (such as a service account) or the dynamic user ``${apiUserId}``.
+    JobRuntime:
+      type: object
+      required:
+      - runtimeType
+      properties:
+        runtimeType:
+          $ref: '#/components/schemas/RuntimeTypeEnum'
+        version:
+          type: string
+    ReqPostSystem:
+      type: object
+      required:
+      - id
+      - systemType
+      - host
+      - defaultAuthnMethod
+      - canExec
+      properties:
+        id:
+          $ref: '#/components/schemas/SysId'
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        systemType:
+          $ref: '#/components/schemas/SystemTypeEnum'
+        owner:
+          type: string
+          description: A specific user set at system creation.
+        host:
+          $ref: '#/components/schemas/SysHost'
+        enabled:
+          $ref: '#/components/schemas/Enabled'
+        effectiveUserId:
+          $ref: '#/components/schemas/EffectiveUserId'
+        defaultAuthnMethod:
+          $ref: '#/components/schemas/AuthnEnum'
+        authnCredential:
+          $ref: '#/components/schemas/ReqPostPutCredential'
+        bucketName:
+          type: string
+          description: Name of the bucket for an S3 type system.
+        rootDir:
+          $ref: '#/components/schemas/RootDir'
+        port:
+          type: integer
+          format: int32
+        useProxy:
+          type: boolean
+          default: false
+        proxyHost:
+          $ref: '#/components/schemas/HostString'
+        proxyPort:
+          type: integer
+          format: int32
+        dtnSystemId:
+          $ref: '#/components/schemas/DtnSysId'
+        canExec:
+          type: boolean
+          description: Indicates if system can be used to execute jobs.
+        canRunBatch:
+          type: boolean
+          default: false
+          description: Indicates if system supports running jobs using a batch scheduler.
+        enableCmdPrefix:
+          type: boolean
+          default: false
+          description: Indicates if system allows a job submission request to specify a *cmdPrefix*.
+        allowChildren:
+          type: boolean
+          default: false
+          description: Indicates if system allows for the creation of child systems.
+        mpiCmd:
+          type: string
+          minLength: 1
+          maxLength: 126
+        jobRuntimes:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/JobRuntime'
+        jobWorkingDir:
+          $ref: '#/components/schemas/DirString'
+        jobEnvVariables:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        jobMaxJobs:
+          type: integer
+        jobMaxJobsPerUser:
+          type: integer
+        batchScheduler:
+          $ref: '#/components/schemas/SchedulerTypeEnum'
+        batchLogicalQueues:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogicalQueue'
+        batchDefaultLogicalQueue:
+          $ref: '#/components/schemas/QueueNameString'
+        batchSchedulerProfile:
+          $ref: '#/components/schemas/IdString'
+        jobCapabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Capability'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagString'
+          description: List of tags as simple strings.
+        notes:
+          type: object
+          description: Metadata in the form of a Json object. Not used by Tapis.
+    LogicalQueue:
+      type: object
+      required:
+      - name
+      - hpcQueueName
+      properties:
+        name:
+          $ref: '#/components/schemas/QueueNameString'
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        hpcQueueName:
+          $ref: '#/components/schemas/QueueNameString'
+        maxJobs:
+          type: integer
+          default: 2147483647
+        maxJobsPerUser:
+          type: integer
+          default: 2147483647
+        minNodeCount:
+          type: integer
+        maxNodeCount:
+          type: integer
+        minCoresPerNode:
+          type: integer
+        maxCoresPerNode:
+          type: integer
+        minMemoryMB:
+          type: integer
+        maxMemoryMB:
+          type: integer
+        minMinutes:
+          type: integer
+        maxMinutes:
+          type: integer
+        schedulerOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SysArgSpec'
+    OperationTypeEnum:
+      type: string
+      enum:
+      - CREATE
+      - READ
+      - MODIFY
+      - EXECUTE
+      - DELETE
+      - UNDELETE
+      - CHANGE_OWNER
+      - ENABLE
+      - DISABLE
+      - GET_PERMS
+      - REVOKE_PERMS
+      - SET_CRED
+      - REMOVE_CRED
+      - GET_CRED
+    SysArgSpec:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          $ref: '#/components/schemas/InputNameString'
+        description:
+          $ref: '#/components/schemas/ArgDescriptionString'
+        inputMode:
+          $ref: '#/components/schemas/SysArgInputModeEnum'
+        arg:
+          type: string
+          minLength: 1
+        notes:
+          type: object
+    IdString:
+      type: string
+      minLength: 1
+      maxLength: 80
+    RuntimeTypeEnum:
+      type: string
+      enum:
+      - DOCKER
+      - SINGULARITY
+      - ZIP
+    QueueNameString:
+      type: string
+      minLength: 1
+      maxLength: 128
+    SysHost:
+      type: string
+      minLength: 1
+      maxLength: 256
+      description: FQDN, IP address, Globus endpoint ID or Globus collection ID.
+    HostString:
+      type: string
+      minLength: 1
+      maxLength: 256
+    AuthnEnum:
+      type: string
+      enum:
+      - PASSWORD
+      - PKI_KEYS
+      - ACCESS_KEY
+      - TOKEN
+      - TMS_KEYS
+      - CERT
+    KeyValuePair:
+      type: object
+      required:
+      - key
+      properties:
+        key:
+          type: string
+          minLength: 1
+        value:
+          type: string
+          default: ''
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        inputMode:
+          $ref: '#/components/schemas/KeyValueInputModeEnum'
+        notes:
+          type: object
+    CategoryEnum:
+      type: string
+      enum:
+      - SCHEDULER
+      - OS
+      - HARDWARE
+      - SOFTWARE
+      - JOB
+      - CONTAINER
+      - MISC
+      - CUSTOM
+    RootDir:
+      type: string
+      maxLength: 4096
+      description: Effective root directory to be used when listing files or moving files to and from the system.
+    Credential:
+      type: object
+      properties:
+        authnMethod:
+          $ref: '#/components/schemas/AuthnEnum'
+        loginUser:
+          $ref: '#/components/schemas/UserNameString'
+        password:
+          type: string
+        privateKey:
+          type: string
+        publicKey:
+          type: string
+        accessKey:
+          type: string
+        accessSecret:
+          type: string
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tmsPrivateKey:
+          type: string
+        tmsPublicKey:
+          type: string
+        tmsFingerprint:
+          type: string
+        certificate:
+          type: string
+    DatatypeEnum:
+      type: string
+      enum:
+      - STRING
+      - INTEGER
+      - BOOLEAN
+      - NUMBER
+      - TIMESTAMP
+    ParentSysId:
+      type: string
+      minLength: 1
+      maxLength: 80
+      description: Parent system associated with this child system.
+    TapisSystem:
+      type: object
+      properties:
+        tenant:
+          type: string
+        id:
+          $ref: '#/components/schemas/SysId'
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        systemType:
+          $ref: '#/components/schemas/SystemTypeEnum'
+        owner:
+          $ref: '#/components/schemas/UserNameApiDefaultString'
+        host:
+          $ref: '#/components/schemas/SysHost'
+        enabled:
+          $ref: '#/components/schemas/Enabled'
+        effectiveUserId:
+          $ref: '#/components/schemas/EffectiveUserId'
+        defaultAuthnMethod:
+          $ref: '#/components/schemas/AuthnEnum'
+        authnCredential:
+          $ref: '#/components/schemas/Credential'
+        bucketName:
+          $ref: '#/components/schemas/BucketName'
+        rootDir:
+          $ref: '#/components/schemas/RootDir'
+        port:
+          type: integer
+          format: int32
+        useProxy:
+          type: boolean
+          default: false
+        proxyHost:
+          $ref: '#/components/schemas/HostString'
+        proxyPort:
+          type: integer
+          format: int32
+        dtnSystemId:
+          $ref: '#/components/schemas/DtnSysId'
+        canExec:
+          type: boolean
+          description: Indicates if system can be used to execute jobs.
+        canRunBatch:
+          type: boolean
+          description: Indicates if system supports running jobs using a batch scheduler.
+        enableCmdPrefix:
+          type: boolean
+          default: false
+        allowChildren:
+          type: boolean
+          default: false
+          description: Indicates if system allows for the creation of child systems.
+        parentId:
+          $ref: '#/components/schemas/ParentSysId'
+        mpiCmd:
+          type: string
+          minLength: 1
+          maxLength: 126
+        jobRuntimes:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/JobRuntime'
+        jobWorkingDir:
+          $ref: '#/components/schemas/DirString'
+        jobEnvVariables:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        jobMaxJobs:
+          type: integer
+          default: 2147483647
+        jobMaxJobsPerUser:
+          type: integer
+          default: 2147483647
+        batchScheduler:
+          $ref: '#/components/schemas/SchedulerTypeEnum'
+        batchLogicalQueues:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogicalQueue'
+        batchDefaultLogicalQueue:
+          $ref: '#/components/schemas/QueueNameString'
+        batchSchedulerProfile:
+          $ref: '#/components/schemas/IdString'
+        jobCapabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Capability'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagString'
+        notes:
+          type: object
+        uuid:
+          type: string
+          format: uuid
+        deleted:
+          type: boolean
+        created:
+          type: string
+        updated:
+          type: string
+        hasCredentials:
+          type: boolean
+          default: false
+        isPublic:
+          type: boolean
+        isDynamicEffectiveUser:
+          type: boolean
+        sharedWithUsers:
+          type: array
+          items:
+            type: string
+    ReqPostPutCredential:
+      type: object
+      properties:
+        password:
+          type: string
+        privateKey:
+          type: string
+        publicKey:
+          type: string
+        accessKey:
+          type: string
+        accessSecret:
+          type: string
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        certificate:
+          type: string
+    RespSystems:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/TapisSystem'
+        metadata:
+          type: object
+          properties:
+            recordCount:
+              type: integer
+            recordLimit:
+              type: integer
+            recordsSkipped:
+              type: integer
+            orderBy:
+              type: string
+            startAfter:
+              type: string
+            totalCount:
+              type: integer
+    ArgDescriptionString:
+      type: string
+      maxLength: 8096
+    ResultResourceUrl:
+      type: object
+      properties:
+        url:
+          type: string
+    TagString:
+      type: string
+      minLength: 1
+      maxLength: 128
+    RespBoolean:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultBoolean'
+        metadata:
+          type: object
+    RespResourceUrl:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultResourceUrl'
+        metadata:
+          type: object
+    InputNameString:
+      type: string
+      minLength: 1
+      maxLength: 80
+    DirString:
+      type: string
+      minLength: 1
+      maxLength: 4096
+    Capability:
+      type: object
+      required:
+      - category
+      - name
+      - datatype
+      properties:
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        name:
+          type: string
+        datatype:
+          $ref: '#/components/schemas/DatatypeEnum'
+        precedence:
+          type: integer
+        value:
+          type: string
+    SystemHistory:
+      type: object
+      properties:
+        jwtTenant:
+          type: string
+        jwtUser:
+          $ref: '#/components/schemas/UserNameString'
+        oboTenant:
+          type: string
+        oboUser:
+          $ref: '#/components/schemas/UserNameString'
+        operation:
+          $ref: '#/components/schemas/OperationTypeEnum'
+        description:
+          type: string
+        created:
+          type: string
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: object
+        metadata:
+          type: object
+    RespSystem:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/TapisSystem'
+        metadata:
+          type: object
+    ResultChangeCount:
+      type: object
+      properties:
+        changes:
+          type: integer
+          format: int32
+    ReqMatchConstraints:
+      type: object
+      required:
+      - match
+      properties:
+        match:
+          type: array
+          minItems: 1
+          items:
+            type: string
+    UserNameApiDefaultString:
+      type: string
+      minLength: 1
+      maxLength: 60
+      default: ${apiUserId}
+    KeyValueInputModeEnum:
+      type: string
+      enum:
+      - REQUIRED
+      - FIXED
+      - INCLUDE_ON_DEMAND
+      - INCLUDE_BY_DEFAULT
+      default: INCLUDE_BY_DEFAULT
+    RespSystemHistory:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/SystemHistory'
+        metadata:
+          type: object
+    SchedulerTypeEnum:
+      type: string
+      enum:
+      - SLURM
+      - CONDOR
+      - PBS
+      - SGE
+      - UGE
+      - TORQUE
+    DtnSysId:
+      type: string
+      minLength: 1
+      maxLength: 80
+      description: An alternate system to use as a Data Transfer Node (DTN) during job execution.
+    SysId:
+      type: string
+      minLength: 1
+      maxLength: 80
+      description: Short descriptive name for the system that is unique within the tenant.
+    ReqPatchSystem:
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        host:
+          $ref: '#/components/schemas/SysHost'
+        effectiveUserId:
+          $ref: '#/components/schemas/EffectiveUserId'
+        defaultAuthnMethod:
+          $ref: '#/components/schemas/AuthnEnum'
+        port:
+          type: integer
+          format: int32
+        useProxy:
+          type: boolean
+        proxyHost:
+          $ref: '#/components/schemas/HostString'
+        proxyPort:
+          type: integer
+          format: int32
+        dtnSystemId:
+          $ref: '#/components/schemas/DtnSysId'
+        canRunBatch:
+          type: boolean
+          description: Indicates if system supports running jobs using a batch scheduler.
+        enableCmdPrefix:
+          type: boolean
+        allowChildren:
+          type: boolean
+          description: Indicates if system allows for the creation of child systems.
+        mpiCmd:
+          type: string
+          minLength: 1
+          maxLength: 126
+        jobRuntimes:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/JobRuntime'
+        jobWorkingDir:
+          $ref: '#/components/schemas/DirString'
+        jobEnvVariables:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        jobMaxJobs:
+          type: integer
+        jobMaxJobsPerUser:
+          type: integer
+        batchScheduler:
+          $ref: '#/components/schemas/SchedulerTypeEnum'
+        batchLogicalQueues:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogicalQueue'
+        batchDefaultLogicalQueue:
+          $ref: '#/components/schemas/QueueNameString'
+        batchSchedulerProfile:
+          $ref: '#/components/schemas/IdString'
+        jobCapabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Capability'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagString'
+        notes:
+          type: object
+    UserNameString:
+      type: string
+      minLength: 1
+      maxLength: 60
+    RespChangeCount:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultChangeCount'
+        metadata:
+          type: object
+    ReqPutSystem:
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        host:
+          $ref: '#/components/schemas/SysHost'
+        defaultAuthnMethod:
+          $ref: '#/components/schemas/AuthnEnum'
+        port:
+          type: integer
+          format: int32
+        useProxy:
+          type: boolean
+          default: false
+        proxyHost:
+          $ref: '#/components/schemas/HostString'
+        proxyPort:
+          type: integer
+          format: int32
+        dtnSystemId:
+          $ref: '#/components/schemas/DtnSysId'
+        canRunBatch:
+          type: boolean
+          description: Indicates if system supports running jobs using a batch scheduler.
+        enableCmdPrefix:
+          type: boolean
+          default: false
+        allowChildren:
+          type: boolean
+          default: false
+          description: Indicates if system allows for the creation of child systems.
+        mpiCmd:
+          type: string
+          minLength: 1
+          maxLength: 126
+        jobRuntimes:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/JobRuntime'
+        jobWorkingDir:
+          $ref: '#/components/schemas/DirString'
+        jobEnvVariables:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        jobMaxJobs:
+          type: integer
+        jobMaxJobsPerUser:
+          type: integer
+        batchScheduler:
+          $ref: '#/components/schemas/SchedulerTypeEnum'
+        batchLogicalQueues:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogicalQueue'
+        batchDefaultLogicalQueue:
+          $ref: '#/components/schemas/QueueNameString'
+        batchSchedulerProfile:
+          $ref: '#/components/schemas/IdString'
+        jobCapabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Capability'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagString'
+        notes:
+          type: object
+    BucketName:
+      type: string
+      description: Name of the bucket for an S3 type system.
+    ResultName:
+      type: object
+      properties:
+        name:
+          type: string
+    Enabled:
+      type: boolean
+      default: true
+      description: Indicates if system is currently considered active and available for use.
+  securitySchemes:
+    TapisJWT:
+      type: apiKey
+      description: Tapis signed JWT token authentication
+      name: X-Tapis-Token
+      in: header
+externalDocs:
+  description: Tapis Project
+  url: https://tapis-project.org

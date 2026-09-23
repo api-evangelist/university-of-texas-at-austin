@@ -1,0 +1,729 @@
+openapi: 3.2.0
+info:
+  title: University Of Texas At Austin Permissions API
+  license:
+    name: 3-Clause BSD License
+    url: https://opensource.org/licenses/BSD-3-Clause
+  termsOfService: https://tapis-project.org
+  version: '1.0'
+  description: 'Operations tagged Permissions across 3 of this provider''s published API definitions: university-of-texas-at-austin-tapis-apps-openapi-original.yml, university-of-texas-at-austin-tapis-files-openapi-original.yml, university-of-texas-at-austin-tapis-systems-openapi-original.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: http://localhost:8080/
+  description: Local test environment
+  variables: {}
+- url: https://dev.develop.tapis.io/
+  description: Development environment
+  variables: {}
+tags:
+- name: Permissions
+  description: 'The permissions model allows for fine grained access control of resources. The application owner
+
+    may grant READ and MODIFY permission to specific users. MODIFY implies READ.
+
+
+    Please note that Tapis also supports a higher level approach to granting access known as *Sharing* that also includes
+
+    certain implicit access to resources during the execution of a Tapis job.'
+paths:
+  /v3/apps/perms/{appId}/user/{userName}:
+    get:
+      tags:
+      - Permissions
+      description: Retrieve all application related permissions for a given application and user.
+      operationId: getUserPerms
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: userName
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespNameArray'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Application not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Get user perms
+      x-summary-source: derived
+    post:
+      tags:
+      - Permissions
+      description: Create permissions in the Security Kernel for a user. Requester must be owner. Permissions are READ, MODIFY, EXECUTE.
+      operationId: grantUserPerms
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: userName
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      requestBody:
+        required: true
+        description: A JSON object specifying a list of permissions.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqPerms'
+      responses:
+        '200':
+          description: Permissions granted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Grant user perms
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/apps/perms/{appId}/user/{userName}/revoke:
+    post:
+      tags:
+      - Permissions
+      description: Remove permissions from the Security Kernel for a user. Requester must be owner. Permissions are READ, MODIFY, EXECUTE.
+      operationId: revokeUserPerms
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: userName
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      requestBody:
+        required: true
+        description: A JSON object specifying a list of permissions.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqPerms'
+      responses:
+        '200':
+          description: Permission revoked.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Revoke user perms
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/apps/perms/{appId}/user/{userName}/{permission}:
+    delete:
+      tags:
+      - Permissions
+      description: Remove user permission from the Security Kernel. Requester must be owner. Permissions are READ, MODIFY, EXECUTE.
+      operationId: revokeUserPerm
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: userName
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      - name: permission
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Permission revoked.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Revoke user perm
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/files/permissions/{systemId}/{path}:
+    get:
+      tags:
+      - Permissions
+      description: 'Get the Tapis permissions for a user for the system and path.
+
+        If no user specified then permissions are retrieved for the user making the request.'
+      operationId: getPermissions
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        description: System ID
+        required: true
+        schema:
+          type: string
+      - name: path
+        in: path
+        description: Path relative to the system *rootDir*
+        required: true
+        schema:
+          type: string
+      - name: username
+        in: query
+        description: Username to list
+        schema:
+          type: string
+      responses:
+        '200':
+          description: FilePermission
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FilePermissionResponse'
+      summary: Get permissions
+      x-summary-source: derived
+    post:
+      tags:
+      - Permissions
+      description: Grant access to a path for a user. Access may be READ or MODIFY. MODIFY implies READ.
+      operationId: grantPermissions
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        description: System ID
+        required: true
+        schema:
+          type: string
+      - name: path
+        in: path
+        description: Path relative to the system *rootDir*
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePermissionRequest'
+        required: true
+      responses:
+        '200':
+          description: FilePermission
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FilePermissionResponse'
+      summary: Grant permissions
+      x-summary-source: derived
+    delete:
+      tags:
+      - Permissions
+      description: Revoke access for a user for the system and path. All access is revoked.
+      operationId: deletePermissions
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        description: System ID
+        required: true
+        schema:
+          type: string
+      - name: path
+        in: path
+        description: Path relative to the system *rootDir*
+        required: true
+        schema:
+          type: string
+      - name: username
+        in: query
+        description: Username to remove
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: FilePermission
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StringResponse'
+      summary: Delete permissions
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/systems/perms/{systemId}/user/{userName}:
+    get:
+      tags:
+      - Permissions
+      description: Retrieve all system related permissions for a given system and user.
+      operationId: getUserPerms
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: userName
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespNameArray'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Get user perms
+      x-summary-source: derived
+    post:
+      tags:
+      - Permissions
+      description: 'Create permissions in the Security Kernel for a user. Requester must be owner of the system.
+
+        Permissions are READ, MODIFY, EXECUTE. MODIFY implies READ.'
+      operationId: grantUserPerms
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: userName
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      requestBody:
+        required: true
+        description: A JSON object specifying a list of permissions.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqPerms'
+      responses:
+        '200':
+          description: Permissions granted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Grant user perms
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/systems/perms/{systemId}/user/{userName}/revoke:
+    post:
+      tags:
+      - Permissions
+      description: 'Remove permissions from the Security Kernel for a user. Requester must be owner of the system.
+
+        Permissions are READ, MODIFY, EXECUTE.'
+      operationId: revokeUserPerms
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: userName
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      requestBody:
+        required: true
+        description: A JSON object specifying a list of permissions.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqPerms'
+      responses:
+        '200':
+          description: Permission revoked.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Revoke user perms
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/systems/perms/{systemId}/user/{userName}/{permission}:
+    delete:
+      tags:
+      - Permissions
+      description: 'Remove system user permission from the Security Kernel. Requester must be owner of the system.
+
+        Permissions are READ, MODIFY, EXECUTE.'
+      operationId: revokeUserPerm
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: userName
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      - name: permission
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Permission revoked.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Revoke user perm
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+components:
+  schemas:
+    IdString:
+      type: string
+      minLength: 1
+      maxLength: 80
+    ResultNameArray:
+      type: object
+      properties:
+        names:
+          type: array
+          items:
+            type: string
+    UserNameString:
+      type: string
+      minLength: 1
+      maxLength: 60
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: object
+        metadata:
+          type: object
+    ReqPerms:
+      type: object
+      required:
+      - permissions
+      properties:
+        permissions:
+          type: array
+          minItems: 1
+          items:
+            type: string
+    RespNameArray:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultNameArray'
+        metadata:
+          type: object
+    CreatePermissionRequest:
+      required:
+      - permission
+      - username
+      type: object
+      properties:
+        username:
+          type: string
+        permission:
+          $ref: '#/components/schemas/PermEnum'
+    PermEnum:
+      type: string
+      enum:
+      - READ
+      - MODIFY
+    FilePermission:
+      type: object
+      properties:
+        tenantId:
+          type: string
+        username:
+          type: string
+        systemId:
+          type: string
+        path:
+          type: string
+        permission:
+          $ref: '#/components/schemas/PermEnum'
+    FilePermissionResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          $ref: '#/components/schemas/FilePermission'
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    StringResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+  securitySchemes:
+    TapisJWT:
+      type: apiKey
+      description: Tapis signed JWT token authentication
+      name: X-Tapis-Token
+      in: header
+externalDocs:
+  description: Tapis Project
+  url: https://tapis-project.org
+x-refined-from:
+- university-of-texas-at-austin-tapis-apps-openapi-original.yml
+- university-of-texas-at-austin-tapis-files-openapi-original.yml
+- university-of-texas-at-austin-tapis-systems-openapi-original.yml

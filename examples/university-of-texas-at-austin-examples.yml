@@ -1,0 +1,80 @@
+---
+# Probed response captures for University of Texas at Austin surfaces.
+# Every file here is a VERBATIM response body, captured with an unauthenticated GET.
+name: University of Texas at Austin — probed response examples
+generated: '2026-08-30'
+method: probed
+source: live unauthenticated HTTP GET against each URL below
+examples:
+  - name: Texas ScholarWorks DSpace REST API root
+    file: university-of-texas-at-austin-scholarworks-dspace-root.json
+    url: https://repositories.lib.utexas.edu/server/api
+    status: 200
+    content_type: application/hal+json
+    x-operator: institution
+    generated: '2026-08-30'
+    method: probed
+    source: https://repositories.lib.utexas.edu/server/api
+    note: >-
+      Root HAL document. dspaceName "DSpace at UT Austin", dspaceVersion
+      "DSpace 9.4-SNAPSHOT" (the repo previously recorded DSpace 8).
+  - name: Texas ScholarWorks OAI-PMH Identify
+    file: university-of-texas-at-austin-scholarworks-oai-identify.xml
+    url: https://repositories.lib.utexas.edu/server/oai/request?verb=Identify
+    status: 200
+    content_type: text/xml
+    x-operator: institution
+    generated: '2026-08-30'
+    method: probed
+    source: https://repositories.lib.utexas.edu/server/oai/request?verb=Identify
+    note: >-
+      repositoryName "DSpace at UT Austin", protocolVersion 2.0, adminEmail
+      tdl-systems@utlists.utexas.edu, earliestDatestamp 2008-08-13.
+  - name: UT Austin enterprise IdP OpenID Connect discovery document
+    file: university-of-texas-at-austin-idp-openid-configuration.json
+    url: https://enterprise.login.utexas.edu/.well-known/openid-configuration
+    status: 200
+    content_type: application/json
+    x-operator: institution
+    generated: '2026-08-30'
+    method: probed
+    source: https://enterprise.login.utexas.edu/.well-known/openid-configuration
+    note: >-
+      Shibboleth IdP OIDC extension. issuer https://enterprise.login.utexas.edu,
+      dynamic client registration endpoint present.
+  - name: UT Austin enterprise IdP SAML 2.0 metadata
+    file: university-of-texas-at-austin-idp-saml2-metadata.xml
+    url: https://enterprise.login.utexas.edu/idp/shibboleth
+    status: 200
+    content_type: application/xml
+    x-operator: institution
+    generated: '2026-08-30'
+    method: probed
+    source: https://enterprise.login.utexas.edu/idp/shibboleth
+    note: >-
+      entityID https://enterprise.login.utexas.edu/idp/shibboleth,
+      OrganizationName "The University of Texas at Austin". The same entity is
+      served signed from the InCommon metadata query service.
+  - name: Tapis Systems service health check (TACC production tenant)
+    file: university-of-texas-at-austin-tapis-systems-healthcheck.json
+    url: https://tacc.tapis.io/v3/systems/healthcheck
+    status: 200
+    content_type: application/json
+    x-operator: institution
+    generated: '2026-08-30'
+    method: probed
+    source: https://tacc.tapis.io/v3/systems/healthcheck
+  - name: Texas Data Repository — University of Texas at Austin Dataverse collection
+    file: university-of-texas-at-austin-tdr-dataverse-collection.json
+    url: https://dataverse.tdl.org/api/dataverses/utexas
+    status: 200
+    content_type: application/json
+    x-operator: tenant
+    generated: '2026-08-30'
+    method: probed
+    source: https://dataverse.tdl.org/api/dataverses/utexas
+    note: >-
+      Proof of the TENANT relationship, not of institutional engineering:
+      the collection is named "University of Texas at Austin Dataverse
+      Collection" with affiliation "The University of Texas at Austin", on a
+      Dataverse instance operated by the Texas Digital Library consortium.

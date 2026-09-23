@@ -1,0 +1,133 @@
+openapi: 3.2.0
+info:
+  title: Tapis Files Content API
+  description: The Tapis Files API provides for management of file resources on Tapis systems
+  version: 1.8.2
+  termsOfService: https://tapis-project.org
+  contact:
+    name: Files API - CICSupport
+    url: https://tapis-project.org
+    email: cicsupport@tacc.utexas.edu
+  license:
+    name: 3-Clause BSD License
+    url: https://opensource.org/licenses/BSD-3-Clause
+servers:
+- url: http://localhost:8080/
+  description: Local test environment
+  variables: {}
+- url: https://dev.develop.tapis.io/
+  description: Development environment
+  variables: {}
+tags:
+- name: Content
+  description: Download a file or directory. Not supported for all system types.
+paths:
+  /v3/files/content/{systemId}/{path}:
+    get:
+      tags:
+      - Content
+      description: 'Get file or directory contents as a stream of data.
+
+
+        Certain services may use the query parameter *impersonationId* to be used in place of the requesting
+
+        Tapis user. Tapis will use this user Id when performing authorization and resolving the *effectiveUserId*
+
+        for the system.
+
+
+        Use the query parameter *zip* to request a stream compressed using the ZIP file format. This is not allowed
+
+        if system *rootDir* plus *path* would result in all files on the host being included. Please download
+
+        individual directories, files or objects.
+
+
+        Certain services may use the query parameter *sharedCtx* to indicate that the request is in a shared
+
+        context. *sharedCtx* must be set to the share grantor.
+
+        Tapis will include the share grantor as part of authorization checks.'
+      operationId: getContents
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        description: System ID
+        required: true
+        schema:
+          type: string
+        example: system123
+      - name: path
+        in: path
+        description: Path relative to the system *rootDir*
+        required: true
+        schema:
+          type: string
+        example: directoryA/directoryB/
+      - name: range
+        in: header
+        description: Optional range of bytes to send. If not specified all content will be sent.
+        schema:
+          $ref: '#/components/schemas/HeaderByteRange'
+        example: range=0,999
+      - name: zip
+        in: query
+        description: Indicates a zip output stream should be provided.
+        schema:
+          type: boolean
+        example: false
+      - name: more
+        in: header
+        description: Send 1k of UTF-8 encoded string back starting at 'page' 1, e.g. more=1
+        schema:
+          type: integer
+          format: int64
+      - name: impersonationId
+        in: query
+        description: Restricted. Only certain services may impersonate a Tapis user.
+        schema:
+          type: string
+      - name: sharedCtx
+        in: query
+        description: Restricted. Only certain services may indicate that the request is in a shared context. Must be set to the share grantor.
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Not Authenticated
+        '404':
+          description: Not Found
+        '403':
+          description: Permission Denied
+      summary: Get contents
+      x-summary-source: derived
+components:
+  schemas:
+    HeaderByteRange:
+      type: object
+      properties:
+        min:
+          type: integer
+          format: int64
+        max:
+          type: integer
+          format: int64
+    UserNameString:
+      type: string
+      minLength: 1
+      maxLength: 60
+  securitySchemes:
+    TapisJWT:
+      type: apiKey
+      description: Tapis signed JWT token authentication
+      name: X-Tapis-Token
+      in: header
+externalDocs:
+  description: Tapis Project
+  url: https://tapis-project.org

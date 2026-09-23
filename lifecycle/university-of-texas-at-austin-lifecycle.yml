@@ -1,0 +1,75 @@
+---
+name: University of Texas at Austin — versioning and lifecycle
+description: >-
+  Versioning, deprecation and change-communication posture per surface, read
+  from what each surface actually reports about itself.
+generated: '2026-08-30'
+method: probed
+source: live HTTP probes 2026-08-30
+surfaces:
+  - surface: Tapis v3 platform — TACC production tenant
+    x-operator: institution
+    versioning: URI path major version (/v3)
+    reported_versions:
+      systems: 26Q2.0
+      files: 1.8.2
+      apps: 26Q1.0
+      jobs: 26Q1.0
+      notifications: 26Q1.1
+    version_scheme: >-
+      Calendar-quarter releases (YYQn.n) on four of five services; the Files
+      service still reports semantic versioning (1.8.2). The mixed scheme is the
+      platform's, not an artifact of this profile.
+    runtime_version_endpoint: https://tacc.tapis.io/v3/{service}/healthcheck
+    build_identifier: >-
+      Health checks report a version plus a git commit hash
+      (e.g. 26Q2.0-5a56899b), so a deployed build is externally identifiable.
+    deprecation_policy_published: false
+    changelog_published: false
+    sunset_header: false
+    generated: '2026-08-30'
+    method: probed
+    source: https://tacc.tapis.io/v3/systems/healthcheck
+  - surface: Texas ScholarWorks DSpace REST API
+    x-operator: institution
+    versioning: none in the URI; software version reported on the API root
+    reported_version: DSpace 9.4-SNAPSHOT
+    note: >-
+      The root document reports a -SNAPSHOT build in production. The upstream
+      software version is the only version signal; there is no API version
+      distinct from it, and no deprecation or sunset policy is published.
+    deprecation_policy_published: false
+    changelog_published: false
+    generated: '2026-08-30'
+    method: probed
+    source: https://repositories.lib.utexas.edu/server/api
+  - surface: Texas ScholarWorks OAI-PMH endpoint
+    x-operator: institution
+    versioning: OAI-PMH protocolVersion 2.0 (fixed by the protocol)
+    deletedRecord: transient
+    granularity: YYYY-MM-DDThh:mm:ssZ
+    earliest_datestamp: '2008-08-13T19:07:28Z'
+    note: >-
+      deletedRecord "transient" means a harvester cannot rely on deletion
+      records persisting; incremental harvests need periodic full reconciliation.
+    generated: '2026-08-30'
+    method: probed
+    source: https://repositories.lib.utexas.edu/server/oai/request?verb=Identify
+  - surface: UT Austin Enterprise Identity Provider
+    x-operator: institution
+    versioning: >-
+      Protocol-versioned (SAML 2.0, OpenID Connect 1.0). The InCommon-signed
+      metadata carries a validUntil expiry, which is the operative freshness
+      signal for relying parties.
+    deprecation_policy_published: false
+    generated: '2026-08-30'
+    method: probed
+    source: https://mdq.incommon.org/entities/https%3A%2F%2Fenterprise.login.utexas.edu%2Fidp%2Fshibboleth
+  - surface: Texas Data Repository (Dataverse)
+    x-operator: tenant
+    versioning: /api with a reported software version
+    reported_version: 6.10.1 (build master-300d5b5)
+    note: The Texas Digital Library's release cadence, not UT Austin's.
+    generated: '2026-08-30'
+    method: probed
+    source: https://dataverse.tdl.org/api/info/version

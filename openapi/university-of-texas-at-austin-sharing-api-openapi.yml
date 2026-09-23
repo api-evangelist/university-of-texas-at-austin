@@ -1,0 +1,1338 @@
+openapi: 3.2.0
+info:
+  title: University Of Texas At Austin Sharing API
+  license:
+    name: 3-Clause BSD License
+    url: https://opensource.org/licenses/BSD-3-Clause
+  termsOfService: https://tapis-project.org
+  version: '1.0'
+  description: 'Operations tagged Sharing across 4 of this provider''s published API definitions: university-of-texas-at-austin-tapis-apps-openapi-original.yml, university-of-texas-at-austin-tapis-files-openapi-original.yml, university-of-texas-at-austin-tapis-jobs-openapi-original.yml, university-of-texas-at-austin-tapis-systems-openapi-original.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: http://localhost:8080/
+  description: Local test environment
+  variables: {}
+- url: https://dev.develop.tapis.io/
+  description: Development environment
+  variables: {}
+tags:
+- name: Sharing
+  description: In addition to fine grained permissions support, Tapis also supports a higher level approach to granting access.
+paths:
+  /v3/apps/share/{appId}:
+    get:
+      tags:
+      - Sharing
+      summary: Retrieve all sharing information for an app
+      description: 'Retrieve all sharing information for an app. This includes all users with whom the app
+
+        has been shared and whether or not the app has been made publicly available.'
+      operationId: getShareInfo
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespShareInfo'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Application not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    post:
+      tags:
+      - Sharing
+      summary: Share an app with one or more users
+      description: 'Create or update sharing information for an app. The app will be shared with the list of users
+
+        provided in the request body. Requester must be owner of the app.'
+      operationId: shareApp
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      requestBody:
+        required: true
+        description: A JSON object specifying updated sharing information.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqShareUpdate'
+      responses:
+        '200':
+          description: Sharing information updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/apps/share_public/{appId}:
+    post:
+      tags:
+      - Sharing
+      summary: Share an app publicly with all users in the tenant
+      description: Share an app with all users in the tenant. Requester must be owner of the app.
+      operationId: shareAppPublic
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: App shared publicly.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/apps/unshare/{appId}:
+    post:
+      tags:
+      - Sharing
+      summary: Unshare an app with one or more users
+      description: 'Create or update sharing information for an app. The app will be unshared with the list of users
+
+        provided in the request body. Requester must be owner of the app.'
+      operationId: unShareApp
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      requestBody:
+        required: true
+        description: A JSON object specifying updated sharing information.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqShareUpdate'
+      responses:
+        '200':
+          description: Sharing information updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/apps/unshare_public/{appId}:
+    post:
+      tags:
+      - Sharing
+      summary: Remove public access for an app
+      description: Remove public sharing for an app. Requester must be owner of the app.
+      operationId: unShareAppPublic
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: App public access removed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/files/share/{systemId}/{path}:
+    get:
+      tags:
+      - Sharing
+      summary: Retrieve all sharing information for a path on a system
+      description: 'Retrieve all sharing information for a path on a system. This includes all users with whom the path
+
+        has been shared and whether or not the path has been made publicly available.
+
+        Sharing a path grants users READ access to the path or, in the context of running a job, it grants users READ
+
+        and MODIFY access to the path.'
+      operationId: getShareInfo
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: path
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespShareInfo_2'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission Denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    post:
+      tags:
+      - Sharing
+      summary: Share a path on a system with one or more users
+      description: 'Create or update sharing information for a path on a system. The path will be shared with the list of users
+
+        provided in the request body. Requester must be owner of the system. For LINUX systems path sharing is
+
+        hierarchical.
+
+        Sharing a path grants users READ access to the path or, in the context of running a job, it grants users READ
+
+        and MODIFY access to the path.'
+      operationId: sharePath
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: path
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: A JSON object specifying updated sharing information.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqShareUpdate_2'
+      responses:
+        '200':
+          description: Sharing information updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission Denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/files/share_public/{systemId}/{path}:
+    post:
+      tags:
+      - Sharing
+      summary: Share a path on a system publicly with all users in the tenant
+      description: 'Share a path on a system with all users in the tenant. Requester must be owner of the system.
+
+        Sharing a path grants users READ access to the path or, in the context of running a job, it grants users READ
+
+        and MODIFY access to the path.'
+      operationId: sharePathPublic
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: path
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Path shared publicly.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission Denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/files/unshare/{systemId}/{path}:
+    post:
+      tags:
+      - Sharing
+      summary: Unshare a path on a system with one or more users
+      description: 'Create or update sharing information for a path on a system. The path will be unshared with the list of users
+
+        provided in the request body. Requester must be owner of the system.'
+      operationId: unSharePath
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: path
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: A JSON object specifying updated sharing information.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqShareUpdate_2'
+      responses:
+        '200':
+          description: Sharing information updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission Denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/files/unshare_public/{systemId}/{path}:
+    post:
+      tags:
+      - Sharing
+      summary: Remove public access for a path on a system
+      description: Remove public sharing for a path on a system. Requester must be owner of the system.
+      operationId: unSharePathPublic
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: path
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Path public access removed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission Denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/files/unshare_all/{systemId}/{path}:
+    post:
+      tags:
+      - Sharing
+      summary: Remove all shares for a path on a system including public access
+      description: Remove all shares for a path on a system including public access. This will also be done for all sub-paths.
+      operationId: unSharePathAll
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: path
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: recurse
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: All share access removed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission Denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /jobs/{jobUuid}/share/{user}:
+    delete:
+      tags:
+      - Sharing
+      description: 'Delete all share information of a previously shared job for a specific user
+
+
+        The caller must be the job owner, creator or a tenant administrator.'
+      operationId: deleteJobShare
+      parameters:
+      - name: jobUuid
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: user
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Job's share information deleted for a specific user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespUnShareJob'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '404':
+          description: Job not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+      security:
+      - TapisJWT: []
+      summary: Delete job share
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /jobs/{jobUuid}/share:
+    get:
+      tags:
+      - Sharing
+      description: 'Retrieve share information of a job by its UUID.
+
+
+        The caller must be the job owner, creator or a tenant administrator.'
+      operationId: getJobShare
+      parameters:
+      - name: jobUuid
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: skip
+        in: query
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Job's share information retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespGetJobShareList'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '404':
+          description: Job not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+      security:
+      - TapisJWT: []
+      summary: Get job share
+      x-summary-source: derived
+    post:
+      tags:
+      - Sharing
+      description: Share a job with a user of the tenant. The caller must be the job owner, creator or a tenant administrator.
+      operationId: shareJob
+      parameters:
+      - name: jobUuid
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqShareJob'
+        required: true
+      responses:
+        '200':
+          description: Job is shared successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespShareJob'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+      security:
+      - TapisJWT: []
+      summary: Share job
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/systems/share/{systemId}:
+    get:
+      tags:
+      - Sharing
+      summary: Retrieve all sharing information for a system
+      description: 'Retrieve all sharing information for a system. This includes all users with whom the system
+
+        has been shared and whether or not the system has been made publicly available.'
+      operationId: getShareInfo
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespShareInfo'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    post:
+      tags:
+      - Sharing
+      summary: Share a system with one or more users
+      description: 'Create or update sharing information for a system. The system will be shared with the list of users
+
+        provided in the request body. Sharing allows READ and EXECUTE access. When the system has a dynamic
+
+        *effectiveUserId*, sharing also allows for MODIFY access to all paths for calls made through the
+
+        Files service. Requester must be owner of the system.'
+      operationId: shareSystem
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      requestBody:
+        required: true
+        description: A JSON object specifying updated sharing information.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqShareUpdate'
+      responses:
+        '200':
+          description: Sharing information updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/systems/share_public/{systemId}:
+    post:
+      tags:
+      - Sharing
+      summary: Share a system publicly with all users in the tenant
+      description: 'Share a system with all users in the tenant. Sharing allows READ and EXECUTE access.
+
+        When the system has a dynamic *effectiveUserId*, sharing also allows for MODIFY access
+
+        to all paths for calls made through the Files service.
+
+        Requester must be owner of the system.'
+      operationId: shareSystemPublic
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: System shared publicly.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/systems/unshare/{systemId}:
+    post:
+      tags:
+      - Sharing
+      summary: Unshare a system with one or more users
+      description: 'Create or update sharing information for a system. The system will be unshared with the list of users
+
+        provided in the request body. Requester must be owner of the system.'
+      operationId: unShareSystem
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      requestBody:
+        required: true
+        description: A JSON object specifying updated sharing information.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqShareUpdate'
+      responses:
+        '200':
+          description: Sharing information updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/systems/unshare_public/{systemId}:
+    post:
+      tags:
+      - Sharing
+      summary: Remove public access for a system
+      description: Remove public sharing for a system. Requester must be owner of the system.
+      operationId: unShareSystemPublic
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: System public access removed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+components:
+  schemas:
+    IdString:
+      type: string
+      minLength: 1
+      maxLength: 80
+    SkShareRecord:
+      type: object
+      properties:
+        tenant:
+          type: string
+        grantor:
+          type: string
+        grantee:
+          type: string
+        resourceType:
+          type: string
+        resourceId1:
+          type: string
+        resourceId2:
+          type: string
+        privilege:
+          type: string
+        created:
+          type: string
+        createdBy:
+          type: string
+        createdByTenant:
+          type: string
+    ReqShareUpdate:
+      type: object
+      required:
+      - users
+      properties:
+        users:
+          type: array
+          minItems: 1
+          items:
+            type: string
+    RespShareInfo:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ShareInfo'
+        metadata:
+          type: object
+    UserNameString:
+      type: string
+      minLength: 1
+      maxLength: 60
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: object
+        metadata:
+          type: object
+    ShareInfo:
+      type: object
+      required:
+      - public
+      - userList
+      properties:
+        public:
+          type: boolean
+        userList:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserNameString'
+        shareRecords:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkShareRecord'
+    ResultShareInfo:
+      type: object
+      properties:
+        isPublic:
+          type: boolean
+          description: Indicates given path is shared publicly
+        isPublicPath:
+          type: string
+          description: Path that resulted in specified path being shared publicly
+        userSet:
+          type: array
+          description: Set of users with whom the path is shared.
+          items:
+            $ref: '#/components/schemas/UserNameString'
+        userShareInfoSet:
+          type: array
+          description: List of additional share information for each user.
+          items:
+            $ref: '#/components/schemas/UserShareInfo'
+    ReqShareUpdate_2:
+      type: object
+      required:
+      - users
+      properties:
+        users:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/UserNameString'
+    UserShareInfo:
+      type: object
+      properties:
+        username:
+          $ref: '#/components/schemas/UserNameString'
+        path:
+          type: string
+          description: Path that resulted in specified path being shared with the user
+    RespShareInfo_2:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultShareInfo'
+        metadata:
+          type: object
+    JobUnShareDisplay:
+      type: object
+      properties:
+        message:
+          type: string
+    JobShareDisplay:
+      type: object
+      properties:
+        message:
+          type: string
+    RespShareJob:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/JobShareDisplay'
+    RespGetJobShareList:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobShareListDTO'
+    ReqShareJob:
+      type: object
+      properties:
+        grantee:
+          type: string
+        jobResource:
+          type: array
+          items:
+            type: string
+            enum:
+            - JOB_HISTORY
+            - JOB_RESUBMIT_REQUEST
+            - JOB_OUTPUT
+            - JOB_INPUT
+        jobPermission:
+          type: string
+          enum:
+          - READ
+    ResultMetadata:
+      type: object
+    JobShareListDTO:
+      type: object
+      properties:
+        tenant:
+          type: string
+        createdby:
+          type: string
+        jobUuid:
+          type: string
+        grantee:
+          type: string
+        jobResource:
+          type: string
+        jobPermission:
+          type: string
+        created:
+          type: string
+          format: date-time
+    RespName:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/ResultName'
+    RespBasic_2:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          type: object
+    RespUnShareJob:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/JobUnShareDisplay'
+    ResultName:
+      type: object
+      properties:
+        name:
+          type: string
+  securitySchemes:
+    TapisJWT:
+      type: apiKey
+      description: Tapis signed JWT token authentication
+      name: X-Tapis-Token
+      in: header
+externalDocs:
+  description: Tapis Project
+  url: https://tapis-project.org
+x-refined-from:
+- university-of-texas-at-austin-tapis-apps-openapi-original.yml
+- university-of-texas-at-austin-tapis-files-openapi-original.yml
+- university-of-texas-at-austin-tapis-jobs-openapi-original.yml
+- university-of-texas-at-austin-tapis-systems-openapi-original.yml

@@ -1,0 +1,483 @@
+openapi: 3.2.0
+info:
+  title: Tapis Notifications Test API
+  description: The Tapis Notifications API provides for management of subscriptions and event publication
+  version: 26Q1.1
+  termsOfService: https://tapis-project.org
+  contact:
+    name: Notifications API - CICSupport
+    url: https://tapis-project.org
+    email: cicsupport@tacc.utexas.edu
+  license:
+    name: 3-Clause BSD License
+    url: https://opensource.org/licenses/BSD-3-Clause
+servers:
+- url: http://localhost:8080/
+  description: Local test environment
+  variables: {}
+- url: https://dev.develop.tapis.io/
+  description: Development environment
+  variables: {}
+tags:
+- name: Test
+  description: Support for managing a sequence of test notifications.
+paths:
+  /v3/notifications/test/begin:
+    post:
+      tags:
+      - Test
+      description: 'Start a test sequence by creating a subscription and publishing one or more events matching the subscription.
+
+        If more than one event requested then events will be published at the rate of 1 every 3 seconds.
+
+        Only services may perform this operation.
+
+
+        The subscription will have the following properties:
+
+        - owner: *api_user*
+
+        - name: *subscription_uuid*
+
+        - typeFilter: notifications.test.*
+
+        - subjectFilter: *subscription_uuid*
+
+        - deliveryTarget:
+
+        - deliveryMethod: WEBHOOK
+
+        - deliveryAddress: *tenant_base_url*/v3/notifications/test/callback/*subscription_uuid*
+
+        - ttlMinutes: 60
+
+
+        The default TTL of 1 hour may be overridden using the query parameter *subscriptionTTL*.
+
+
+        The initial event will have the following properties:
+
+        - source: *tenant_base_url*/v3/notifications/test
+
+        - type: notifications.test.begin
+
+        - subject: *subscription_uuid*
+
+        - seriesId: *subscription_uuid*
+
+
+        The requested number of events will be published to the main queue and the subscription will be returned to the caller.
+
+        The sequence of test events may be continued by publishing events that match the test subscription.
+
+        Results will be recorded when notifications associated with the test are received via the callback.
+
+        The first notification should be recorded shortly after the initial event is published.
+
+        If query parameter *endSeries* is set to true (the default), when the final event of the test sequence is
+
+        sent it will have the event attribute *endSeries* set to true. This will result in removal of series tracking data.'
+      operationId: beginTestSequence
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: subscriptionTTL
+        in: query
+        description: Subscription TTL in minutes. Default is 60 minutes. A TTL of 0 or less indicates no expiration.
+        schema:
+          type: integer
+          default: 60
+      - name: numberOfEvents
+        in: query
+        description: Number of events to publish when starting the series. Default is 1.
+        schema:
+          type: integer
+          default: 1
+      - name: endSeries
+        in: query
+        description: Flag indicating if tracking data for series should be removed when final event in the test sequence is sent. Default is true.
+        schema:
+          type: boolean
+          default: true
+      requestBody:
+        required: false
+        description: A json request body. Not used but required to correctly generate the client.
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Test subscription created and test event published.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSubscription'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Begin test sequence
+      x-summary-source: derived
+  /v3/notifications/test/{name}:
+    get:
+      tags:
+      - Test
+      description: Retrieve status and result history for a test sequence created using the endpoint *test/begin*.
+      operationId: getTestSequence
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/NameString'
+      responses:
+        '200':
+          description: Results found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespTestSequence'
+        '400':
+          description: Subscription is not associated with a test sequence.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Subscription not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Get test sequence
+      x-summary-source: derived
+    delete:
+      tags:
+      - Test
+      description: 'Delete all test sequence artifacts including the subscription, results and event series tracking data.
+
+        Only services may perform this operation.'
+      operationId: deleteTestSequence
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/NameString'
+      responses:
+        '200':
+          description: Test sequence deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Subscription is not associated with a test sequence.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Test sequence not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Delete test sequence
+      x-summary-source: derived
+  /v3/notifications/test/callback/{name}:
+    post:
+      tags:
+      - Test
+      description: 'Callback endpoint for receiving a notification associated with a test sequence.
+
+        Results will be recorded when notifications associated with the test are received via the callback.'
+      operationId: recordTestNotification
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/NameString'
+      requestBody:
+        required: true
+        description: A JSON object with event details.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notification'
+      responses:
+        '200':
+          description: Test event received and recorded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Subscription is not associated with a test sequence.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Test sequence not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Record test notification
+      x-summary-source: derived
+components:
+  schemas:
+    UserNameApiDefaultString:
+      type: string
+      minLength: 1
+      maxLength: 60
+      default: ${apiUserId}
+    NameString:
+      type: string
+      minLength: 1
+      maxLength: 188
+    RespTestSequence:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/TestSequence'
+        metadata:
+          type: object
+    TestSequence:
+      type: object
+      properties:
+        tenant:
+          type: string
+        subscription:
+          $ref: '#/components/schemas/TapisSubscription'
+        receivedEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+    DeliveryTarget:
+      type: object
+      required:
+      - deliveryMethod
+      - deliveryAddress
+      properties:
+        deliveryMethod:
+          $ref: '#/components/schemas/DeliveryMethod'
+        deliveryAddress:
+          type: string
+    DeliveryMethod:
+      type: string
+      enum:
+      - WEBHOOK
+      - EMAIL
+    Notification:
+      type: object
+      properties:
+        uuid:
+          type: string
+        tenant:
+          type: string
+        subscriptionName:
+          type: string
+        deliveryTarget:
+          $ref: '#/components/schemas/DeliveryTarget'
+        eventUuid:
+          type: string
+        event:
+          $ref: '#/components/schemas/Event'
+        created:
+          type: string
+    DescriptionString:
+      type: string
+      maxLength: 2048
+    TapisSubscription:
+      type: object
+      properties:
+        tenant:
+          type: string
+        name:
+          $ref: '#/components/schemas/NameString'
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        owner:
+          $ref: '#/components/schemas/UserNameApiDefaultString'
+        enabled:
+          type: boolean
+          default: true
+        typeFilter:
+          $ref: '#/components/schemas/TypeFilterString'
+        subjectFilter:
+          $ref: '#/components/schemas/SubjectFilterString'
+        deliveryTargets:
+          $ref: '#/components/schemas/DeliveryTargets'
+        ttlMinutes:
+          type: integer
+        uuid:
+          type: string
+        expiry:
+          type: string
+        created:
+          type: string
+        updated:
+          type: string
+    DeliveryTargets:
+      type: array
+      items:
+        $ref: '#/components/schemas/DeliveryTarget'
+    Event:
+      type: object
+      required:
+      - source
+      - type
+      - timestamp
+      properties:
+        source:
+          type: string
+        type:
+          type: string
+        subject:
+          type: string
+        data:
+          type: string
+        seriesId:
+          type: string
+        endSeries:
+          type: boolean
+          default: false
+        timestamp:
+          type: string
+        deleteSubscriptionsMatchingSubject:
+          type: boolean
+          default: false
+        tenant:
+          type: string
+        user:
+          type: string
+        uuid:
+          type: string
+        received:
+          type: string
+        seriesSeqCount:
+          type: integer
+    SubjectFilterString:
+      type: string
+      minLength: 1
+      maxLength: 150
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: object
+        metadata:
+          type: object
+    RespChangeCount:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultChangeCount'
+        metadata:
+          type: object
+    ResultChangeCount:
+      type: object
+      properties:
+        changes:
+          type: integer
+          format: int32
+    TypeFilterString:
+      type: string
+      minLength: 5
+      maxLength: 128
+    RespSubscription:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/TapisSubscription'
+        metadata:
+          type: object
+  securitySchemes:
+    TapisJWT:
+      type: apiKey
+      description: Tapis signed JWT token authentication
+      name: X-Tapis-Token
+      in: header
+externalDocs:
+  description: Tapis Project
+  url: https://tapis-project.org

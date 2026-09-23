@@ -1,0 +1,395 @@
+openapi: 3.2.0
+info:
+  title: Tapis Systems Scheduler Profiles API
+  description: The Tapis Systems API provides for management of Tapis Systems including permissions, credentials and Scheduler Profiles.
+  version: 26Q2.0
+  termsOfService: https://tapis-project.org
+  contact:
+    name: Systems API - CICSupport
+    url: https://tapis-project.org
+    email: cicsupport@tacc.utexas.edu
+  license:
+    name: 3-Clause BSD License
+    url: https://opensource.org/licenses/BSD-3-Clause
+servers:
+- url: http://localhost:8080/
+  description: Local test environment
+  variables: {}
+- url: https://dev.develop.tapis.io/
+  description: Development environment
+  variables: {}
+tags:
+- name: Scheduler Profiles
+  description: The Systems service supports managing Tapis scheduler profiles.
+paths:
+  /v3/systems/schedulerProfile:
+    get:
+      tags:
+      - Scheduler Profiles
+      description: Retrieve list of scheduler profiles.
+      operationId: getSchedulerProfiles
+      security:
+      - TapisJWT: []
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSchedulerProfiles'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Get scheduler profiles
+      x-summary-source: derived
+    post:
+      tags:
+      - Scheduler Profiles
+      description: 'Create a scheduler profile using a request body. Name must be unique within a tenant and can be composed of
+
+        alphanumeric characters and the following special characters [-._~].
+
+        Name must begin with an alphabetic character and can be no more than 80 characters in length.
+
+        Description is optional with a maximum length of 2048 characters.
+
+
+        Note that certain attributes (such as *tenant*) are allowed but ignored so that the JSON result returned by a GET
+
+        may be modified and used when making a POST request to create a profile.
+
+        The attributes that are allowed but ignored are
+
+
+        - tenant
+
+        - uuid
+
+        - created
+
+        - updated'
+      operationId: createSchedulerProfile
+      security:
+      - TapisJWT: []
+      requestBody:
+        required: true
+        description: A JSON object specifying information for the profile to be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqPostSchedulerProfile'
+      responses:
+        '201':
+          description: Scheduler profile created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '409':
+          description: Scheduler profile already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Create scheduler profile
+      x-summary-source: derived
+  /v3/systems/schedulerProfile/{name}:
+    get:
+      tags:
+      - Scheduler Profiles
+      description: Retrieve information for a scheduler profile given the profile name.
+      operationId: getSchedulerProfile
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSchedulerProfile'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Scheduler profile not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Get scheduler profile
+      x-summary-source: derived
+    delete:
+      tags:
+      - Scheduler Profiles
+      description: Remove a scheduler profile given the profile name. Requester must be owner of the profile.
+      operationId: deleteSchedulerProfile
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: Scheduler profile deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Delete scheduler profile
+      x-summary-source: derived
+components:
+  schemas:
+    IdString:
+      type: string
+      minLength: 1
+      maxLength: 80
+    ResultChangeCount:
+      type: object
+      properties:
+        changes:
+          type: integer
+          format: int32
+    RespSchedulerProfiles:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/SchedulerProfile'
+        metadata:
+          type: object
+    ResultResourceUrl:
+      type: object
+      properties:
+        url:
+          type: string
+    ReqPostSchedulerProfile:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          $ref: '#/components/schemas/IdString'
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        owner:
+          type: string
+        moduleLoads:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModuleLoadSpec'
+        hiddenOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SchedulerHiddenOptionEnum'
+    DescriptionString:
+      type: string
+      maxLength: 2048
+      description: Optional more verbose description.
+    ModuleLoadSpec:
+      type: object
+      required:
+      - moduleLoadCommand
+      properties:
+        moduleLoadCommand:
+          type: string
+          minLength: 1
+        modulesToLoad:
+          type: array
+          items:
+            type: string
+            minLength: 1
+    RespResourceUrl:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultResourceUrl'
+        metadata:
+          type: object
+    SchedulerProfile:
+      type: object
+      required:
+      - name
+      properties:
+        tenant:
+          type: string
+        name:
+          $ref: '#/components/schemas/IdString'
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        owner:
+          $ref: '#/components/schemas/UserNameApiDefaultString'
+        moduleLoads:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModuleLoadSpec'
+        hiddenOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SchedulerHiddenOptionEnum'
+    RespChangeCount:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultChangeCount'
+        metadata:
+          type: object
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: object
+        metadata:
+          type: object
+    RespSchedulerProfile:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/SchedulerProfile'
+        metadata:
+          type: object
+    SchedulerHiddenOptionEnum:
+      type: string
+      enum:
+      - MEM
+      - PARTITION
+    UserNameApiDefaultString:
+      type: string
+      minLength: 1
+      maxLength: 60
+      default: ${apiUserId}
+  securitySchemes:
+    TapisJWT:
+      type: apiKey
+      description: Tapis signed JWT token authentication
+      name: X-Tapis-Token
+      in: header
+externalDocs:
+  description: Tapis Project
+  url: https://tapis-project.org

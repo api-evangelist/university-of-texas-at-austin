@@ -1,0 +1,963 @@
+openapi: 3.2.0
+info:
+  title: Tapis Files File Operations API
+  description: The Tapis Files API provides for management of file resources on Tapis systems
+  version: 1.8.2
+  termsOfService: https://tapis-project.org
+  contact:
+    name: Files API - CICSupport
+    url: https://tapis-project.org
+    email: cicsupport@tacc.utexas.edu
+  license:
+    name: 3-Clause BSD License
+    url: https://opensource.org/licenses/BSD-3-Clause
+servers:
+- url: http://localhost:8080/
+  description: Local test environment
+  variables: {}
+- url: https://dev.develop.tapis.io/
+  description: Development environment
+  variables: {}
+tags:
+- name: File Operations
+  description: 'Manage file resources on Tapis systems. List, upload, copy, native operations, etc.
+
+    Note that not all operations are supported for all system types.'
+paths:
+  /v3/files/ops/{systemId}/{path}:
+    get:
+      tags:
+      - File Operations
+      description: 'List files or objects on a Tapis system. Type for items will depend on system type. For example, for LINUX
+
+        they will be posix files and for S3 they will be storage objects. For S3 the recurse flag is ignored and all
+
+        objects with keys matching the path as a prefix are included.
+
+
+        For system types that support directory hierarchies the maximum recursion depth is 20.
+
+
+        Note that S3 buckets do not have a hierarchical structure. There are no directories. Everything is an object
+
+        associated with a key.
+
+
+        Certain services may use the query parameter *impersonationId* to be used in place of the requesting
+
+        Tapis user. Tapis will use this user Id when performing authorization and resolving the *effectiveUserId*
+
+        for the system.
+
+
+        Certain services may use the query parameter *sharedCtx* to indicate that the request is in a shared
+
+        context. *sharedCtx* must be set to the share grantor.
+
+        Tapis will include the share grantor as part of authorization checks.'
+      operationId: listFiles
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        description: System ID
+        required: true
+        schema:
+          type: string
+        example: system123
+      - name: path
+        in: path
+        description: Path relative to the system *rootDir*
+        required: true
+        schema:
+          type: string
+        example: directoryA/directoryB/
+      - name: pattern
+        in: query
+        description: "Wildcard pattern (glob) or regular expression to filter the results returned by this request.  Regular \nexpressions must have the prefix \"regex:\".  Only files where the name matches the pattern will be \nreturned.  The pattern is evaluated against the filename portion of the path only, and not the entire \npath.  For example to match a file that begins with \"myFile\" you could use a pattern of \"myFile*\" or \n\"regex:myFile.*\".  Or, to match files that end with .txt, you could supply a pattern of \"*.txt\" or \n\"regex:.*\\.txt$\".  Recursive listings filter only against filnames also - so even if the directory \ndoesn't match the pattern, files in the directory can be returned.  See documentation for Java regex \nfor the exact details of how Java handles regular expressions.  NOTE - this is only supported for linux \nsystems at present.\n"
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: pagination limit
+        schema:
+          type: integer
+          format: int32
+          default: 1000
+        example: 100
+      - name: offset
+        in: query
+        description: pagination offset
+        schema:
+          type: integer
+          format: int64
+          default: 0
+        example: 1000
+      - name: recurse
+        in: query
+        description: Recursive listing. Maximum recursion depth is 20.
+        schema:
+          type: boolean
+          default: false
+        example: false
+      - name: impersonationId
+        in: query
+        description: Restricted. Only certain services may impersonate a Tapis user.
+        schema:
+          type: string
+      - name: sharedCtx
+        in: query
+        description: Restricted. Only certain services may indicate that the request is in a shared context. Must be set to the share grantor.
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      responses:
+        '200':
+          description: A list of files
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileListingResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '401':
+          description: Not Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '403':
+          description: Permission Denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+      summary: List files
+      x-summary-source: derived
+    put:
+      tags:
+      - File Operations
+      description: 'Move or copy a file, directory or object on {systemID} at path {path}.
+
+        Not all operations supported for all system types.'
+      operationId: moveCopy
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        description: System ID
+        required: true
+        schema:
+          type: string
+      - name: path
+        in: path
+        description: Path relative to the system *rootDir*
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveCopyRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '401':
+          description: Not Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '403':
+          description: Permission Denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+      summary: Move copy
+      x-summary-source: derived
+    post:
+      tags:
+      - File Operations
+      description: The file or object will be uploaded at the {path} independent of the original name.
+      operationId: insert
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        description: System ID
+        required: true
+        schema:
+          type: string
+      - name: path
+        in: path
+        description: Path relative to the system *rootDir*
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+              - file
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '401':
+          description: Not Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '403':
+          description: Permission Denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+      summary: Insert
+      x-summary-source: derived
+    delete:
+      tags:
+      - File Operations
+      description: 'Delete a file, directory or object on {systemID} at path {path}.
+
+
+        For a LINUX directory this will be a recursive delete.
+
+
+        For an S3 system, the path will represent either a single object or all objects in the bucket with a prefix
+
+        matching the system *rootDir* if the path is the empty string.
+
+
+        **WARNING** For an S3 system if the path is the empty string, then all objects in the bucket with a key matching
+
+        the prefix *rootDir* will be deleted. So if the *rootDir* is also the empty string, then all objects in the bucket
+
+        will be removed.'
+      operationId: delete
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        description: System ID
+        required: true
+        schema:
+          type: string
+      - name: path
+        in: path
+        description: Path relative to the system *rootDir*
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '401':
+          description: Not Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '403':
+          description: Permission Denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+      summary: Delete
+      x-summary-source: derived
+  /v3/files/ops/{systemId}:
+    post:
+      tags:
+      - File Operations
+      description: 'Create a directory on the system at the given path. Not supported for all system types. Currently supported
+
+        for LINUX, IRODS and GLOBUS type systems.
+
+
+        Certain services may use the query parameter *sharedCtx* to indicate that the request is in a shared
+
+        context. *sharedCtx* must be set to the share grantor.
+
+        Tapis will include the share grantor as part of authorization checks.
+
+
+        If the path already exists as a directory, no error will be returned.'
+      operationId: mkdir
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        description: System ID
+        required: true
+        schema:
+          type: string
+      - name: sharedCtx
+        in: query
+        description: Restricted. Only certain services may indicate that the request is in a shared context. Must be set to the share grantor.
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MkdirRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '401':
+          description: Not Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '403':
+          description: Permission Denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+      summary: Mkdir
+      x-summary-source: derived
+  /v3/files/utils/linux/{systemId}/{path}:
+    get:
+      tags:
+      - File Operations
+      description: Get native stat information for a file or directory for a system of type LINUX.
+      operationId: getStatInfo
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        description: System ID
+        required: true
+        schema:
+          type: string
+        example: system123
+      - name: path
+        in: path
+        description: Path relative to the system *rootDir*
+        required: true
+        schema:
+          type: string
+        example: directoryA/file1
+      - name: followLinks
+        in: query
+        description: When path is a symbolic link whether to get information about the link (false) or the link target (true)
+        schema:
+          type: boolean
+          default: false
+        example: true
+      responses:
+        '200':
+          description: Linux stat information for the file or directory.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStatInfoResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '401':
+          description: Not Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '403':
+          description: Permission Denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+      summary: Get stat info
+      x-summary-source: derived
+    post:
+      tags:
+      - File Operations
+      description: Run a native operation on a path. Operations are chmod, chown or chgrp. For a system of type LINUX.
+      operationId: runLinuxNativeOp
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        description: System ID
+        required: true
+        schema:
+          type: string
+      - name: path
+        in: path
+        description: Path relative to the system *rootDir*
+        required: true
+        schema:
+          type: string
+      - name: recursive
+        in: query
+        description: If path is a directory this indicates whether or not to apply the changes recursively
+        schema:
+          type: boolean
+          default: false
+        example: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NativeLinuxOpRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NativeLinuxOpResultResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '401':
+          description: Not Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '403':
+          description: Permission Denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+      summary: Run linux native op
+      x-summary-source: derived
+  /v3/files/utils/linux/facl/{systemId}/{path}:
+    get:
+      tags:
+      - File Operations
+      description: Get file ACLs for files or directories for a system of type LINUX.
+      operationId: getFacl
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        description: System ID
+        required: true
+        schema:
+          type: string
+        example: system123
+      - name: path
+        in: path
+        description: Path relative to the system *rootDir*
+        required: true
+        schema:
+          type: string
+        example: /directoryA/directoryB/
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NativeLinuxGetFaclResponse'
+        '401':
+          description: Not Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '403':
+          description: Permission Denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+      summary: Get facl
+      x-summary-source: derived
+    post:
+      tags:
+      - File Operations
+      description: 'Set file ACLs for files or directories for a system of type LINUX.
+
+
+        This can be used for a single file or directory, or can be recursive. If recursion is
+
+        used, it can be made to follow symlinks, or not follow symlinks.
+
+
+        The operations support adding or removing Acl Entries as well as removing all acls or all
+
+        default acls'
+      operationId: setFacl
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: systemId
+        in: path
+        required: true
+        description: System ID
+        schema:
+          type: string
+        example: system123
+      - name: path
+        in: path
+        description: Path relative to the system *rootDir*
+        required: true
+        schema:
+          type: string
+        example: /directoryA/directoryB/
+      requestBody:
+        required: true
+        description: A JSON object specifying updated sharing information.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NativeLinuxSetFaclRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NativeLinuxSetFaclResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '401':
+          description: Not Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '403':
+          description: Permission Denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStringResponse'
+      summary: Set facl
+      x-summary-source: derived
+components:
+  schemas:
+    NativeLinuxOpResultResponse:
+      type: object
+      properties:
+        command:
+          type: string
+        exitCode:
+          type: integer
+          format: int32
+        stdOut:
+          type: string
+        stdErr:
+          type: string
+    FileStringResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    NativeLinuxSetFaclRequest:
+      required:
+      - operation
+      - aclString
+      type: object
+      properties:
+        operation:
+          type: string
+          enum:
+          - ADD
+          - REMOVE
+          - REMOVE_DEFAULT
+          - REMOVE_ALL
+        recursionMethod:
+          type: string
+          enum:
+          - NONE
+          - PHYSICAL
+          - LOGICAL
+          default: NONE
+          description: 'Recursion may be set to physical (don''t follow symlinks) or
+
+            logical (follow symlinks), or none (don''t recurse).
+
+            '
+        aclString:
+          type: string
+          description: "specifies the actual acl string to set.  Multiple acls may be separated by \ncommas.\nExamples - user:myuser:rwx,group \n           group:mygroup:rw \n           user:myuser:rwx,group,group:mygroup:rw \n"
+    NativeLinuxGetFaclResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          items:
+            $ref: '#/components/schemas/AclEntryInfo'
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    AclEntryInfo:
+      type: object
+      properties:
+        defaultAcl:
+          type: boolean
+        type:
+          type: string
+        principal:
+          type: string
+        permissions:
+          type: string
+    FileStatInfo:
+      type: object
+      properties:
+        absolutePath:
+          type: string
+        uid:
+          type: integer
+          format: int32
+        gid:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int64
+        perms:
+          type: string
+        accessTime:
+          type: integer
+          format: int64
+        modifyTime:
+          type: integer
+          format: int64
+        dir:
+          type: boolean
+        link:
+          type: boolean
+    MoveCopyRequest:
+      required:
+      - newPath
+      - operation
+      type: object
+      properties:
+        operation:
+          type: string
+          enum:
+          - MOVE
+          - COPY
+        newPath:
+          type: string
+          description: Paths must be absolute, ../.. is not allowed
+    NativeLinuxSetFaclResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          $ref: '#/components/schemas/NativeLinuxSetFaclResult'
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    NativeLinuxOpRequest:
+      required:
+      - argument
+      - operation
+      type: object
+      properties:
+        operation:
+          type: string
+          enum:
+          - CHMOD
+          - CHOWN
+          - CHGRP
+        argument:
+          type: string
+          description: Argument for native linux operation
+    FileListingResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileInfo'
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    UserNameString:
+      type: string
+      minLength: 1
+      maxLength: 60
+    FileStatInfoResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          $ref: '#/components/schemas/FileStatInfo'
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    NativeLinuxSetFaclResult:
+      type: object
+      properties:
+        command:
+          type: string
+        exitCode:
+          type: integer
+          format: int32
+        stdOut:
+          type: string
+        stdErr:
+          type: string
+    MkdirRequest:
+      required:
+      - path
+      type: object
+      properties:
+        path:
+          pattern: ^(?!.*\.\.).*
+          type: string
+    FileTypeEnum:
+      type: string
+      enum:
+      - file
+      - dir
+      - symbolic_link
+      - other
+      - unknown
+    FileInfo:
+      type: object
+      properties:
+        mimeType:
+          type: string
+        type:
+          $ref: '#/components/schemas/FileTypeEnum'
+        owner:
+          type: string
+        group:
+          type: string
+        nativePermissions:
+          type: string
+        url:
+          type: string
+        lastModified:
+          type: string
+          format: date-time
+        name:
+          type: string
+        path:
+          type: string
+        size:
+          type: integer
+          description: size in kB
+          format: int64
+  securitySchemes:
+    TapisJWT:
+      type: apiKey
+      description: Tapis signed JWT token authentication
+      name: X-Tapis-Token
+      in: header
+externalDocs:
+  description: Tapis Project
+  url: https://tapis-project.org

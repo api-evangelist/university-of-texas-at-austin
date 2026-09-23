@@ -1,0 +1,331 @@
+openapi: 3.2.0
+info:
+  title: University Of Texas At Austin General API
+  license:
+    name: 3-Clause BSD License
+    url: https://opensource.org/licenses/BSD-3-Clause
+  termsOfService: https://tapis-project.org
+  version: '1.0'
+  description: 'Operations tagged General across 5 of this provider''s published API definitions: university-of-texas-at-austin-tapis-apps-openapi-original.yml, university-of-texas-at-austin-tapis-files-openapi-original.yml, university-of-texas-at-austin-tapis-jobs-openapi-original.yml, university-of-texas-at-austin-tapis-notifications-openapi-original.yml, university-of-texas-at-austin-tapis-systems-openapi-original.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: http://localhost:8080/
+  description: Local test environment
+  variables: {}
+- url: https://dev.develop.tapis.io/
+  description: Development environment
+  variables: {}
+tags:
+- name: General
+  description: General service health and readiness
+paths:
+  /v3/apps/healthcheck:
+    get:
+      tags:
+      - General
+      description: Health check. Lightweight non-authenticated check that service is alive.
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Message received.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+      summary: Health check
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/apps/readycheck:
+    get:
+      tags:
+      - General
+      description: Ready check. Non-authenticated check that service is ready to do work.
+      operationId: readyCheck
+      responses:
+        '200':
+          description: Service ready.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '503':
+          description: Service not ready.
+      summary: Ready check
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/files/healthcheck:
+    get:
+      tags:
+      - General
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Message received.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+      summary: Health check
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/files/readycheck:
+    get:
+      tags:
+      - General
+      operationId: readyCheck
+      responses:
+        '200':
+          description: Service ready.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '503':
+          description: Service unavailable.
+      summary: Ready check
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /jobs/healthcheck:
+    get:
+      tags:
+      - General
+      description: Lightweight health check for liveness. No authorization required.
+      operationId: checkHealth
+      responses:
+        '200':
+          description: Message received.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespProbe'
+        '503':
+          description: Service unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespProbe'
+      summary: Check health
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /jobs/readycheck:
+    get:
+      tags:
+      - General
+      description: Lightweight readiness check. No authorization required.
+      operationId: readycheck
+      responses:
+        '200':
+          description: Service ready.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespProbe'
+        '503':
+          description: Service unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespProbe'
+      summary: Readycheck
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/notifications/healthcheck:
+    get:
+      tags:
+      - General
+      description: Health check. Lightweight non-authenticated check that service is alive.
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Message received.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+      summary: Health check
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/notifications/readycheck:
+    get:
+      tags:
+      - General
+      description: Ready check. Non-authenticated check that service is ready to do work.
+      operationId: readyCheck
+      responses:
+        '200':
+          description: Service ready.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '503':
+          description: Service not ready.
+      summary: Ready check
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/systems/healthcheck:
+    get:
+      tags:
+      - General
+      description: Health check. Lightweight non-authenticated check that service is alive.
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Message received.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+      summary: Health check
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/systems/readycheck:
+    get:
+      tags:
+      - General
+      description: Ready check. Non-authenticated check that service is ready to do work.
+      operationId: readyCheck
+      responses:
+        '200':
+          description: Service ready.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '503':
+          description: Service not ready.
+      summary: Ready check
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+components:
+  schemas:
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: object
+        metadata:
+          type: object
+    ResultMetadata:
+      type: object
+    JobsProbe:
+      type: object
+      properties:
+        checkNum:
+          type: integer
+          format: int64
+        databaseAccess:
+          type: boolean
+        tenantsAccess:
+          type: boolean
+        queueAccess:
+          type: boolean
+    RespProbe:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/JobsProbe'
+  securitySchemes:
+    TapisJWT:
+      type: apiKey
+      description: Tapis signed JWT token authentication
+      name: X-Tapis-Token
+      in: header
+externalDocs:
+  description: Tapis Project
+  url: https://tapis-project.org
+x-refined-from:
+- university-of-texas-at-austin-tapis-apps-openapi-original.yml
+- university-of-texas-at-austin-tapis-files-openapi-original.yml
+- university-of-texas-at-austin-tapis-jobs-openapi-original.yml
+- university-of-texas-at-austin-tapis-notifications-openapi-original.yml
+- university-of-texas-at-austin-tapis-systems-openapi-original.yml

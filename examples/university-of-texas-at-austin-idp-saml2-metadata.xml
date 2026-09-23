@@ -1,0 +1,95 @@
+<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" 
+    xmlns:ds="http://www.w3.org/2000/09/xmldsig#" 
+    xmlns:shibmd="urn:mace:shibboleth:metadata:1.0" entityID="https://enterprise.login.utexas.edu/idp/shibboleth">
+    <IDPSSODescriptor errorURL="http://www.utexas.edu/its/helpdesk/" protocolSupportEnumeration="urn:mace:shibboleth:1.0 urn:oasis:names:tc:SAML:1.1:protocol urn:oasis:names:tc:SAML:2.0:protocol">
+        <Extensions>
+            <shibmd:Scope regexp="false">utexas.edu</shibmd:Scope>
+            <mdui:UIInfo xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui">
+                <mdui:DisplayName xml:lang="en">University of Texas at Austin</mdui:DisplayName>
+                <mdui:Description xml:lang="en">Login service for The University of Texas at Austin</mdui:Description>
+                <mdui:PrivacyStatementURL xml:lang="en">https://it.utexas.edu/policies/web-privacy</mdui:PrivacyStatementURL>
+                <mdui:Logo height="75" width="153" xml:lang="en">https://idm.utsystem.edu/images/UTAus.png</mdui:Logo>
+            </mdui:UIInfo>
+            <mdattr:EntityAttributes xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute">
+                <saml:Attribute xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+                        NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
+                        Name="urn:oasis:names:tc:SAML:attribute:assurance-certification">
+                    <saml:AttributeValue>https://refeds.org/sirtfi</saml:AttributeValue>
+                </saml:Attribute>
+            </mdattr:EntityAttributes>
+            <mdattr:EntityAttributes xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute">
+            <saml:Attribute
+                    xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+                    NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
+                    Name="http://macedir.org/entity-category-support">
+                <saml:AttributeValue>http://refeds.org/category/research-and-scholarship</saml:AttributeValue>
+            </saml:Attribute>
+            </mdattr:EntityAttributes>
+        </Extensions>
+        <KeyDescriptor use="signing">
+            <ds:KeyInfo>
+                <ds:X509Data>
+                    <ds:X509Certificate>
+MIIFrjCCA5YCCQDehy9VUQg0DTANBgkqhkiG9w0BAQ0FADCBmDELMAkGA1UEBhMC
+VVMxDjAMBgNVBAgMBVRleGFzMQ8wDQYDVQQHDAZBdXN0aW4xKjAoBgNVBAoMIVRo
+ZSBVbml2ZXJzaXR5IG9mIFRleGFzIGF0IEF1c3RpbjEWMBQGA1UECwwNVVQgQXVz
+dGluIElUUzEkMCIGA1UEAwwbZW50ZXJwcmlzZS5sb2dpbi51dGV4YXMuZWR1MB4X
+DTE5MDgxNjE1MzYzMFoXDTM0MDgxMjE1MzYzMFowgZgxCzAJBgNVBAYTAlVTMQ4w
+DAYDVQQIDAVUZXhhczEPMA0GA1UEBwwGQXVzdGluMSowKAYDVQQKDCFUaGUgVW5p
+dmVyc2l0eSBvZiBUZXhhcyBhdCBBdXN0aW4xFjAUBgNVBAsMDVVUIEF1c3RpbiBJ
+VFMxJDAiBgNVBAMMG2VudGVycHJpc2UubG9naW4udXRleGFzLmVkdTCCAiIwDQYJ
+KoZIhvcNAQEBBQADggIPADCCAgoCggIBALzVXmmrmEN0lsHzS8C7sWgQDtlwZ4OT
+Xvq/hZ6dQ404yrqUZb1OxHg8m7gism0QHrwG9clrjufBrANWXAAWF/jK+dPboq9L
+SiGr6UMAUH0GDbjaQWnA0oUBxgPkwcZKno/HLotIJ+txAH8oVeR0Ofg4HQ6ERHmb
+8bnEAmZlzzRfA+DzIZVR0NCiG4RDHEPgHk9RUKkMbBHyyPRyqT3eeLfidvo2HTDi
+j+Pt00ZTXfd6VDqKLsWTWrumnUYRbBysK/qWixVeE4KDaYf7v05a1xwWz8PO3Isn
+bQLO/o1JlRvj/gVDFt5pOXnKUqoEBKj1n+db2mNJbKpZElBSx5cLBs9knRtR0F9B
+FpzIVXOYEqcqmaeOQ6VMytOqogdyB/TugSNgL1Ns+1gRzA6SaW1zt/ih9+UxlCd8
+Wg+c+iE4FBSuKyaWYscT8pNnUahsx/0hnfx6aknjF3WWL249x0120HJEUeZ42HE+
+YdvMUjeVTGPZ1c+a6batXPgZTqE7I2+isacEiC9vjiF8MCkTke+H7Z2Om3X5c63Z
+04usWwP+fa2wonWtAQIJQ9kLuXoF6l9OezlDloptStooXSBDfRgAM58h4mriiAwQ
+ZFAD3NFmxVtcmthMWswhiOSlQU+2T4UHDdOepf686F8N/mhHucUFgoj2mFGj6LM3
+VTksTfWnxq5jAgMBAAEwDQYJKoZIhvcNAQENBQADggIBALR68OL+t9Hfi87JSbkA
+EYaZ8gpGad2deiwPFi6wz+WL/b/fomuSxLwmBBjAxu/mN7f9QmYx6PD0mwW/SG2X
+REC+/L0yIBPkqQ07sNIddKpCkvv8nTotoITFLBhc6joqnSaY/iYE19LfjGzgnweC
+mMU86y/HzqxRhU8Zta6uRud954DirLeDNdczB9M9jWO9xzLRGP4nHWhYJFLVECbJ
+Ho3nfLlepiV20BXxQDfwuNkhrt/V8TQ5zrtvVVfp6h+FJSpxcsffoLLlkMyJjUte
+6NOMHk9LRc7l2VQVWjs/1DgGdeCOzDzgXFrmlkain4XgUtnEUrRveEX1QBQA1Xmn
+Kc6JqyVscsRPaouPbWaWnAfwAhVW8l+bJiwZcyEr0wLIxCuXElyUIDYTyDfooVf4
+GQfm8NRW+8ufGXQCzPxeCtVX+ojs2fj4kjFTfHdLUQHyX5d9cpXM5gBop+Bx2MiZ
+uxtchcAgvRi74E1XUPTQUy6iK5IexVKEUCIbTmY2kAQ7han6wfSYGbxmkxm/Mbj5
+PB0bOKFDzBkeMacrZ4AJVsmFqlCu7wdZRRPdbpwgD/dF03w+3mgZqBSIpOraRuiX
+LPiqaNpNcSFZrGQzSr1Q14ZyhsMUPLF0g2c3OwP1PKs519q6kVVektkAuS0S3cmg
+fxvFVQWNUHFpVY+EyA+TFti4
+
+                    </ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </KeyDescriptor>
+        <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://enterprise.login.utexas.edu/idp/profile/SAML2/Redirect/SSO"/>
+        <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://enterprise.login.utexas.edu/idp/profile/SAML2/POST/SSO"/>
+        <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign" Location="https://enterprise.login.utexas.edu/idp/profile/SAML2/POST-SimpleSign/SSO"/>
+        <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://enterprise.login.utexas.edu/idp/profile/SAML2/SOAP/ECP"/>
+    </IDPSSODescriptor>
+    <Organization>
+        <OrganizationName xml:lang="en">The University of Texas at Austin</OrganizationName>
+        <OrganizationDisplayName xml:lang="en">The University of Texas at Austin</OrganizationDisplayName>
+        <OrganizationURL xml:lang="en">https://www.utexas.edu</OrganizationURL>
+    </Organization>
+  <ContactPerson contactType="technical">
+    <GivenName>UT Austin Enterprise Authentication Team</GivenName>
+    <EmailAddress>entauthn@utlists.utexas.edu</EmailAddress>
+  </ContactPerson>
+  <ContactPerson contactType="administrative">
+    <GivenName>UT Austin Enterprise Authentication Team</GivenName>
+    <EmailAddress>entauthn@utlists.utexas.edu</EmailAddress>
+  </ContactPerson>
+  <ContactPerson contactType="support">
+    <GivenName>UT Austin Enterprise Authentication Team</GivenName>
+    <EmailAddress>entauthn@utlists.utexas.edu</EmailAddress>
+  </ContactPerson>
+  <ContactPerson xmlns:remd="http://refeds.org/metadata" contactType="other" remd:contactType="http://refeds.org/metadata/contactType/security">
+    <GivenName>UT Austin Enterprise Authentication Security Team</GivenName>
+    <EmailAddress>entauthn-security@utlists.utexas.edu</EmailAddress>
+  </ContactPerson>
+</EntityDescriptor>

@@ -1,0 +1,104 @@
+---
+name: University of Texas at Austin — authentication
+description: >-
+  How each University of Texas at Austin surface authenticates. Every entry was
+  observed on a live unauthenticated request; nothing here is inferred from
+  documentation prose.
+generated: '2026-08-30'
+method: probed
+source: live HTTP probes 2026-08-30 (see examples/)
+mechanisms:
+  - surface: UT Austin Enterprise Identity Provider
+    x-operator: institution
+    software: Shibboleth Identity Provider
+    protocols:
+      - name: SAML 2.0 Web SSO
+        entity_id: https://enterprise.login.utexas.edu/idp/shibboleth
+        metadata_url: https://enterprise.login.utexas.edu/idp/shibboleth
+        status: 200
+        bindings:
+          - urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
+          - urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign
+          - urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect
+          - urn:oasis:names:tc:SAML:2.0:bindings:SOAP
+        federation: InCommon
+        federation_metadata_url: https://mdq.incommon.org/entities/https%3A%2F%2Fenterprise.login.utexas.edu%2Fidp%2Fshibboleth
+        federation_status: 200
+        generated: '2026-08-30'
+        method: probed
+        source: https://enterprise.login.utexas.edu/idp/shibboleth
+      - name: OpenID Connect 1.0
+        issuer: https://enterprise.login.utexas.edu
+        discovery_url: https://enterprise.login.utexas.edu/.well-known/openid-configuration
+        status: 200
+        authorization_endpoint: https://enterprise.login.utexas.edu/idp/profile/oidc/authorize
+        token_endpoint: https://enterprise.login.utexas.edu/idp/profile/oidc/token
+        userinfo_endpoint: https://enterprise.login.utexas.edu/idp/profile/oidc/userinfo
+        jwks_uri: https://enterprise.login.utexas.edu/idp/profile/oidc/keyset
+        introspection_endpoint: https://enterprise.login.utexas.edu/idp/profile/oauth2/introspection
+        revocation_endpoint: https://enterprise.login.utexas.edu/idp/profile/oauth2/revocation
+        end_session_endpoint: https://enterprise.login.utexas.edu/idp/profile/oidc/end-session
+        registration_endpoint: https://enterprise.login.utexas.edu/idp/profile/oidc/register
+        dynamic_client_registration: true
+        grant_types_supported: [ authorization_code, refresh_token ]
+        token_endpoint_auth_methods_supported:
+          - client_secret_basic
+          - client_secret_post
+          - client_secret_jwt
+          - private_key_jwt
+        subject_types_supported: [ public, pairwise ]
+        generated: '2026-08-30'
+        method: probed
+        source: https://enterprise.login.utexas.edu/.well-known/openid-configuration
+    note: >-
+      Client registration is not self-service. The registration_endpoint is
+      advertised in the discovery document but issuing credentials is an
+      institutional process run through UT Austin Identity and Access
+      Management; no public developer sign-up was found.
+  - surface: Texas ScholarWorks DSpace REST API
+    x-operator: institution
+    base_url: https://repositories.lib.utexas.edu/server/api
+    anonymous_read: true
+    anonymous_read_status: 200
+    challenge_header: >-
+      shibboleth realm="DSpace REST API",
+      location="https://repositories.lib.utexas.edu/Shibboleth.sso/Login?target=https%3A%2F%2Frepositories.lib.utexas.edu%2Fserver%2Fapi%2Fauthn%2Fshibboleth",
+      password realm="DSpace REST API"
+    schemes:
+      - name: Shibboleth SSO
+        detail: >-
+          Advertised in the WWW-Authenticate header on
+          /server/api/authn/status. Routes to the institution's own
+          Shibboleth.sso service provider.
+      - name: Password (EPerson)
+        detail: DSpace native login against a repository account.
+    csrf: DSpace requires an X-XSRF-TOKEN header for state-changing requests.
+    generated: '2026-08-30'
+    method: probed
+    source: https://repositories.lib.utexas.edu/server/api/authn/status
+  - surface: Tapis v3 platform — TACC production tenant
+    x-operator: institution
+    base_url: https://tacc.tapis.io/v3
+    anonymous_read: false
+    scheme: JWT bearer token (X-Tapis-Token header), issued by the tenant authenticator
+    authenticator: https://tacc.tapis.io/v3/oauth2
+    observed_rejection: >-
+      HTTP 401 "TAPIS_SECURITY_MISSING_JWT_INFO HTTP GET request rejected due to
+      missing JSON Web Token information." on GET /v3/systems
+    account_prerequisite: A TACC user account; allocation required for compute resources.
+    generated: '2026-08-30'
+    method: probed
+    source: https://tacc.tapis.io/v3/systems
+  - surface: Texas Data Repository (Dataverse)
+    x-operator: tenant
+    base_url: https://dataverse.tdl.org/api
+    anonymous_read: true
+    anonymous_read_status: 200
+    scheme: X-Dataverse-key API token for write operations
+    note: >-
+      The authentication model is the Texas Digital Library's, not UT Austin's.
+      Recorded because UT Austin's research data lands here, not because UT
+      Austin operates it.
+    generated: '2026-08-30'
+    method: probed
+    source: https://dataverse.tdl.org/api/dataverses/utexas

@@ -1,0 +1,1649 @@
+openapi: 3.2.0
+info:
+  title: University Of Texas At Austin Subscriptions API
+  license:
+    name: 3-Clause BSD License
+    url: https://opensource.org/licenses/BSD-3-Clause
+  termsOfService: https://tapis-project.org
+  version: '1.0'
+  description: 'Operations tagged Subscriptions across 2 of this provider''s published API definitions: university-of-texas-at-austin-tapis-jobs-openapi-original.yml, university-of-texas-at-austin-tapis-notifications-openapi-original.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: http://localhost:8080/
+  description: Local test environment
+  variables: {}
+- url: https://dev.develop.tapis.io/
+  description: Development environment
+  variables: {}
+tags:
+- name: Subscriptions
+  description: manage job subscriptions
+paths:
+  /jobs/subscribe/{uuid}:
+    delete:
+      tags:
+      - Subscriptions
+      description: 'Depending on the UUID provide, this API either deletes a single subscription from a job or all subscriptions
+
+        from a job. To delete single subscription, provide the UUID of that subscription as listed in the subscription
+
+        retrieval result for the job. To delete all a job''s subscriptions, specify the job UUID.
+
+
+        Like all Job subscription APIs, modifications only affect running jobs and never change the saved job
+
+        definition. As a consequence, job resubmissions are not affected by runtime subscription changes.'
+      operationId: deleteSubscriptions
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Job created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+      - TapisJWT: []
+      summary: Delete subscriptions
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /jobs/subscribe/{jobUuid}:
+    get:
+      tags:
+      - Subscriptions
+      description: 'Retrieve a job''s subscriptions fom the Notifications service. After subscriptions expire or are deleted by user
+
+        action they may no longer be listed in Notification service. To inspect the initial set of subscriptions
+
+        assigned to a job, retrieve the job definition.'
+      operationId: getSubscriptions
+      parameters:
+      - name: jobUuid
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      - name: skip
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      responses:
+        '200':
+          description: Job created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespGetSubscriptions'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+      - TapisJWT: []
+      summary: Get subscriptions
+      x-summary-source: derived
+    post:
+      tags:
+      - Subscriptions
+      description: 'Subcribe to a running job identified by it''s UUID. The caller must be the job owner or a tenant administrator.
+
+
+        Like all Job subscription APIs, modifications only affect running jobs and never change the saved job definition.
+
+        As a consequence, job resubmissions are not affected by runtime subscription changes.
+
+
+        The events to which one can subscribe are:
+
+
+        - JOB_NEW_STATUS - the job has transitioned to a new status
+
+        - JOB_INPUT_TRANSACTION_ID - a request to stage job input files has been submitted
+
+        - JOB_ARCHIVE_TRANSACTION_ID - a request to archive job output files has been submitted
+
+        - JOB_SUBSCRIPTION - a change to the job''s subscriptions has occurred
+
+        - JOB_SHARE_EVENT - a job resource has been shared or unshared
+
+        - JOB_ERROR_MESSAGE - the job experienced an error
+
+        - JOB_USER_EVENT - user generated events
+
+        - ALL - all job event categories'
+      operationId: subscribe
+      parameters:
+      - name: jobUuid
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqSubscribe'
+        required: true
+      responses:
+        '200':
+          description: Job subscription created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+      - TapisJWT: []
+      summary: Subscribe
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/notifications/subscriptions:
+    get:
+      tags:
+      - Subscriptions
+      description: 'Retrieve list of subscriptions owned by the requesting user. Use search and select query parameters to limit results.
+
+
+        Query parameter *ownedBy* may be used to retrieve subscriptions owned by a user other than the requesting user.
+
+        Ignored if *anyOwner* is set to true. Only services or tenant administrators may set *ownedBy*.
+
+
+        Query parameter *anyOwner* may be used to retrieve all subscriptions owned by any user.
+
+        Query parameter *anyOwner* takes precedence over parameter *ownedBy*. Only services may set *anyOwner*.'
+      operationId: getSubscriptions
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: search
+        in: query
+        description: Search conditions as a single query parameter. For example search=(name.like.MySubscr*)~(enabled.eq.false)
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Limit number of items returned. For example limit=10. Use -1 for unlimited. Default is 100.
+        schema:
+          type: integer
+          default: 100
+      - name: orderBy
+        in: query
+        description: Attribute for sorting. Direction may be included. For example orderBy=name(desc). Default direction is (asc).
+        schema:
+          type: string
+      - name: skip
+        in: query
+        description: Number of items to skip. Use one of skip or startAfter. For example skip=10. Default is 0.
+        schema:
+          type: integer
+      - name: startAfter
+        in: query
+        description: Where to start when sorting. Use one of skip or startAfter. Must also specify orderBy. For example, limit=10&orderBy=name(asc)&startAfter=my.sub1
+        schema:
+          type: string
+      - name: computeTotal
+        in: query
+        description: Compute total number of results that would have been returned if unlimited. Default is false.
+        schema:
+          type: boolean
+          default: false
+      - name: select
+        in: query
+        description: List of attributes to be included as part of each result item. Keywords *allAttributes* and *summaryAttributes* are supported. For example select=owner,name,typeFilter.
+        schema:
+          type: string
+          default: summaryAttributes
+      - name: ownedBy
+        in: query
+        description: Retrieve subscriptions owned by a user other than the requesting user. Ignored if *anyOwner* is true. Requester must be a service or tenant administrator.
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      - name: anyOwner
+        in: query
+        description: Include subscriptions owned by any user. If set to true then *ownedBy* is ignored. Default is false. Requester must be a service.
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSubscriptions'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+      summary: Get subscriptions
+      x-summary-source: derived
+    post:
+      tags:
+      - Subscriptions
+      description: 'Create a subscription using a request body. Only services may perform this operation.
+
+
+        For each owner the *name* must be unique and can be composed of alphanumeric characters and the following
+
+        five special characters [-._~@]. If attribute *name* is not provided then the service will generate one.
+
+        The attributes *typeFilter*, *subjectFilter* and *deliveryTargets* are required.
+
+
+        Subscription attributes:
+
+        - name: Optional short descriptive name. *owner+name* must be unique. If one is not provided the service will create one.
+
+        - description: Optional more verbose description. Maximum length of 2048 characters.
+
+        - owner: A specific user set at create time. Default is *${apiUserId}*.
+
+        - enabled: Indicates if subscription is active. By default enabled is true.
+
+        - typeFilter: Filter to use when matching events. Filter for event type. Has three dot separated parts: *service*, *category* and *detail*. Each field may be a specific type or the wildcard character. Examples are *jobs.job.complete*, *jobs.new_status.\**.
+
+        - subjectFilter: Filter to use when matching events. Filter for subject. This may be a specific subject such as a job Id or the wildcard character *.
+
+        - deliveryTargets: List of delivery targets to be used when delivering a matching event. Must have at least one. Each target includes delivery method (EMAIL or WEBHOOK) and delivery address.
+
+        - ttlMinutes: Time to live in minutes specified when subscription is created or TTL is updated. Service will compute expiry based on TTL. Default is one week from creation. Value of 0 indicates no expiration.'
+      operationId: postSubscription
+      security:
+      - TapisJWT: []
+      requestBody:
+        required: true
+        description: A JSON object specifying information for the subscription to be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqPostSubscription'
+      responses:
+        '201':
+          description: Subscription created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl_2'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '409':
+          description: Subscription already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl_2'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+      summary: Post subscription
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/notifications/subscriptions/search:
+    get:
+      tags:
+      - Subscriptions
+      description: 'Retrieve details for subscriptions owned by the requesting user.
+
+        Use query parameters to specify search conditions. For example name.eq=MySubscription.
+
+        Query parameter *ownedBy* may be used to retrieve subscriptions owned by another user.
+
+        Only services or tenant administrators may set *ownedBy*.'
+      operationId: searchSubscriptionsQueryParameters
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: freeFormParameterName
+        in: query
+        description: Free form query parameters.
+        explode: true
+        allowEmptyValue: true
+        schema:
+          type: object
+          additionalProperties:
+            type: string
+        style: form
+      - name: limit
+        in: query
+        description: Limit number of items returned. For example limit=10. Use -1 for unlimited. Default is 100.
+        schema:
+          type: integer
+          default: 100
+      - name: orderBy
+        in: query
+        description: Attribute for sorting. Direction may be included. For example orderBy=name(desc). Default direction is (asc).
+        schema:
+          type: string
+      - name: skip
+        in: query
+        description: Number of items to skip. Use one of skip or startAfter. For example skip=10. Default is 0.
+        schema:
+          type: integer
+      - name: startAfter
+        in: query
+        description: Where to start when sorting. Use one of skip or startAfter. Must also specify orderBy. For example, limit=10&orderBy=name(asc)&startAfter=my.sub2
+        schema:
+          type: string
+      - name: computeTotal
+        in: query
+        description: Compute total number of results that would have been returned if unlimited. Default is false.
+        schema:
+          type: boolean
+          default: false
+      - name: select
+        in: query
+        description: List of attributes to be included as part of each result item. Keywords *allAttributes* and *summaryAttributes* are supported. For example select=owner,name,typeFilter
+        schema:
+          type: string
+          default: summaryAttributes
+      - name: ownedBy
+        in: query
+        description: Retrieve subscriptions owned by a user other than the requesting user. Requester must be a service or tenant administrator.
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSubscriptions'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+      summary: Search subscriptions query parameters
+      x-summary-source: derived
+    post:
+      tags:
+      - Subscriptions
+      description: 'Retrieve details for subscriptions owned by the requesting user.
+
+        Use request body to specify SQL-like search conditions.
+
+        Query parameter *ownedBy* may be used to retrieve subscriptions owned by another user.
+
+        Only services or tenant administrators may set *ownedBy*.'
+      operationId: searchSubscriptionsRequestBody
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: limit
+        in: query
+        description: Limit number of items returned. For example limit=10. Use -1 for unlimited. Default is 100.
+        schema:
+          type: integer
+          default: 100
+      - name: orderBy
+        in: query
+        description: Attribute for sorting. Direction may be included. For example orderBy=name(desc). Default direction is (asc).
+        schema:
+          type: string
+      - name: skip
+        in: query
+        description: Number of items to skip. Use one of skip or startAfter. For example skip=10. Default is 0.
+        schema:
+          type: integer
+      - name: startAfter
+        in: query
+        description: Where to start when sorting. Use one of skip or startAfter. Must also specify orderBy. For example, limit=10&orderBy=name(asc)&startAfter=my.sub1
+        schema:
+          type: string
+      - name: computeTotal
+        in: query
+        description: Compute total number of results that would have been returned if unlimited. Default is false.
+        schema:
+          type: boolean
+          default: false
+      - name: select
+        in: query
+        description: List of attributes to be included as part of each result item. Keywords *allAttributes* and *summaryAttributes* are supported. For example select=owner,name,typeFilter
+        schema:
+          type: string
+          default: summaryAttributes
+      - name: ownedBy
+        in: query
+        description: Retrieve subscriptions owned by a user other than the requesting user. Requester must be a service or tenant administrator.
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      requestBody:
+        required: true
+        description: A JSON object specifying SQL-like search conditions as an array of strings. Strings are concatenated to form full search query.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqSearchSubscriptions'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSubscriptions'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+      summary: Search subscriptions request body
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/notifications/subscriptions/byName/{name}:
+    get:
+      tags:
+      - Subscriptions
+      description: 'Retrieve a subscription owned by the requesting user and whose name matches the provided value.
+
+        Query parameter *ownedBy* may be used to retrieve a subscription owned by another user.
+
+        Only services or tenant administrators may set the *ownedBy* query parameter.
+
+
+        Summary of subscription attributes. For details please see *postSubscription*:
+
+        - owner: Tapis user who owns the subscription.
+
+        - name: Short descriptive name.
+
+        - description: Optional more verbose description.
+
+        - enabled: Indicates if subscription is currently active.
+
+        - typeFilter: Filter to use when matching events. Format is *service.category.detail*. Each field may be a specific type or the wildcard character *.
+
+        - subjectFilter: Filter to use when matching events. Filter for subject. May be wildcard character *.
+
+        - deliveryTargets: List of delivery targets to be used when delivering a matching event.
+
+        - ttlMinutes: Time to live in minutes. 0 indicates no expiration.
+
+        - uuid: A UUID generated by the service.
+
+        - expiry: Time at which the subscription expires and will be deleted. Maintained by the service.
+
+        - created: When created. Maintained by the service.
+
+        - updated: When last updated. Maintained by the service.'
+      operationId: getSubscriptionByName
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/NameString'
+      - name: select
+        in: query
+        description: List of attributes to be included as part of the result item. Keywords *allAttributes* and *summaryAttributes* are supported. For example select=owner,name,typeFilter
+        schema:
+          type: string
+          default: allAttributes
+      - name: ownedBy
+        in: query
+        description: Retrieve subscription owned by a user other than the requesting user. Requester must be a service or tenant administrator.
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      responses:
+        '200':
+          description: Subscription found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSubscription'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '404':
+          description: Subscription not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+      summary: Get subscription by name
+      x-summary-source: derived
+    patch:
+      tags:
+      - Subscriptions
+      description: 'Update selected attributes of a subscription. Only services may perform this operation.
+
+
+        Request body may only contain updatable attributes. Subscription must exist.
+
+        Query parameter *ownedBy* may be used to patch a subscription owned by another user.
+
+        Only services or tenant administrators may set *ownedBy*.
+
+
+        Attributes that may not be updated via PATCH are
+
+
+        - name
+
+        - owner
+
+        - enabled
+
+        - ttlMinutes
+
+
+        Note that the attributes *enabled* and *ttlMinutes* may be modified using other endpoints.'
+      operationId: patchSubscriptionByName
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/NameString'
+      - name: ownedBy
+        in: query
+        description: Patch a subscription owned by a user other than the requesting user. Requester must be a service or tenant administrator.
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      requestBody:
+        required: true
+        description: A JSON object specifying changes to be applied.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqPatchSubscription'
+      responses:
+        '200':
+          description: Subscription updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl_2'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '404':
+          description: Subscription not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+      summary: Patch subscription by name
+      x-summary-source: derived
+    delete:
+      tags:
+      - Subscriptions
+      description: 'Delete a subscription. Only services may perform this operation.
+
+
+        Events will stop being delivered. Subscription must be re-created to resume event delivery.
+
+        Query parameter *ownedBy* may be used to delete a subscription owned by another user.
+
+        Only services or tenant administrators may set *ownedBy*.'
+      operationId: deleteSubscriptionByName
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/NameString'
+      - name: ownedBy
+        in: query
+        description: Delete a subscription owned by a user other than the requesting user. Requester must be a service or tenant administrator.
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      responses:
+        '200':
+          description: Subscription deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '404':
+          description: Subscription not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+      summary: Delete subscription by name
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/notifications/subscriptions/byUuid/{uuid}:
+    get:
+      tags:
+      - Subscriptions
+      description: 'Retrieve a subscription whose UUID matches the provided value.
+
+
+        Summary of subscription attributes. For details please see *postSubscription*:
+
+        - owner: Tapis user who owns the subscription.
+
+        - name: Short descriptive name.
+
+        - description: Optional more verbose description.
+
+        - enabled: Indicates if subscription is currently active.
+
+        - typeFilter: Filter to use when matching events. Format is *service.category.detail*. Each field may be a specific type or the wildcard character *.
+
+        - subjectFilter: Filter to use when matching events. Filter for subject. May be wildcard character *.
+
+        - deliveryTargets: List of delivery targets to be used when delivering a matching event.
+
+        - ttlMinutes: Time to live in minutes. 0 indicates no expiration.
+
+        - uuid: A UUID generated by the service.
+
+        - expiry: Time at which the subscription expires and will be deleted. Maintained by the service.
+
+        - created: When created. Maintained by the service.
+
+        - updated: When last updated. Maintained by the service.'
+      operationId: getSubscriptionByUuid
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: select
+        in: query
+        description: List of attributes to be included as part of the result item. Keywords *allAttributes* and *summaryAttributes* are supported. For example select=owner,name,typeFilter
+        schema:
+          type: string
+          default: allAttributes
+      responses:
+        '200':
+          description: Subscription found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSubscription'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '404':
+          description: Subscription not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+      summary: Get subscription by uuid
+      x-summary-source: derived
+    delete:
+      tags:
+      - Subscriptions
+      description: Delete a subscription whose UUID matches the provided value. Only services may perform this operation.
+      operationId: deleteSubscriptionByUuid
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Subscription deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '404':
+          description: Subscription not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+      summary: Delete subscription by uuid
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/notifications/subscriptions/bySubject/{subject}:
+    delete:
+      tags:
+      - Subscriptions
+      description: 'Delete all subscriptions whose *subjectFilter* exactly matches the specific *subject* provided.
+
+        Only services may perform this operation.
+
+
+        Query parameter *ownedBy* may be used to delete subscriptions owned by a user other than the requesting user.
+
+        Ignored if *anyOwner* is set to true. Only services or tenant administrators may set *ownedBy*.
+
+
+        Query parameter *anyOwner* may be used to delete subscriptions owned by any user.
+
+        Query parameter *anyOwner* takes precedence over parameter *ownedBy*.
+
+        Only services may set *anyOwner*.'
+      operationId: deleteSubscriptionsBySubject
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: subject
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: ownedBy
+        in: query
+        description: Delete subscriptions owned by a user other than the requesting user. Ignored if *anyOwner* is true. Requester must be a service or tenant administrator.
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      - name: anyOwner
+        in: query
+        description: Delete subscriptions owned by any user. If set to true then *ownedBy* is ignored. Default is false. Requester must be a service.
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: Subscriptions deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+      summary: Delete subscriptions by subject
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/notifications/subscriptions/{name}/isEnabled:
+    get:
+      tags:
+      - Subscriptions
+      description: 'Check if a subscription owned by the requesting user is currently active.
+
+        Query parameter *ownedBy* may be used to check a subscription owned by another user.
+
+        Only services or tenant administrators may set *ownedBy*.'
+      operationId: isEnabled
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/NameString'
+      - name: ownedBy
+        in: query
+        description: Check a subscription owned by a user other than the requesting user. Requester must be a service or tenant administrator.
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      responses:
+        '200':
+          description: Check successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBoolean'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '404':
+          description: Subscription not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+      summary: Is enabled
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/notifications/subscriptions/{name}/enable:
+    post:
+      tags:
+      - Subscriptions
+      description: 'Update a subscription to be active. Only services may perform this operation.
+
+
+        Matching events will start being delivered.
+
+        Query parameter *ownedBy* may be used to enable a subscription owned by another user.
+
+        Only services or tenant administrators may set *ownedBy*.'
+      operationId: enableSubscription
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/NameString'
+      - name: ownedBy
+        in: query
+        description: Update a subscription owned by a user other than the requesting user. Requester must be a service or tenant administrator.
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      responses:
+        '200':
+          description: Subscription enabled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '404':
+          description: Subscription not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+      summary: Enable subscription
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/notifications/subscriptions/{name}/disable:
+    post:
+      tags:
+      - Subscriptions
+      description: 'Update a subscription to be inactive. Only services may perform this operation.
+
+
+        Matching events will stop being delivered.
+
+        Query parameter *ownedBy* may be used to disable a subscription owned by another user.
+
+        Only services or tenant administrators may set *ownedBy*.'
+      operationId: disableSubscription
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/NameString'
+      - name: ownedBy
+        in: query
+        description: Update a subscription owned by a user other than the requesting user. Requester must be a service or tenant administrator.
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      responses:
+        '200':
+          description: Subscription disabled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '404':
+          description: Subscription not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+      summary: Disable subscription
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+  /v3/notifications/subscriptions/{name}/updateTTL/{ttlMinutes}:
+    post:
+      tags:
+      - Subscriptions
+      description: 'Update Time-To-Live (TTL) for a subscription. Only services may perform this operation.
+
+
+        TTL provided as number of minutes. Use 0 to indicate subscription should never expire.
+
+        Query parameter *ownedBy* may be used to update a subscription owned by another user.
+
+        Only services or tenant administrators may set *ownedBy*.'
+      operationId: updateTTL
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/NameString'
+      - name: ttlMinutes
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: ownedBy
+        in: query
+        description: Update a subscription owned by a user other than the requesting user. Requester must be a service or tenant administrator.
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      responses:
+        '200':
+          description: Subscription TTL updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '404':
+          description: Subscription not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic_2'
+      summary: Update TTL
+      x-summary-source: derived
+    servers:
+    - url: http://localhost:8080/
+      description: Local test environment
+      variables: {}
+    - url: https://dev.develop.tapis.io/
+      description: Development environment
+      variables: {}
+components:
+  schemas:
+    NotifDeliveryTarget:
+      type: object
+      properties:
+        deliveryMethod:
+          type: string
+          enum:
+          - WEBHOOK
+          - EMAIL
+        deliveryAddress:
+          type: string
+    DeliveryTarget:
+      type: object
+      properties:
+        deliveryMethod:
+          type: string
+          enum:
+          - WEBHOOK
+          - EMAIL
+        deliveryAddress:
+          type: string
+    ResultResourceUrl:
+      type: object
+      properties:
+        url:
+          type: string
+    RespGetSubscriptions:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/TapisSubscription'
+    RespResourceUrl:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/ResultResourceUrl'
+    TapisSubscription:
+      type: object
+      properties:
+        tenant:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        owner:
+          type: string
+        enabled:
+          type: boolean
+        typeFilter:
+          type: string
+        subjectFilter:
+          type: string
+        deliveryTargets:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeliveryTarget'
+        ttlMinutes:
+          type: integer
+          format: int32
+        uuid:
+          type: string
+        expiry:
+          type: string
+        created:
+          type: string
+        updated:
+          type: string
+    ReqSubscribe:
+      type: object
+      properties:
+        description:
+          type: string
+        enabled:
+          type: boolean
+        eventCategoryFilter:
+          type: string
+          enum:
+          - JOB_NEW_STATUS
+          - JOB_INPUT_TRANSACTION_ID
+          - JOB_ARCHIVE_TRANSACTION_ID
+          - JOB_SUBSCRIPTION
+          - JOB_SHARE_EVENT
+          - JOB_ERROR_MESSAGE
+          - JOB_USER_EVENT
+          - ALL
+        deliveryTargets:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotifDeliveryTarget'
+        ttlminutes:
+          type: integer
+          format: int32
+    ResultMetadata:
+      type: object
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          type: object
+    ResultChangeCount:
+      type: object
+      properties:
+        changes:
+          type: integer
+          format: int32
+    NameString:
+      type: string
+      minLength: 1
+      maxLength: 188
+    ReqPatchSubscription:
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        typeFilter:
+          $ref: '#/components/schemas/TypeFilterString'
+        subjectFilter:
+          $ref: '#/components/schemas/SubjectFilterString'
+        deliveryTargets:
+          $ref: '#/components/schemas/DeliveryTargets'
+    ResultBoolean:
+      type: object
+      properties:
+        aBool:
+          type: boolean
+    DescriptionString:
+      type: string
+      maxLength: 2048
+    TypeFilterString:
+      type: string
+      minLength: 5
+      maxLength: 128
+    DeliveryTarget_2:
+      type: object
+      required:
+      - deliveryMethod
+      - deliveryAddress
+      properties:
+        deliveryMethod:
+          $ref: '#/components/schemas/DeliveryMethod'
+        deliveryAddress:
+          type: string
+    ReqSearchSubscriptions:
+      type: object
+      required:
+      - search
+      properties:
+        search:
+          type: array
+          minItems: 1
+          items:
+            type: string
+    DeliveryMethod:
+      type: string
+      enum:
+      - WEBHOOK
+      - EMAIL
+    RespBoolean:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultBoolean'
+        metadata:
+          type: object
+    RespResourceUrl_2:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultResourceUrl'
+        metadata:
+          type: object
+    DeliveryTargets:
+      type: array
+      items:
+        $ref: '#/components/schemas/DeliveryTarget_2'
+    RespBasic_2:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: object
+        metadata:
+          type: object
+    UserNameApiDefaultString:
+      type: string
+      minLength: 1
+      maxLength: 60
+      default: ${apiUserId}
+    RespSubscription:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/TapisSubscription_2'
+        metadata:
+          type: object
+    ReqPostSubscription:
+      type: object
+      required:
+      - typeFilter
+      - subjectFilter
+      - deliveryTargets
+      properties:
+        name:
+          $ref: '#/components/schemas/NameString'
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        owner:
+          $ref: '#/components/schemas/UserNameApiDefaultString'
+        enabled:
+          type: boolean
+          default: true
+        typeFilter:
+          $ref: '#/components/schemas/TypeFilterString'
+        subjectFilter:
+          $ref: '#/components/schemas/SubjectFilterString'
+        deliveryTargets:
+          $ref: '#/components/schemas/DeliveryTargets'
+        ttlMinutes:
+          type: integer
+    TapisSubscription_2:
+      type: object
+      properties:
+        tenant:
+          type: string
+        name:
+          $ref: '#/components/schemas/NameString'
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        owner:
+          $ref: '#/components/schemas/UserNameApiDefaultString'
+        enabled:
+          type: boolean
+          default: true
+        typeFilter:
+          $ref: '#/components/schemas/TypeFilterString'
+        subjectFilter:
+          $ref: '#/components/schemas/SubjectFilterString'
+        deliveryTargets:
+          $ref: '#/components/schemas/DeliveryTargets'
+        ttlMinutes:
+          type: integer
+        uuid:
+          type: string
+        expiry:
+          type: string
+        created:
+          type: string
+        updated:
+          type: string
+    SubjectFilterString:
+      type: string
+      minLength: 1
+      maxLength: 150
+    RespChangeCount:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultChangeCount'
+        metadata:
+          type: object
+    RespSubscriptions:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/TapisSubscription_2'
+        metadata:
+          type: object
+          properties:
+            recordCount:
+              type: integer
+            recordLimit:
+              type: integer
+            recordsSkipped:
+              type: integer
+            orderBy:
+              type: string
+            startAfter:
+              type: string
+            totalCount:
+              type: integer
+    UserNameString:
+      type: string
+      minLength: 1
+      maxLength: 60
+  securitySchemes:
+    TapisJWT:
+      type: apiKey
+      description: Tapis signed JWT token authentication
+      name: X-Tapis-Token
+      in: header
+externalDocs:
+  description: Tapis Project
+  url: https://tapis-project.org
+x-refined-from:
+- university-of-texas-at-austin-tapis-jobs-openapi-original.yml
+- university-of-texas-at-austin-tapis-notifications-openapi-original.yml

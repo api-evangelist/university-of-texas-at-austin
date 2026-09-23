@@ -1,0 +1,481 @@
+openapi: 3.2.0
+info:
+  title: Tapis Files Transfers API
+  description: The Tapis Files API provides for management of file resources on Tapis systems
+  version: 1.8.2
+  termsOfService: https://tapis-project.org
+  contact:
+    name: Files API - CICSupport
+    url: https://tapis-project.org
+    email: cicsupport@tacc.utexas.edu
+  license:
+    name: 3-Clause BSD License
+    url: https://opensource.org/licenses/BSD-3-Clause
+servers:
+- url: http://localhost:8080/
+  description: Local test environment
+  variables: {}
+- url: https://dev.develop.tapis.io/
+  description: Development environment
+  variables: {}
+tags:
+- name: Transfers
+  description: 'Manage file transfers between two systems. Initiate, cancel and retrieve status.
+
+    Note that not all combinations of system types are supported. For example, transfers involving a GLOBUS
+
+    system must be GLOBUS to GLOBUS.'
+paths:
+  /v3/files/transfers:
+    get:
+      tags:
+      - Transfers
+      description: Get a list of transfer tasks starting with the most recent.
+      operationId: getRecentTransferTasks
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: limit
+        in: query
+        description: pagination limit
+        schema:
+          type: integer
+          format: int32
+          default: 1000
+        example: 100
+      - name: offset
+        in: query
+        description: pagination offset
+        schema:
+          type: integer
+          format: int32
+          default: 0
+        example: 1000
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferTaskListResponse'
+      summary: Get recent transfer tasks
+      x-summary-source: derived
+    post:
+      tags:
+      - Transfers
+      description: 'Create a background task which will transfer files between systems.
+
+        Note that not all combinations of system types are supported. For example, transfers involving a GLOBUS
+
+        system must be GLOBUS to GLOBUS.
+
+
+        Transfers will fail if there are more than a set number of files per directory. The current limit is
+
+        10,000 files, however that could change in the future. It''s recommended that for large numbers of files
+
+        you build an archive (tar, zip, etc) and transfer that instead.'
+      operationId: createTransferTask
+      security:
+      - TapisJWT: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqTransfer'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferTaskResponse'
+      summary: Create transfer task
+      x-summary-source: derived
+  /v3/files/transfers/{transferTaskId}:
+    get:
+      tags:
+      - Transfers
+      description: 'Retrieve a transfer task. By default only the top level attributes are included in the result.
+
+        The top level attributes are: tenantId, uuid, status, username, tag, created, startTime, endTime, errorMessage.
+
+        The query parameter *includeSummary* may be set to *true* to also include totalTransfers, completeTransfers
+
+        and estimatedTotalBytes. The default for *includeSummary* is *false*.
+
+
+        Certain services may use the query parameter *impersonationId* to be used in place of the requesting
+
+        Tapis user. Tapis will use this user Id when performing authorization and resolving the *effectiveUserId*
+
+        for the system.
+
+
+        TransferTask attributes:
+
+        - *tenantId*: tenant associated with the transfer task.
+
+        - *uuid*: Unique id of the transfer task.
+
+        - *tag*: Optional tag provided by user who requested the transfer.
+
+        - *username*: Tapis user who requested the transfer.
+
+        - *status*: ACCEPTED, STAGED, IN_PROGRESS, COMPLETED, CANCELLED, FAILED, FAILED_OPT, PAUSED
+
+        - *created*: Timestamp
+
+        - *startTime*: Timestamp
+
+        - *endTime*: Timestamp
+
+        - *errorMessage*: Error message, if applicable.
+
+        - *totalTransfers*: Total number of child transfers requested.
+
+        - *completeTransfers*: Number of child transfers completed.
+
+        - *estimatedTotalBytes*: Estimate of total number of bytes transferred by all child tasks.'
+      operationId: getTransferTask
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: transferTaskId
+        in: path
+        description: Transfer task ID
+        required: true
+        schema:
+          type: string
+        example: 6491c2a5-acb2-40ef-b2c0-bc1fc4cd7e6c
+      - name: includeSummary
+        in: query
+        description: Indicates if summary information such as *estimatedTotalBytes* should be included.
+        schema:
+          type: boolean
+      - name: impersonationId
+        in: query
+        description: Restricted. Only certain services may impersonate a Tapis user.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferTaskResponse'
+      summary: Get transfer task
+      x-summary-source: derived
+    delete:
+      tags:
+      - Transfers
+      description: Request that a transfer task be cancelled.
+      operationId: cancelTransferTask
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: transferTaskId
+        in: path
+        description: Transfer task ID
+        required: true
+        schema:
+          type: string
+        example: 6491c2a5-acb2-40ef-b2c0-bc1fc4cd7e6c
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StringResponse'
+      summary: Cancel transfer task
+      x-summary-source: derived
+  /v3/files/transfers/{transferTaskId}/details:
+    get:
+      tags:
+      - Transfers
+      description: 'Retrieve all information for a transfer task, including totalTransfers, completedTransfers, estimatedTotalBytes,
+
+        list of parents and list of children for each parent.
+
+
+        Certain services may use the query parameter *impersonationId* to be used in place of the requesting
+
+        Tapis user. Tapis will use this user Id when performing authorization and resolving the *effectiveUserId*
+
+        for the system.
+
+
+        For more information on transfer task attributes please see *getTransferTask*.'
+      operationId: getTransferTaskDetails
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: transferTaskId
+        in: path
+        description: Transfer task ID
+        required: true
+        schema:
+          type: string
+        example: 6491c2a5-acb2-40ef-b2c0-bc1fc4cd7e6c
+      - name: impersonationId
+        in: query
+        description: Restricted. Only certain services may impersonate a Tapis user.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferTaskResponse'
+      summary: Get transfer task details
+      x-summary-source: derived
+components:
+  schemas:
+    TransferTask:
+      type: object
+      properties:
+        username:
+          type: string
+        tenantId:
+          type: string
+        tag:
+          type: string
+        uuid:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/TransferStatusEnum'
+        parentTasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransferTaskParent'
+        estimatedTotalBytes:
+          type: integer
+          format: int64
+        totalBytesTransferred:
+          type: integer
+          format: int64
+        totalTransfers:
+          type: integer
+          format: int32
+        completeTransfers:
+          type: integer
+          format: int32
+        errorMessage:
+          type: string
+        created:
+          type: string
+          format: date-time
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+    TransferTaskResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          $ref: '#/components/schemas/TransferTask'
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    ReqTransferElement:
+      required:
+      - destinationURI
+      - sourceURI
+      type: object
+      properties:
+        sourceURI:
+          type: string
+        destinationURI:
+          type: string
+        optional:
+          type: boolean
+          default: false
+          description: Allow the full transfer to succeed even if this element fails.
+        transferType:
+          type: string
+          enum:
+          - TRANSFER
+          - SERVICE_MOVE_DIRECTORY_CONTENTS
+          - SERVICE_MOVE_FILE_OR_DIRECTORY
+          default: null
+          description: "If this value is set to anything other than TRANSFER, both the source and target MUST,\nbe on the same tapis system.  If the value is SERVICE_MOVE_DIRECTORY_CONTENTS, the \nsource URI is expected to be a directory, and the contents of that directory will be\ntransfered to the target URI.  The target must be an existing directory or the operation\nwill fail.  If the value is SERVICE_MOVE_FILE_OR_DIRECTORY the file or directory will\nbe moved to the target URI.  If the target already exists, it will be overwritten.\n"
+        srcSharedCtx:
+          $ref: '#/components/schemas/UserNameString'
+        destSharedCtx:
+          $ref: '#/components/schemas/UserNameString'
+    UserNameString:
+      type: string
+      minLength: 1
+      maxLength: 60
+    TransferTaskListResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransferTask'
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    TransferStatusEnum:
+      type: string
+      description: The status of the task, such as ACCEPTED, IN_PROGRESS, COMPLETED, CANCELLED
+      example: PENDING
+      enum:
+      - ACCEPTED
+      - STAGED
+      - IN_PROGRESS
+      - COMPLETED
+      - CANCELLED
+      - FAILED
+      - FAILED_OPT
+      - PAUSED
+    StringResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    TransferTaskParent:
+      type: object
+      properties:
+        tenantId:
+          type: string
+        username:
+          type: string
+        sourceURI:
+          type: string
+        destinationURI:
+          type: string
+        totalBytes:
+          type: integer
+          format: int64
+        bytesTransferred:
+          type: integer
+          format: int64
+        taskId:
+          type: integer
+          format: int32
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransferTaskChild'
+        errorMessage:
+          type: string
+        uuid:
+          type: string
+          description: Unique ID of the task.
+          format: uuid
+        status:
+          $ref: '#/components/schemas/TransferStatusEnum'
+        created:
+          type: string
+          format: date-time
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+    TransferTaskChild:
+      type: object
+      properties:
+        tenantId:
+          type: string
+        username:
+          type: string
+        sourceURI:
+          type: string
+        destinationURI:
+          type: string
+        totalBytes:
+          type: integer
+          format: int64
+        bytesTransferred:
+          type: integer
+          format: int64
+        taskId:
+          type: integer
+          format: int32
+        errorMessage:
+          type: string
+        parentTaskId:
+          type: integer
+          format: int32
+        retries:
+          type: integer
+          format: int32
+        dir:
+          type: boolean
+        uuid:
+          type: string
+          description: Unique ID of the task.
+          format: uuid
+        status:
+          $ref: '#/components/schemas/TransferStatusEnum'
+        created:
+          type: string
+          format: date-time
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+    ReqTransfer:
+      required:
+      - elements
+      type: object
+      properties:
+        tag:
+          type: string
+        elements:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReqTransferElement'
+  securitySchemes:
+    TapisJWT:
+      type: apiKey
+      description: Tapis signed JWT token authentication
+      name: X-Tapis-Token
+      in: header
+externalDocs:
+  description: Tapis Project
+  url: https://tapis-project.org

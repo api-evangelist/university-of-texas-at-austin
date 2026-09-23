@@ -1,0 +1,258 @@
+{
+  "dspaceUI" : "https://repositories.lib.utexas.edu",
+  "dspaceName" : "DSpace at UT Austin",
+  "dspaceServer" : "https://repositories.lib.utexas.edu/server",
+  "dspaceVersion" : "DSpace 9.4-SNAPSHOT",
+  "type" : "root",
+  "_links" : {
+    "actuator" : {
+      "href" : "https://repositories.lib.utexas.edu/server/actuator"
+    },
+    "authn" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/authn"
+    },
+    "authorizations" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/authz/authorizations"
+    },
+    "bitstreamformats" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/core/bitstreamformats"
+    },
+    "bitstreams" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/core/bitstreams"
+    },
+    "browses" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/discover/browses"
+    },
+    "bulkaccessconditionoptions" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/config/bulkaccessconditionoptions"
+    },
+    "bundles" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/core/bundles"
+    },
+    "captcha" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/captcha"
+    },
+    "claimedtasks" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/workflow/claimedtasks"
+    },
+    "claimedtasks-search" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/workflow/claimedtasks/search"
+    },
+    "collections" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/core/collections"
+    },
+    "communities" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/core/communities"
+    },
+    "contentreport" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/contentreport"
+    },
+    "correctiontypes" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/config/correctiontypes"
+    },
+    "discover" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/discover"
+    },
+    "dso" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/dso/find{?uuid}",
+      "templated" : true
+    },
+    "duplicates" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/submission/duplicates"
+    },
+    "duplicates-search" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/submission/duplicates/search"
+    },
+    "enqueueretry" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/ldn/messages/{id}/enqueueretry",
+      "templated" : true
+    },
+    "entitytypes" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/core/entitytypes"
+    },
+    "eperson-registration" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/eperson/registrations"
+    },
+    "epersons" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/eperson/epersons"
+    },
+    "externalsources" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/integration/externalsources"
+    },
+    "features" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/authz/features"
+    },
+    "feedbacks" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/tools/feedbacks"
+    },
+    "groups" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/eperson/groups"
+    },
+    "identifiers" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/pid/identifiers"
+    },
+    "itemfilters" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/config/itemfilters"
+    },
+    "itemrequests" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/tools/itemrequests"
+    },
+    "items" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/core/items"
+    },
+    "itemtemplates" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/core/itemtemplates"
+    },
+    "ldnservices" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/ldn/ldnservices"
+    },
+    "messages" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/ldn/messages"
+    },
+    "metadatafields" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/core/metadatafields"
+    },
+    "metadataschemas" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/core/metadataschemas"
+    },
+    "notifyrequests" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/ldn/notifyrequests"
+    },
+    "oidc" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/authn"
+    },
+    "pid" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/pid/find{?id}",
+      "templated" : true
+    },
+    "pooltasks" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/workflow/pooltasks"
+    },
+    "pooltasks-search" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/workflow/pooltasks/search"
+    },
+    "processes" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/system/processes"
+    },
+    "properties" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/config/properties"
+    },
+    "qualityassuranceevents" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/integration/qualityassuranceevents"
+    },
+    "qualityassurancesources" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/integration/qualityassurancesources"
+    },
+    "qualityassurancetopics" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/integration/qualityassurancetopics"
+    },
+    "registrations" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/eperson/registrations"
+    },
+    "relationships" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/core/relationships"
+    },
+    "relationshiptypes" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/core/relationshiptypes"
+    },
+    "resourcepolicies" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/authz/resourcepolicies"
+    },
+    "resourcepolicies-search" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/authz/resourcepolicies/search"
+    },
+    "scripts" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/system/scripts"
+    },
+    "self" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api"
+    },
+    "sites" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/core/sites"
+    },
+    "statistics" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/statistics"
+    },
+    "submissionaccessoptions" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/config/submissionaccessoptions"
+    },
+    "submissioncclicenseUrls" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/config/submissioncclicenseUrls"
+    },
+    "submissioncclicenseUrls-search" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/config/submissioncclicenseUrls/search"
+    },
+    "submissioncclicenses" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/config/submissioncclicenses"
+    },
+    "submissioncoarnotifyconfigs" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/config/submissioncoarnotifyconfigs"
+    },
+    "submissiondefinitions" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/config/submissiondefinitions"
+    },
+    "submissionforms" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/config/submissionforms"
+    },
+    "submissionsections" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/config/submissionsections"
+    },
+    "submissionuploads" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/config/submissionuploads"
+    },
+    "subscriptions" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/core/subscriptions"
+    },
+    "subscriptions-search" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/core/subscriptions/search"
+    },
+    "suggestions" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/integration/suggestions"
+    },
+    "suggestionsources" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/integration/suggestionsources"
+    },
+    "suggestiontargets" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/integration/suggestiontargets"
+    },
+    "supervisionorders" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/core/supervisionorders"
+    },
+    "systemwidealerts" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/system/systemwidealerts"
+    },
+    "usagereports" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/statistics/usagereports"
+    },
+    "versionhistories" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/versioning/versionhistories"
+    },
+    "versions" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/versioning/versions"
+    },
+    "vocabularies" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/submission/vocabularies"
+    },
+    "vocabularyEntryDetails" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/submission/vocabularyEntryDetails"
+    },
+    "vocabularyEntryDetails-search" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/submission/vocabularyEntryDetails/search"
+    },
+    "workflowactions" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/config/workflowactions"
+    },
+    "workflowdefinitions" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/config/workflowdefinitions"
+    },
+    "workflowitems" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/workflow/workflowitems"
+    },
+    "workflowsteps" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/config/workflowsteps"
+    },
+    "workspaceitems" : {
+      "href" : "https://repositories.lib.utexas.edu/server/api/submission/workspaceitems"
+    }
+  }
+}

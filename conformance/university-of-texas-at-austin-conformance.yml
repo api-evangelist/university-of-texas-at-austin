@@ -1,0 +1,107 @@
+---
+name: University of Texas at Austin — domain standard conformance
+description: >-
+  Conformance to the Kin Score `education` regime standards, evidenced against a
+  live surface. Reward-only: a standard absent from this file was not found, and
+  nothing here is claimed from prose.
+regime: education
+generated: '2026-08-30'
+method: probed
+source: live HTTP probes 2026-08-30
+standards:
+  - standard: oai-pmh
+    conformant: true
+    version: '2.0'
+    x-operator: institution
+    surface: Texas ScholarWorks OAI-PMH endpoint
+    evidence_url: https://repositories.lib.utexas.edu/server/oai/request?verb=Identify
+    evidence_status: 200
+    evidence: >-
+      Identify response declares protocolVersion 2.0, repositoryName "DSpace at
+      UT Austin", baseURL https://repositories.lib.utexas.edu/server/oai/request,
+      granularity YYYY-MM-DDThh:mm:ssZ, earliestDatestamp 2008-08-13T19:07:28Z.
+      ListMetadataFormats returns oai_dc, didl, dim, etdms, marc, mets, mods,
+      ore, qdc, rdf, rioxx, uketd_dc, xoai.
+    evidence_file: ../examples/university-of-texas-at-austin-scholarworks-oai-identify.xml
+    generated: '2026-08-30'
+    method: probed
+  - standard: saml
+    conformant: true
+    version: '2.0'
+    x-operator: institution
+    surface: UT Austin Enterprise Identity Provider
+    evidence_url: https://enterprise.login.utexas.edu/idp/shibboleth
+    evidence_status: 200
+    evidence: >-
+      SAML 2.0 EntityDescriptor with entityID
+      https://enterprise.login.utexas.edu/idp/shibboleth, an IDPSSODescriptor
+      supporting HTTP-POST, HTTP-POST-SimpleSign, HTTP-Redirect and SOAP/ECP
+      bindings, and OrganizationName "The University of Texas at Austin". The
+      same entity resolves signed from the InCommon metadata query service
+      (https://mdq.incommon.org/entities/..., HTTP 200), so the institution is a
+      registered InCommon/eduGAIN participant.
+    evidence_file: ../examples/university-of-texas-at-austin-idp-saml2-metadata.xml
+    generated: '2026-08-30'
+    method: probed
+  - standard: shibboleth
+    conformant: true
+    x-operator: institution
+    surfaces:
+      - UT Austin Enterprise Identity Provider
+      - Texas ScholarWorks DSpace REST API
+    evidence_url: https://repositories.lib.utexas.edu/server/api/authn/status
+    evidence_status: 200
+    evidence: >-
+      Two independent confirmations. (1) The IdP metadata carries the
+      urn:mace:shibboleth:metadata:1.0 namespace and a Shibboleth Scope element.
+      (2) The ScholarWorks REST API answers with
+      `WWW-Authenticate: shibboleth realm="DSpace REST API",
+      location="https://repositories.lib.utexas.edu/Shibboleth.sso/Login?..."`,
+      i.e. a Shibboleth service provider running on the institution's own host.
+    generated: '2026-08-30'
+    method: probed
+  - standard: datacite
+    conformant: true
+    x-operator: tenant
+    surface: Texas Data Repository (Dataverse) — UT Austin collection
+    evidence_url: https://api.datacite.org/dois?query=publisher:%22Texas%20Data%20Repository%22
+    evidence_status: 200
+    evidence: >-
+      UT Austin research datasets are deposited into the Texas Data Repository,
+      which mints DataCite DOIs under prefix 10.18738 (publisher "Texas Data
+      Repository", 80,001 DOIs indexed at DataCite on 2026-08-30). The UT Austin
+      collection is confirmed at
+      https://dataverse.tdl.org/api/dataverses/utexas (HTTP 200, affiliation
+      "The University of Texas at Austin").
+    caveat: >-
+      SCOPED TO A TENANT SURFACE. The DataCite membership and the minting
+      infrastructure belong to the Texas Digital Library consortium, not to UT
+      Austin. Recorded so the fact is auditable, and explicitly marked
+      x-operator tenant so it is never read as institutional engineering.
+    generated: '2026-08-30'
+    method: probed
+not_found:
+  - standard: scim
+    checked: https://enterprise.login.utexas.edu/, https://iamservices.utexas.edu/
+    result: No public SCIM endpoint or SCIM service-provider-config found.
+  - standard: lti
+    result: >-
+      No public LTI tool/platform registration surface found. Canvas is the
+      institution's LMS and any LTI conformance there is Instructure's.
+  - standard: oneroster
+    result: Not found.
+  - standard: ed-fi
+    result: Not found.
+  - standard: caliper
+    result: Not found.
+  - standard: qti
+    result: Not found.
+  - standard: orcid
+    checked: https://repositories.lib.utexas.edu/server/api
+    result: >-
+      No ORCID authority or ORCID login endpoint advertised on the ScholarWorks
+      DSpace root document. DSpace 9 supports ORCID integration but this
+      deployment does not advertise it publicly, so no conformance is claimed.
+  - standard: crossref
+    result: >-
+      Not found. ScholarWorks identifies items by Handle (prefix 2152), not DOI.

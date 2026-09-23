@@ -1,0 +1,1968 @@
+openapi: 3.2.0
+info:
+  title: Tapis Applications API
+  description: The Tapis Applications API provides for management of Tapis applications including permissions.
+  version: 26Q1.0
+  termsOfService: https://tapis-project.org
+  contact:
+    name: Applications API - CICSupport
+    url: https://tapis-project.org
+    email: cicsupport@tacc.utexas.edu
+  license:
+    name: 3-Clause BSD License
+    url: https://opensource.org/licenses/BSD-3-Clause
+servers:
+- url: http://localhost:8080/
+  description: Local test environment
+  variables: {}
+- url: https://dev.develop.tapis.io/
+  description: Development environment
+  variables: {}
+tags:
+- name: Applications
+  description: Manage Tapis application resources. Create, retrieve, update, etc.
+paths:
+  /v3/apps:
+    get:
+      tags:
+      - Applications
+      description: 'Retrieve list of applications.
+
+
+        Use *listType*, *search* and *select* query parameters to limit results. Query
+
+        parameter *listType* allows for filtering results based on authorization. Options for *listType* are
+
+
+        - *OWNED* Include only items owned by requester (Default)
+
+        - *SHARED_PUBLIC* Include only items shared publicly
+
+        - *SHARED_DIRECT* Include only items shared directly with requester. Exclude publicly shared items.
+
+        - *READ_PERM* Include only items for which requester was granter READ or MODIFY permission.
+
+        - *MINE* Include items owned or shared directly with requester. Exclude publicly shared items.
+
+        - *ALL* Include all items requester is authorized to view. Includes check for READ or MODIFY permission.
+
+
+        Certain Tapis services or a tenant administrator may use the query parameter *impersonationId* to be used in
+
+        place of the requesting Tapis user. Tapis will use this user Id when performing authorization.'
+      operationId: getApps
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: search
+        in: query
+        description: Search conditions as a single query parameter. For example search=(id.like.MyApp*)~(enabled.eq.true)
+        schema:
+          type: string
+      - name: listType
+        in: query
+        description: Determines additional filtering of results based on ownership, permissions and sharing. Default is to only see items owned by requester.
+        schema:
+          $ref: '#/components/schemas/ListTypeEnum'
+      - name: limit
+        in: query
+        description: Limit number of items returned. For example limit=10. Use -1 for unlimited. Default is 100.
+        schema:
+          type: integer
+          default: 100
+      - name: orderBy
+        in: query
+        description: Attribute for sorting. Direction may be included. For example orderBy=id(desc). Default direction is (asc).
+        schema:
+          type: string
+      - name: skip
+        in: query
+        description: Number of items to skip. Use one of skip or startAfter. For example skip=10. Default is 0.
+        schema:
+          type: integer
+      - name: startAfter
+        in: query
+        description: Where to start when sorting. Use one of skip or startAfter. Must also specify orderBy. For example, limit=10&orderBy=id(asc)&startAfter=my.app1
+        schema:
+          type: string
+      - name: computeTotal
+        in: query
+        description: Compute total number of results that would have been returned if unlimited. Default is false.
+        schema:
+          type: boolean
+          default: false
+      - name: select
+        in: query
+        description: List of attributes to be included as part of each result item. Keywords *allAttributes* and *summaryAttributes* are supported. For example select=id,version,owner
+        schema:
+          type: string
+          default: summaryAttributes
+      - name: showDeleted
+        in: query
+        description: Indicates if Applications marked as deleted should be shown in the results. Default is false.
+        schema:
+          type: boolean
+          default: false
+      - name: impersonationId
+        in: query
+        description: Restricted. Only certain Tapis services or a tenant administrator may impersonate a Tapis user.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespApps'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Get apps
+      x-summary-source: derived
+    post:
+      tags:
+      - Applications
+      description: 'Create an application using a request body. App id+version must be unique within tenant and can be composed of
+
+        alphanumeric characters and the following special characters [-._~]. Id must begin with an alphanumeric character
+
+        and can be no more than 80 characters in length.
+
+
+        Note that certain attributes (such as tenant) are allowed but ignored so that the JSON result returned by a GET
+
+        may be modified and used when making a POST request to create an application.
+
+        The attributes that are allowed but ignored are
+
+
+        - tenant
+
+        - uuid
+
+        - isPublic
+
+        - sharedWithUsers
+
+        - sharedAppCtx
+
+        - deleted
+
+        - created
+
+        - updated'
+      operationId: createAppVersion
+      security:
+      - TapisJWT: []
+      requestBody:
+        required: true
+        description: A JSON object specifying information for the app to be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqPostApp'
+      responses:
+        '201':
+          description: Application created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '409':
+          description: Application already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Create app version
+      x-summary-source: derived
+  /v3/apps/search:
+    get:
+      tags:
+      - Applications
+      description: 'Retrieve details for applications. Use query parameters to specify search conditions.
+
+        For example ?owner.eq=jdoe&enabled.eq=false
+
+        Use *listType* and *select* query parameters to limit results. Query parameter *listType* allows
+
+        for filtering results based on authorization. Options for *listType* are
+
+
+        - *OWNED* Include only items owned by requester (Default)
+
+        - *SHARED_PUBLIC* Include only items shared publicly
+
+        - *SHARED_DIRECT* Include only items shared directly with requester. Exclude publicly shared items.
+
+        - *READ_PERM* Include only items for which requester was granter READ or MODIFY permission.
+
+        - *MINE* Include items owned or shared directly with requester. Exclude publicly shared items.
+
+        - *ALL* Include all items requester is authorized to view. Includes check for READ or MODIFY permission.'
+      operationId: searchAppsQueryParameters
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: listType
+        in: query
+        description: Determines additional filtering of results based on ownership, permissions and sharing. Default is to only see items owned by requester.
+        schema:
+          $ref: '#/components/schemas/ListTypeEnum'
+      - name: limit
+        in: query
+        description: Limit number of items returned. For example limit=10. Use -1 for unlimited. Default is 100.
+        schema:
+          type: integer
+          default: 100
+      - name: orderBy
+        in: query
+        description: Attribute for sorting. Direction may be included. For example orderBy=id(desc). Default direction is (asc).
+        schema:
+          type: string
+      - name: skip
+        in: query
+        description: Number of items to skip. Use one of skip or startAfter. For example skip=10. Default is 0.
+        schema:
+          type: integer
+      - name: startAfter
+        in: query
+        description: Where to start when sorting. Use one of skip or startAfter. Must also specify orderBy. For example, limit=10&orderBy=id(asc)&startAfter=my.app2
+        schema:
+          type: string
+      - name: computeTotal
+        in: query
+        description: Compute total number of results that would have been returned if unlimited. Default is false.
+        schema:
+          type: boolean
+          default: false
+      - name: select
+        in: query
+        description: List of attributes to be included as part of each result item. Keywords *allAttributes* and *summaryAttributes* are supported. For example select=id,version,owner
+        schema:
+          type: string
+          default: summaryAttributes
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespApps'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Search apps query parameters
+      x-summary-source: derived
+    post:
+      tags:
+      - Applications
+      description: 'Retrieve details for applications. Use request body to specify SQL-like search conditions.
+
+        Use *listType* and *select* query parameters to limit results. Query parameter *listType* allows
+
+        for filtering results based on authorization. Options for *listType* are
+
+
+        - *OWNED* Include only items owned by requester (Default)
+
+        - *SHARED_PUBLIC* Include only items shared publicly
+
+        - *SHARED_DIRECT* Include only items shared directly with requester. Exclude publicly shared items.
+
+        - *READ_PERM* Include only items for which requester was granter READ or MODIFY permission.
+
+        - *MINE* Include items owned or shared directly with requester. Exclude publicly shared items.
+
+        - *ALL* Include all items requester is authorized to view. Includes check for READ or MODIFY permission.'
+      operationId: searchAppsRequestBody
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: listType
+        in: query
+        description: Determines additional filtering of results based on ownership, permissions and sharing. Default is to only see items owned by requester.
+        schema:
+          $ref: '#/components/schemas/ListTypeEnum'
+      - name: limit
+        in: query
+        description: Limit number of items returned. For example limit=10. Use -1 for unlimited. Default is 100.
+        schema:
+          type: integer
+          default: 100
+      - name: orderBy
+        in: query
+        description: Attribute for sorting. Direction may be included. For example orderBy=id(desc). Default direction is (asc).
+        schema:
+          type: string
+      - name: skip
+        in: query
+        description: Number of items to skip. Use one of skip or startAfter. For example skip=10. Default is 0.
+        schema:
+          type: integer
+      - name: startAfter
+        in: query
+        description: Where to start when sorting. Use one of skip or startAfter. Must also specify orderBy. For example, limit=10&orderBy=id(asc)&startAfter=my.app1
+        schema:
+          type: string
+      - name: computeTotal
+        in: query
+        description: Compute total number of results that would have been returned if unlimited. Default is false.
+        schema:
+          type: boolean
+          default: false
+      - name: select
+        in: query
+        description: List of attributes to be included as part of each result item. Keywords *allAttributes* and *summaryAttributes* are supported. For example select=id,version,owner
+        schema:
+          type: string
+          default: summaryAttributes
+      requestBody:
+        required: true
+        description: A JSON object specifying SQL-like search conditions as an array of strings. Strings are concatenated to form full search query.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqSearchApps'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespApps'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Search apps request body
+      x-summary-source: derived
+  /v3/apps/{appId}:
+    get:
+      tags:
+      - Applications
+      description: 'Retrieve latest version of an application. In the result the attribute *sharedAppCtx* indicates if the
+
+        application is available to the user because it has been shared with the user. The value of *sharedAppCtx*
+
+        will be the grantor, the Tapis user who shared the application.
+
+
+        Certain Tapis services or a tenant administrator may use the query parameter *impersonationId* to be used in
+
+        place of the requesting Tapis user. Tapis will use this user Id when performing authorization.'
+      operationId: getAppLatestVersion
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: requireExecPerm
+        in: query
+        description: check for EXECUTE permission as well as READ permission.
+        schema:
+          type: boolean
+          default: false
+      - name: select
+        in: query
+        description: List of attributes to be included as part of the result item. Keywords *allAttributes* and *summaryAttributes* are supported. For example select=id,version,owner
+        schema:
+          type: string
+          default: allAttributes
+      - name: resourceTenant
+        in: query
+        description: Restricted. May be used by Tapis services to set the tenant associated with the requested resource.
+        schema:
+          type: string
+      - name: impersonationId
+        in: query
+        description: Restricted. Only certain Tapis services or a tenant administrator may impersonate a Tapis user.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Application found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespApp'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Application not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Get app latest version
+      x-summary-source: derived
+  /v3/apps/{appId}/{appVersion}:
+    get:
+      tags:
+      - Applications
+      description: 'Retrieve information for an application given the application Id and version.
+
+        In the result the attribute *sharedAppCtx* indicates if the application is available to the user because it has
+
+        been shared with the user. The value of *sharedAppCtx* will be the grantor, the Tapis user who shared the application.
+
+
+        Certain Tapis services or a tenant administrator may use the query parameter *impersonationId* to be used in
+
+        place of the requesting Tapis user. Tapis will use this user Id when performing authorization.'
+      operationId: getApp
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: appVersion
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/AppVersionString'
+      - name: requireExecPerm
+        in: query
+        description: check for EXECUTE permission as well as READ permission.
+        schema:
+          type: boolean
+          default: false
+      - name: impersonationId
+        in: query
+        description: Restricted. Only certain services may impersonate a Tapis user.
+        schema:
+          type: string
+      - name: select
+        in: query
+        description: List of attributes to be included as part of the result item. Keywords *allAttributes* and *summaryAttributes* are supported. For example select=id,version,owner
+        schema:
+          type: string
+          default: allAttributes
+      - name: resourceTenant
+        in: query
+        description: Restricted. May be used by Tapis services to set the tenant associated with the requested resource.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Application found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespApp'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Application not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Get app
+      x-summary-source: derived
+    patch:
+      tags:
+      - Applications
+      description: 'Update selected attributes of an existing version of an application.
+
+        Request body may only contain updatable attributes. Application must exist.
+
+
+        Attributes that may not be updated via PATCH are
+
+
+        - id
+
+        - owner
+
+        - enabled
+
+        - versionEnabled
+
+        - locked
+
+        - deleted
+
+
+        Note that the attributes owner, enabled, versionEnabled, locked and deleted may be modified using other endpoints.'
+      operationId: patchApp
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: appVersion
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/AppVersionString'
+      requestBody:
+        required: true
+        description: A JSON object specifying changes to be applied.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqPatchApp'
+      responses:
+        '200':
+          description: Application version updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Application version not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Patch app
+      x-summary-source: derived
+    put:
+      tags:
+      - Applications
+      description: 'Update all updatable attributes of an application using a request body identical to POST. Application must exist.
+
+
+        Note that certain attributes (such as tenant) are allowed but ignored so that the JSON result returned by a GET
+
+        may be modified and used when making a PUT request to update.
+
+
+        The attributes that are allowed but ignored for both PUT and POST are
+
+
+        - tenant
+
+        - uuid
+
+        - isPublic
+
+        - sharedWithUsers
+
+        - sharedAppCtx
+
+        - deleted
+
+        - created
+
+        - updated
+
+
+        In addition, for a PUT operation, the following non-updatable attributes are allowed but ignored
+
+
+        - id
+
+        - version
+
+        - owner
+
+        - enabled
+
+        - versionEnabled
+
+        - locked
+
+
+        Note that the attributes owner, enabled, versionEnabled, locked and deleted may be modified using other endpoints.'
+      operationId: putApp
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: appVersion
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/AppVersionString'
+      requestBody:
+        required: true
+        description: A JSON object specifying changes to be applied.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqPutApp'
+      responses:
+        '200':
+          description: Application version updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Application version not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '409':
+          description: Application version already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Put app
+      x-summary-source: derived
+  /v3/apps/{appId}/isEnabled:
+    get:
+      tags:
+      - Applications
+      description: 'Check if an application is currently enabled, i.e. available for use. If the query parameter *version*
+
+        is specified then both the top level attribute *enabled* and the version specific attribute *versionEnabled*
+
+        are checked. Both must be set to *true* for the application to be considered *enabled*.'
+      operationId: isEnabled
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: version
+        in: query
+        description: Include specified application version in the check.
+        schema:
+          $ref: '#/components/schemas/AppVersionString'
+      responses:
+        '200':
+          description: Check successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBoolean'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Application not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Is enabled
+      x-summary-source: derived
+  /v3/apps/{appId}/enable:
+    post:
+      tags:
+      - Applications
+      description: 'Mark an application available for use. Applies to all versions.
+
+        Requester must be owner of the app or a tenant administrator.'
+      operationId: enableApp
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: Application enabled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Application not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Enable app
+      x-summary-source: derived
+  /v3/apps/{appId}/disable:
+    post:
+      tags:
+      - Applications
+      description: 'Mark an application unavailable for use. Applies to all versions.
+
+        Requester must be owner of the app or a tenant administrator.'
+      operationId: disableApp
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: Application disabled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Application not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Disable app
+      x-summary-source: derived
+  /v3/apps/{appId}/{appVersion}/enable:
+    post:
+      tags:
+      - Applications
+      description: 'Mark a specific version of an application available for use.
+
+        Requester must be owner of the app or a tenant administrator.'
+      operationId: enableAppVersion
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: appVersion
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/AppVersionString'
+      responses:
+        '200':
+          description: Application version enabled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Application not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Enable app version
+      x-summary-source: derived
+  /v3/apps/{appId}/{appVersion}/disable:
+    post:
+      tags:
+      - Applications
+      description: 'Mark a specific version of an application unavailable for use.
+
+        Requester must be owner of the app or a tenant administrator.'
+      operationId: disableAppVersion
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: appVersion
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/AppVersionString'
+      responses:
+        '200':
+          description: Application disabled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Application not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Disable app version
+      x-summary-source: derived
+  /v3/apps/{appId}/{appVersion}/lock:
+    post:
+      tags:
+      - Applications
+      description: 'Lock a version of an application to prevent updates via PUT or PATCH.
+
+        Requester must be owner of the app or a tenant administrator.'
+      operationId: lockApp
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: appVersion
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/AppVersionString'
+      responses:
+        '200':
+          description: Application locked.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Application not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Lock app
+      x-summary-source: derived
+  /v3/apps/{appId}/{appVersion}/unlock:
+    post:
+      tags:
+      - Applications
+      description: 'Unlock a version of an application to allow updates via PUT and PATCH.
+
+        Requester must be owner of the app or a tenant administrator.'
+      operationId: unlockApp
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: appVersion
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/AppVersionString'
+      responses:
+        '200':
+          description: Application unlocked.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Application not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Unlock app
+      x-summary-source: derived
+  /v3/apps/{appId}/delete:
+    post:
+      tags:
+      - Applications
+      description: Mark an application as deleted. Application will not appear in queries unless explicitly requested.
+      operationId: deleteApp
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: Application deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Application not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Delete app
+      x-summary-source: derived
+  /v3/apps/{appId}/undelete:
+    post:
+      tags:
+      - Applications
+      description: Mark an application as not deleted. Application will appear in queries.
+      operationId: undeleteApp
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: Application undeleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Application not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Undelete app
+      x-summary-source: derived
+  /v3/apps/{appId}/changeOwner/{userName}:
+    post:
+      tags:
+      - Applications
+      description: Change owner of an application. Applies to all versions.
+      operationId: changeAppOwner
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: userName
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserNameString'
+      responses:
+        '200':
+          description: Application owner updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Application not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Change app owner
+      x-summary-source: derived
+  /v3/apps/{appId}/history:
+    get:
+      tags:
+      - Applications
+      description: Retrieve history of changes for a given appId.
+      operationId: getHistory
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: History successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespAppHistory'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Application not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Get history
+      x-summary-source: derived
+components:
+  schemas:
+    NotifDeliveryMethod:
+      type: string
+      enum:
+      - WEBHOOK
+      - EMAIL
+    ResultBoolean:
+      type: object
+      properties:
+        aBool:
+          type: boolean
+    FileInputModeEnum:
+      type: string
+      enum:
+      - REQUIRED
+      - OPTIONAL
+      - FIXED
+      default: OPTIONAL
+    DescriptionString:
+      type: string
+      maxLength: 2048
+    ListTypeEnum:
+      type: string
+      default: OWNED
+      enum:
+      - OWNED
+      - SHARED_PUBLIC
+      - SHARED_DIRECT
+      - READ_PERM
+      - MINE
+      - ALL
+    JobTypeEnum:
+      type: string
+      enum:
+      - BATCH
+      - FORK
+    AppHistory:
+      type: object
+      properties:
+        appVersion:
+          type: string
+        jwtTenant:
+          type: string
+        jwtUser:
+          $ref: '#/components/schemas/UserNameString'
+        oboTenant:
+          type: string
+        oboUser:
+          $ref: '#/components/schemas/UserNameString'
+        operation:
+          $ref: '#/components/schemas/OperationTypeEnum'
+        description:
+          type: string
+        created:
+          type: string
+    OperationTypeEnum:
+      type: string
+      enum:
+      - CREATE
+      - READ
+      - MODIFY
+      - EXECUTE
+      - DELETE
+      - UNDELETE
+      - HARD_DELETE
+      - CHANGE_OWNER
+      - ENABLE
+      - DISABLE
+      - LOCK
+      - UNLOCK
+      - GET_PERMS
+      - GRANT_PERMS
+      - REVOKE_PERMS
+    ReqSearchApps:
+      type: object
+      required:
+      - search
+      properties:
+        search:
+          type: array
+          minItems: 1
+          items:
+            type: string
+    RuntimeEnum:
+      type: string
+      enum:
+      - SINGULARITY
+      - DOCKER
+      - ZIP
+    NotifDeliveryTarget:
+      type: object
+      required:
+      - deliveryMethod
+      - deliveryAddress
+      properties:
+        deliveryMethod:
+          $ref: '#/components/schemas/NotifDeliveryMethod'
+        deliveryAddress:
+          type: string
+    AppArgSpec:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          $ref: '#/components/schemas/InputNameString'
+        description:
+          $ref: '#/components/schemas/ArgDescriptionString'
+        inputMode:
+          $ref: '#/components/schemas/ArgInputModeEnum'
+        arg:
+          type: string
+          minLength: 1
+        notes:
+          type: object
+    IdString:
+      type: string
+      minLength: 1
+      maxLength: 80
+    QueueNameString:
+      type: string
+      minLength: 1
+      maxLength: 128
+    RespApps:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/TapisApp'
+        metadata:
+          type: object
+          properties:
+            recordCount:
+              type: integer
+            recordLimit:
+              type: integer
+            recordsSkipped:
+              type: integer
+            orderBy:
+              type: string
+            startAfter:
+              type: string
+            totalCount:
+              type: integer
+    RuntimeOptions:
+      type: array
+      items:
+        $ref: '#/components/schemas/RuntimeOptionEnum'
+    ParameterSet:
+      type: object
+      properties:
+        appArgs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppArgSpec'
+        containerArgs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppArgSpec'
+        schedulerOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppArgSpec'
+        envVariables:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        archiveFilter:
+          type: object
+          properties:
+            includes:
+              type: array
+              items:
+                type: string
+                minLength: 1
+            excludes:
+              type: array
+              items:
+                type: string
+                minLength: 1
+            includeLaunchFiles:
+              type: boolean
+              default: true
+        logConfig:
+          type: object
+          required:
+          - stdoutFilename
+          - stderrFilename
+          properties:
+            stdoutFilename:
+              type: string
+            stderrFilename:
+              type: string
+    RespAppHistory:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/AppHistory'
+        metadata:
+          type: object
+    KeyValuePair:
+      type: object
+      required:
+      - key
+      properties:
+        key:
+          type: string
+          minLength: 1
+        value:
+          type: string
+          default: ''
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        inputMode:
+          $ref: '#/components/schemas/KeyValueInputModeEnum'
+        notes:
+          type: object
+    ReqPostApp:
+      type: object
+      required:
+      - id
+      - version
+      - containerImage
+      properties:
+        id:
+          $ref: '#/components/schemas/IdString'
+        version:
+          $ref: '#/components/schemas/AppVersionString'
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        owner:
+          $ref: '#/components/schemas/UserNameApiDefaultString'
+        enabled:
+          type: boolean
+          default: true
+        versionEnabled:
+          type: boolean
+          default: true
+        locked:
+          type: boolean
+          default: false
+        runtime:
+          $ref: '#/components/schemas/RuntimeEnum'
+        runtimeVersion:
+          type: string
+        runtimeOptions:
+          $ref: '#/components/schemas/RuntimeOptions'
+        containerImage:
+          type: string
+        jobType:
+          $ref: '#/components/schemas/JobTypeEnum'
+        maxJobs:
+          type: integer
+          default: -1
+        maxJobsPerUser:
+          type: integer
+          default: -1
+        strictFileInputs:
+          type: boolean
+          default: false
+        jobAttributes:
+          $ref: '#/components/schemas/JobAttributes'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagString'
+        notes:
+          type: object
+    AppFileInput:
+      type: object
+      required:
+      - name
+      - targetPath
+      properties:
+        name:
+          $ref: '#/components/schemas/InputNameString'
+        description:
+          $ref: '#/components/schemas/ArgDescriptionString'
+        inputMode:
+          $ref: '#/components/schemas/FileInputModeEnum'
+        envKey:
+          type: string
+          minLength: 1
+        autoMountLocal:
+          type: boolean
+          default: true
+        notes:
+          type: object
+        sourceUrl:
+          type: string
+          minLength: 1
+        targetPath:
+          type: string
+          minLength: 1
+    AppFileInputArray:
+      type: object
+      required:
+      - name
+      - targetDir
+      properties:
+        name:
+          $ref: '#/components/schemas/InputNameString'
+        description:
+          $ref: '#/components/schemas/ArgDescriptionString'
+        inputMode:
+          $ref: '#/components/schemas/FileInputModeEnum'
+        envKey:
+          type: string
+          minLength: 1
+        notes:
+          type: object
+        sourceUrls:
+          type: array
+          items:
+            type: string
+            minLength: 1
+        targetDir:
+          type: string
+          minLength: 1
+    ArgDescriptionString:
+      type: string
+      maxLength: 8096
+    JobEventCategoryFilter:
+      type: string
+      enum:
+      - ALL
+      - JOB_NEW_STATUS
+      - JOB_INPUT_TRANSACTION_ID
+      - JOB_ARCHIVE_TRANSACTION_ID
+      - JOB_ERROR_MESSAGE
+      - JOB_SUBSCRIPTION
+    RuntimeOptionEnum:
+      type: string
+      enum:
+      - NONE
+      - SINGULARITY_RUN
+    TagString:
+      type: string
+      minLength: 1
+      maxLength: 128
+    RespBoolean:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultBoolean'
+        metadata:
+          type: object
+    RespResourceUrl:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultResourceUrl'
+        metadata:
+          type: object
+    ResultResourceUrl:
+      type: object
+      properties:
+        url:
+          type: string
+    ReqPatchApp:
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        runtime:
+          $ref: '#/components/schemas/RuntimeEnum'
+        runtimeVersion:
+          type: string
+        runtimeOptions:
+          $ref: '#/components/schemas/RuntimeOptions'
+        containerImage:
+          type: string
+        jobType:
+          $ref: '#/components/schemas/JobTypeEnum'
+        maxJobs:
+          type: integer
+          default: -1
+        maxJobsPerUser:
+          type: integer
+          default: -1
+        strictFileInputs:
+          type: boolean
+          default: false
+        jobAttributes:
+          $ref: '#/components/schemas/JobAttributes'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagString'
+        notes:
+          type: object
+    InputNameString:
+      type: string
+      minLength: 1
+      maxLength: 80
+    DirString:
+      type: string
+      minLength: 1
+      maxLength: 4096
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: object
+        metadata:
+          type: object
+    JobAttributes:
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        dynamicExecSystem:
+          type: boolean
+          default: false
+        execSystemConstraints:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            minLength: 3
+        execSystemId:
+          $ref: '#/components/schemas/IdString'
+        execSystemExecDir:
+          $ref: '#/components/schemas/DirString'
+        execSystemInputDir:
+          $ref: '#/components/schemas/DirString'
+        execSystemOutputDir:
+          $ref: '#/components/schemas/DirString'
+        dtnSystemInputDir:
+          $ref: '#/components/schemas/DirString'
+        dtnSystemOutputDir:
+          $ref: '#/components/schemas/DirString'
+        execSystemLogicalQueue:
+          $ref: '#/components/schemas/QueueNameString'
+        archiveSystemId:
+          $ref: '#/components/schemas/IdString'
+        archiveSystemDir:
+          $ref: '#/components/schemas/DirString'
+        archiveOnAppError:
+          type: boolean
+          default: true
+        archiveMode:
+          $ref: '#/components/schemas/ArchiveModeEnum'
+        isMpi:
+          type: boolean
+          default: false
+        mpiCmd:
+          type: string
+          minLength: 1
+          maxLength: 126
+        cmdPrefix:
+          type: string
+          minLength: 1
+          maxLength: 126
+        parameterSet:
+          $ref: '#/components/schemas/ParameterSet'
+        fileInputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppFileInput'
+        fileInputArrays:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppFileInputArray'
+        nodeCount:
+          type: integer
+        coresPerNode:
+          type: integer
+        memoryMB:
+          type: integer
+        maxMinutes:
+          type: integer
+        subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReqSubscribe'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagString'
+    ResultChangeCount:
+      type: object
+      properties:
+        changes:
+          type: integer
+          format: int32
+    KeyValueInputModeEnum:
+      type: string
+      enum:
+      - REQUIRED
+      - FIXED
+      - INCLUDE_ON_DEMAND
+      - INCLUDE_BY_DEFAULT
+      default: INCLUDE_BY_DEFAULT
+    UserNameApiDefaultString:
+      type: string
+      minLength: 1
+      maxLength: 60
+      default: ${apiUserId}
+    ArgInputModeEnum:
+      type: string
+      enum:
+      - REQUIRED
+      - FIXED
+      - INCLUDE_ON_DEMAND
+      - INCLUDE_BY_DEFAULT
+      default: INCLUDE_ON_DEMAND
+    RespApp:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/TapisApp'
+        metadata:
+          type: object
+    ArchiveModeEnum:
+      type: string
+      enum:
+      - ALWAYS
+      - SKIP_ON_FAIL
+      - NEVER
+      default: ALWAYS
+    ReqSubscribe:
+      type: object
+      required:
+      - jobEventCategoryFilter
+      - deliveryTargets
+      properties:
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        enabled:
+          type: boolean
+          default: true
+        jobEventCategoryFilter:
+          $ref: '#/components/schemas/JobEventCategoryFilter'
+        ttlMinutes:
+          type: integer
+          default: 10080
+        deliveryTargets:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/NotifDeliveryTarget'
+    TapisApp:
+      type: object
+      properties:
+        tenant:
+          type: string
+        id:
+          $ref: '#/components/schemas/IdString'
+        version:
+          $ref: '#/components/schemas/AppVersionString'
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        owner:
+          $ref: '#/components/schemas/UserNameApiDefaultString'
+        enabled:
+          type: boolean
+          default: true
+        versionEnabled:
+          type: boolean
+          default: true
+        locked:
+          type: boolean
+          default: false
+        isPublic:
+          type: boolean
+        sharedWithUsers:
+          type: array
+          items:
+            type: string
+        runtime:
+          $ref: '#/components/schemas/RuntimeEnum'
+        runtimeVersion:
+          type: string
+        runtimeOptions:
+          $ref: '#/components/schemas/RuntimeOptions'
+        containerImage:
+          type: string
+        jobType:
+          $ref: '#/components/schemas/JobTypeEnum'
+        maxJobs:
+          type: integer
+          default: -1
+        maxJobsPerUser:
+          type: integer
+          default: -1
+        strictFileInputs:
+          type: boolean
+          default: false
+        jobAttributes:
+          $ref: '#/components/schemas/JobAttributes'
+        tags:
+          type: array
+          items:
+            type: string
+        notes:
+          type: object
+        sharedAppCtx:
+          $ref: '#/components/schemas/UserNameString'
+        uuid:
+          type: string
+          format: uuid
+        deleted:
+          type: boolean
+        created:
+          type: string
+        updated:
+          type: string
+    ReqPutApp:
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        runtime:
+          $ref: '#/components/schemas/RuntimeEnum'
+        runtimeVersion:
+          type: string
+        runtimeOptions:
+          $ref: '#/components/schemas/RuntimeOptions'
+        containerImage:
+          type: string
+        jobType:
+          $ref: '#/components/schemas/JobTypeEnum'
+        maxJobs:
+          type: integer
+          default: -1
+        maxJobsPerUser:
+          type: integer
+          default: -1
+        strictFileInputs:
+          type: boolean
+          default: false
+        jobAttributes:
+          $ref: '#/components/schemas/JobAttributes'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagString'
+        notes:
+          type: object
+    RespChangeCount:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultChangeCount'
+        metadata:
+          type: object
+    UserNameString:
+      type: string
+      minLength: 1
+      maxLength: 60
+    AppVersionString:
+      type: string
+      minLength: 1
+      maxLength: 64
+  securitySchemes:
+    TapisJWT:
+      type: apiKey
+      description: Tapis signed JWT token authentication
+      name: X-Tapis-Token
+      in: header
+externalDocs:
+  description: Tapis Project
+  url: https://tapis-project.org

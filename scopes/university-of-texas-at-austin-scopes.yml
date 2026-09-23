@@ -1,0 +1,63 @@
+---
+name: University of Texas at Austin — authorization scopes
+description: >-
+  Scopes advertised by University of Texas at Austin authorization surfaces.
+  Read from the live discovery document, not from documentation.
+generated: '2026-08-30'
+method: probed
+source: https://enterprise.login.utexas.edu/.well-known/openid-configuration
+surfaces:
+  - surface: UT Austin Enterprise Identity Provider (OpenID Connect)
+    x-operator: institution
+    issuer: https://enterprise.login.utexas.edu
+    generated: '2026-08-30'
+    method: probed
+    source: https://enterprise.login.utexas.edu/.well-known/openid-configuration
+    scopes:
+      - name: openid
+        standard: true
+        description: OpenID Connect base scope; requests an ID token.
+      - name: profile
+        standard: true
+        description: Standard OIDC profile claims.
+      - name: email
+        standard: true
+        description: Standard OIDC email claims.
+      - name: offline_access
+        standard: true
+        description: Refresh-token issuance.
+      - name: iidasmail
+        standard: false
+        description: >-
+          Institution-defined. Mail attribute released from the UT Austin
+          identity store. Semantics are not published publicly.
+      - name: memberof
+        standard: false
+        description: Institution-defined group membership claim.
+      - name: groups
+        standard: false
+        description: Institution-defined group claim.
+      - name: utexas_profile
+        standard: false
+        description: Institution-defined extended UT Austin profile claims.
+      - name: utexas_restrict
+        standard: false
+        description: >-
+          Institution-defined. Name implies restricted/FERPA-sensitive
+          attribute release; semantics are not published publicly.
+      - name: utexas_student_extended
+        standard: false
+        description: >-
+          Institution-defined extended student attributes. Almost certainly
+          FERPA-governed; release is by institutional agreement, not self-service.
+  - surface: Tapis v3 platform — TACC production tenant
+    x-operator: institution
+    generated: '2026-08-30'
+    method: probed
+    source: https://tacc.tapis.io/v3/systems
+    scopes: []
+    note: >-
+      Tapis v3 does not expose an OAuth scope catalog at the tenant. Access is a
+      tenant-issued JWT plus per-resource permissions (READ / MODIFY) and a
+      sharing model, both defined in the Systems, Files and Apps contracts under
+      openapi/. No scope list is published, so none is recorded here.

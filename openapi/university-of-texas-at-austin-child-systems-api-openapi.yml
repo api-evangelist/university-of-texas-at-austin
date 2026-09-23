@@ -1,0 +1,315 @@
+openapi: 3.2.0
+info:
+  title: Tapis Systems Child Systems API
+  description: The Tapis Systems API provides for management of Tapis Systems including permissions, credentials and Scheduler Profiles.
+  version: 26Q2.0
+  termsOfService: https://tapis-project.org
+  contact:
+    name: Systems API - CICSupport
+    url: https://tapis-project.org
+    email: cicsupport@tacc.utexas.edu
+  license:
+    name: 3-Clause BSD License
+    url: https://opensource.org/licenses/BSD-3-Clause
+servers:
+- url: http://localhost:8080/
+  description: Local test environment
+  variables: {}
+- url: https://dev.develop.tapis.io/
+  description: Development environment
+  variables: {}
+tags:
+- name: Child Systems
+  description: 'A system that has *allowChildren* set to *true* allows for the creation of child systems based on it.
+
+    This ability provides a way to easily clone and manage systems based on existing systems.
+
+    Child systems allow a user to set only a few fields, and use all other values from an existing parent system.
+
+    This can reduce the difficulty in managing systems.
+
+    It allows for all child systems to be updated when the parent is updated.'
+paths:
+  /v3/systems/{parentId}/createChildSystem:
+    post:
+      tags:
+      - Child Systems
+      description: 'Create a child system based on a parent system. The child system inherits most attributes from the parent.
+
+        The following fields are filled in when the child system is created:
+
+        - *id*
+
+        - *effectiveUserId*
+
+        - *rootDir*
+
+        - *owner*
+
+
+        The owner will be the user who is creating the system. The caller must have read permission on the parent system.'
+      operationId: createChildSystem
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: parentId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      requestBody:
+        required: true
+        description: A JSON object specifying the attributes of the child system.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqPostChildSystem'
+      responses:
+        '201':
+          description: System created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '400':
+          description: Input error. Invalid JSON or credential validation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '409':
+          description: System already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Create child system
+      x-summary-source: derived
+  /v3/systems/{childSystemId}/unlinkFromParent:
+    post:
+      tags:
+      - Child Systems
+      description: 'Make a child system a standalone system. This will break the connection with it''s parent. From
+
+        this point on, the child system will not be connected to the parent. **WARNING** This cannot be undone.'
+      operationId: unlinkFromParent
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: childSystemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        '200':
+          description: System separated from parent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Unlink from parent
+      x-summary-source: derived
+  /v3/systems/{parentSystemId}/unlinkChildren:
+    post:
+      tags:
+      - Child Systems
+      description: 'Make a child system a standalone system. This will break the connection with it''s parent, and from
+
+        this point on, the child system will not be connected to the parent. This is similar to unlinkFromParent,
+
+        but permissions are required for the parent system rather than the child system.
+
+        **WARNING** This cannot be undone.'
+      operationId: unlinkChildren
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: parentSystemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      - name: all
+        in: query
+        description: Unlink all children from the parent. Default is false.
+        schema:
+          type: boolean
+          default: false
+      requestBody:
+        required: false
+        description: A JSON object containing information about which systems should be unlinked.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqUnlinkChildren'
+      responses:
+        '200':
+          description: System separated from parent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      summary: Unlink children
+      x-summary-source: derived
+components:
+  schemas:
+    EffectiveUserId:
+      type: string
+      minLength: 1
+      maxLength: 60
+      default: ${apiUserId}
+      description: Username to use when accessing the system. A specific user (such as a service account) or the dynamic user ``${apiUserId}``.
+    IdString:
+      type: string
+      minLength: 1
+      maxLength: 80
+    ResultResourceUrl:
+      type: object
+      properties:
+        url:
+          type: string
+    RespResourceUrl:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultResourceUrl'
+        metadata:
+          type: object
+    ReqUnlinkChildren:
+      type: object
+      properties:
+        childSystemIds:
+          type: array
+          description: List containing the IDs of the child systems to unlink from the parent system.
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/IdString'
+    RootDir:
+      type: string
+      maxLength: 4096
+      description: Effective root directory to be used when listing files or moving files to and from the system.
+    SysId:
+      type: string
+      minLength: 1
+      maxLength: 80
+      description: Short descriptive name for the system that is unique within the tenant.
+    RespChangeCount:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultChangeCount'
+        metadata:
+          type: object
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: object
+        metadata:
+          type: object
+    ReqPostChildSystem:
+      type: object
+      required:
+      - effectiveUserId
+      - rootDir
+      properties:
+        id:
+          $ref: '#/components/schemas/SysId'
+        effectiveUserId:
+          $ref: '#/components/schemas/EffectiveUserId'
+        rootDir:
+          $ref: '#/components/schemas/RootDir'
+    ResultChangeCount:
+      type: object
+      properties:
+        changes:
+          type: integer
+          format: int32
+  securitySchemes:
+    TapisJWT:
+      type: apiKey
+      description: Tapis signed JWT token authentication
+      name: X-Tapis-Token
+      in: header
+externalDocs:
+  description: Tapis Project
+  url: https://tapis-project.org

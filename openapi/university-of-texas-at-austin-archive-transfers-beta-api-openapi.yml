@@ -1,0 +1,273 @@
+openapi: 3.2.0
+info:
+  title: Tapis Files Archive transfers (Beta) API
+  description: The Tapis Files API provides for management of file resources on Tapis systems
+  version: 1.8.2
+  termsOfService: https://tapis-project.org
+  contact:
+    name: Files API - CICSupport
+    url: https://tapis-project.org
+    email: cicsupport@tacc.utexas.edu
+  license:
+    name: 3-Clause BSD License
+    url: https://opensource.org/licenses/BSD-3-Clause
+servers:
+- url: http://localhost:8080/
+  description: Local test environment
+  variables: {}
+- url: https://dev.develop.tapis.io/
+  description: Development environment
+  variables: {}
+tags:
+- name: Archive transfers (Beta)
+paths:
+  /v3/files/transfers/fastTransfer/{uuid}:
+    get:
+      tags:
+      - Archive transfers (Beta)
+      description: Get the status of an archive transfer (Beta)
+      operationId: getArchiveTransfer
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: includePaths
+        in: query
+        schema:
+          type: boolean
+          default: false
+      - name: includeTransferLog
+        in: query
+        schema:
+          type: boolean
+          default: false
+      - name: impersonationId
+        in: query
+        description: Restricted. Only certain services may impersonate a Tapis user.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveTransferResponse'
+      summary: Get archive transfer
+      x-summary-source: derived
+    delete:
+      tags:
+      - Archive transfers (Beta)
+      operationId: cancelArchiveTransfer
+      security:
+      - TapisJWT: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StringResponse'
+      summary: Cancel archive transfer
+      x-summary-source: derived
+  /v3/files/transfers/fastTransfer:
+    post:
+      description: '(Beta)
+
+
+        Request a "fast" or "archive" transfer. Archive transfers will use "tar" to put files
+
+        on the source system into an archive, and use tar to extract the archive on the destination
+
+        system. The result of the tar operation is sent directly over the network (there are no
+
+        temporary files created or anything like that). Depending on the archive type specified,
+
+        this transfer could add compression, skip the un-archiving on the destination, or read
+
+        the source from an archive and un-archive them on the destination system. Not all system
+
+        types are supported for all archive type options.
+
+
+        The source base url will point to the root directory of the transfer on the source system,
+
+        and the destination url will point to the root directory of the transfer on the destination
+
+        system. The url''s are tapis urls. For example - tapis://my-tapis-sys/source_files
+
+
+        The relativePaths attribute specified which paths to add to the archive. In this way, you can
+
+        select only certain paths within the directory, and not all paths. The paths will be added
+
+        as relative paths (relative to the source base url), so that when they are extracted they can
+
+        be relative to the destination base url. This would give the user the opportunity to change
+
+        what directory the files are stored in on the destination directory.
+
+
+        The relative paths can be either directories or files. If they are directories, the entire
+
+        contents of the director will be stored. Symlinks are added, but they are not followed.
+
+
+        ### Archive Types
+
+        | Value | Description |
+
+        |-----------------------|---------------------------------------------------------------------------------------------------|
+
+        | **TAR** | Files are added to a tar archive stream on the source system, and un-archived on the destination system. (only supported for ssh systems) |
+
+        | **TAR_GZIP** | Exactly like **TAR** except that gzip compression is used. (only supported for ssh systems) |
+
+        | **TO_TAR_ARCHIVE** | Files are added to a tar archive stream on the source system, however they are **not** un-archived on the destination system. The archive file is written to the destination system (source system must be ssh system) |
+
+        | **TO_GZIP_ARCHIVE** | Exactly like **TO_TAR_ARCHIVE** except that gzip compression is used. (source system must be ssh system) |
+
+        | **FROM_TAR_ARCHIVE** | The source must be an archive file, and files are un-archived on the destination system. (destination must be an ssh system) |
+
+        | **FROM_GZIP_ARCHIVE** | Exactly like **FROM_TAR_ARCHIVE** except that the source must be a gzipped tar file. (destination must be an ssh system) |'
+      tags:
+      - Archive transfers (Beta)
+      operationId: requestArchiveTransfer
+      security:
+      - TapisJWT: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchiveTransferRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveTransferResponse'
+      summary: Request archive transfer
+      x-summary-source: derived
+components:
+  schemas:
+    ArchiveTransferResult:
+      type: object
+      properties:
+        id:
+          type: string
+        uuid:
+          type: string
+        username:
+          type: string
+        tenantId:
+          type: string
+        created:
+          type: string
+          format: date-time
+        sourceBaseUrl:
+          type: string
+        destinationBaseUrl:
+          type: string
+        relativePaths:
+          type: array
+          items:
+            type: string
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        retriesRemaining:
+          type: string
+        nextRetry:
+          type: string
+          format: date-time
+        archiveBytesRead:
+          type: integer
+        fileBytesRead:
+          type: integer
+        errorMessage:
+          type: string
+        srcSharedCtxGrantor:
+          type: string
+        destSharedCtxGrantor:
+          type: string
+    StringResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    ArchiveTransferRequest:
+      type: object
+      properties:
+        sourceBaseUrl:
+          type: string
+        destinationBaseUrl:
+          type: string
+        relativePaths:
+          type: array
+          items:
+            type: string
+        archiveType:
+          type: string
+          enum:
+          - TAR
+          - TAR_GZIP
+          - TO_TAR_ARCHIVE
+          - TO_GZIP_ARCHIVE
+          - FROM_TAR_ARCHIVE
+          - FROM_GZIP_ARCHIVE
+        srcSharedCtxGrantor:
+          type: string
+        destSharedCtxGrantor:
+          type: string
+    ArchiveTransferResponse:
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          $ref: '#/components/schemas/ArchiveTransferResult'
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+  securitySchemes:
+    TapisJWT:
+      type: apiKey
+      description: Tapis signed JWT token authentication
+      name: X-Tapis-Token
+      in: header
+externalDocs:
+  description: Tapis Project
+  url: https://tapis-project.org
