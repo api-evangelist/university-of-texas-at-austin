@@ -700,6 +700,51 @@ paths:
       x-summary-source: derived
 components:
   schemas:
+    NativeLinuxSetFaclResult:
+      type: object
+      properties:
+        command:
+          type: string
+        exitCode:
+          type: integer
+          format: int32
+        stdOut:
+          type: string
+        stdErr:
+          type: string
+    UserNameString:
+      type: string
+      minLength: 1
+      maxLength: 60
+    AclEntryInfo:
+      type: object
+      properties:
+        defaultAcl:
+          type: boolean
+        type:
+          type: string
+        principal:
+          type: string
+        permissions:
+          type: string
+    NativeLinuxGetFaclResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          items:
+            $ref: '#/components/schemas/AclEntryInfo'
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
     NativeLinuxOpResultResponse:
       type: object
       properties:
@@ -712,23 +757,14 @@ components:
           type: string
         stdErr:
           type: string
-    FileStringResponse:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        result:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          type: object
+    FileTypeEnum:
+      type: string
+      enum:
+      - file
+      - dir
+      - symbolic_link
+      - other
+      - unknown
     NativeLinuxSetFaclRequest:
       required:
       - operation
@@ -757,34 +793,39 @@ components:
         aclString:
           type: string
           description: "specifies the actual acl string to set.  Multiple acls may be separated by \ncommas.\nExamples - user:myuser:rwx,group \n           group:mygroup:rw \n           user:myuser:rwx,group,group:mygroup:rw \n"
-    NativeLinuxGetFaclResponse:
+    FileInfo:
       type: object
       properties:
-        status:
+        mimeType:
           type: string
-        message:
-          type: string
-        result:
-          items:
-            $ref: '#/components/schemas/AclEntryInfo'
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          type: object
-    AclEntryInfo:
-      type: object
-      properties:
-        defaultAcl:
-          type: boolean
         type:
+          $ref: '#/components/schemas/FileTypeEnum'
+        owner:
           type: string
-        principal:
+        group:
           type: string
-        permissions:
+        nativePermissions:
+          type: string
+        url:
+          type: string
+        lastModified:
+          type: string
+          format: date-time
+        name:
+          type: string
+        path:
+          type: string
+        size:
+          type: integer
+          description: size in kB
+          format: int64
+    MkdirRequest:
+      required:
+      - path
+      type: object
+      properties:
+        path:
+          pattern: ^(?!.*\.\.).*
           type: string
     FileStatInfo:
       type: object
@@ -812,6 +853,23 @@ components:
           type: boolean
         link:
           type: boolean
+    NativeLinuxSetFaclResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          $ref: '#/components/schemas/NativeLinuxSetFaclResult'
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
     MoveCopyRequest:
       required:
       - newPath
@@ -826,7 +884,7 @@ components:
         newPath:
           type: string
           description: Paths must be absolute, ../.. is not allowed
-    NativeLinuxSetFaclResponse:
+    FileStringResponse:
       type: object
       properties:
         status:
@@ -834,7 +892,24 @@ components:
         message:
           type: string
         result:
-          $ref: '#/components/schemas/NativeLinuxSetFaclResult'
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    FileStatInfoResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          $ref: '#/components/schemas/FileStatInfo'
         version:
           type: string
         commit:
@@ -877,81 +952,6 @@ components:
           type: string
         metadata:
           type: object
-    UserNameString:
-      type: string
-      minLength: 1
-      maxLength: 60
-    FileStatInfoResponse:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        result:
-          $ref: '#/components/schemas/FileStatInfo'
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          type: object
-    NativeLinuxSetFaclResult:
-      type: object
-      properties:
-        command:
-          type: string
-        exitCode:
-          type: integer
-          format: int32
-        stdOut:
-          type: string
-        stdErr:
-          type: string
-    MkdirRequest:
-      required:
-      - path
-      type: object
-      properties:
-        path:
-          pattern: ^(?!.*\.\.).*
-          type: string
-    FileTypeEnum:
-      type: string
-      enum:
-      - file
-      - dir
-      - symbolic_link
-      - other
-      - unknown
-    FileInfo:
-      type: object
-      properties:
-        mimeType:
-          type: string
-        type:
-          $ref: '#/components/schemas/FileTypeEnum'
-        owner:
-          type: string
-        group:
-          type: string
-        nativePermissions:
-          type: string
-        url:
-          type: string
-        lastModified:
-          type: string
-          format: date-time
-        name:
-          type: string
-        path:
-          type: string
-        size:
-          type: integer
-          description: size in kB
-          format: int64
   securitySchemes:
     TapisJWT:
       type: apiKey

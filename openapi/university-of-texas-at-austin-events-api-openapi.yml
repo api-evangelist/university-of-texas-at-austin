@@ -250,22 +250,6 @@ paths:
       x-summary-source: derived
 components:
   schemas:
-    EventSeries:
-      type: object
-      required:
-      - source
-      - subject
-      - seriesId
-      properties:
-        source:
-          type: string
-          minLength: 1
-        subject:
-          type: string
-          minLength: 1
-        seriesId:
-          type: string
-          minLength: 1
     Event:
       type: object
       required:
@@ -301,6 +285,22 @@ components:
           type: string
         seriesSeqCount:
           type: integer
+    EventSeries:
+      type: object
+      required:
+      - source
+      - subject
+      - seriesId
+      properties:
+        source:
+          type: string
+          minLength: 1
+        subject:
+          type: string
+          minLength: 1
+        seriesId:
+          type: string
+          minLength: 1
     RespBasic:
       type: object
       properties:

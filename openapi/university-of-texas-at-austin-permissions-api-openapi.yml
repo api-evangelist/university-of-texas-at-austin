@@ -367,7 +367,7 @@ paths:
       tags:
       - Permissions
       description: Retrieve all system related permissions for a given system and user.
-      operationId: getUserPerms
+      operationId: getV3SystemsPermsBySystemIdUserByUserName
       security:
       - TapisJWT: []
       parameters:
@@ -414,13 +414,15 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
       summary: Get user perms
       x-summary-source: derived
+      x-operation-id-source: normalized
+      x-operation-id-original: getUserPerms
     post:
       tags:
       - Permissions
       description: 'Create permissions in the Security Kernel for a user. Requester must be owner of the system.
 
         Permissions are READ, MODIFY, EXECUTE. MODIFY implies READ.'
-      operationId: grantUserPerms
+      operationId: postV3SystemsPermsBySystemIdUserByUserName
       security:
       - TapisJWT: []
       parameters:
@@ -468,6 +470,8 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
       summary: Grant user perms
       x-summary-source: derived
+      x-operation-id-source: normalized
+      x-operation-id-original: grantUserPerms
     servers:
     - url: http://localhost:8080/
       description: Local test environment
@@ -482,7 +486,7 @@ paths:
       description: 'Remove permissions from the Security Kernel for a user. Requester must be owner of the system.
 
         Permissions are READ, MODIFY, EXECUTE.'
-      operationId: revokeUserPerms
+      operationId: postV3SystemsPermsBySystemIdUserByUserNameRevoke
       security:
       - TapisJWT: []
       parameters:
@@ -524,6 +528,8 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
       summary: Revoke user perms
       x-summary-source: derived
+      x-operation-id-source: normalized
+      x-operation-id-original: revokeUserPerms
     servers:
     - url: http://localhost:8080/
       description: Local test environment
@@ -538,7 +544,7 @@ paths:
       description: 'Remove system user permission from the Security Kernel. Requester must be owner of the system.
 
         Permissions are READ, MODIFY, EXECUTE.'
-      operationId: revokeUserPerm
+      operationId: deleteV3SystemsPermsBySystemIdUserByUserNameByPermission
       security:
       - TapisJWT: []
       parameters:
@@ -584,6 +590,8 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
       summary: Revoke user perm
       x-summary-source: derived
+      x-operation-id-source: normalized
+      x-operation-id-original: revokeUserPerm
     servers:
     - url: http://localhost:8080/
       description: Local test environment
@@ -593,48 +601,10 @@ paths:
       variables: {}
 components:
   schemas:
-    IdString:
-      type: string
-      minLength: 1
-      maxLength: 80
-    ResultNameArray:
-      type: object
-      properties:
-        names:
-          type: array
-          items:
-            type: string
     UserNameString:
       type: string
       minLength: 1
       maxLength: 60
-    RespBasic:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          type: object
-        metadata:
-          type: object
-    ReqPerms:
-      type: object
-      required:
-      - permissions
-      properties:
-        permissions:
-          type: array
-          minItems: 1
-          items:
-            type: string
     RespNameArray:
       type: object
       properties:
@@ -652,6 +622,44 @@ components:
           $ref: '#/components/schemas/ResultNameArray'
         metadata:
           type: object
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: object
+        metadata:
+          type: object
+    IdString:
+      type: string
+      minLength: 1
+      maxLength: 80
+    ResultNameArray:
+      type: object
+      properties:
+        names:
+          type: array
+          items:
+            type: string
+    ReqPerms:
+      type: object
+      required:
+      - permissions
+      properties:
+        permissions:
+          type: array
+          minItems: 1
+          items:
+            type: string
     CreatePermissionRequest:
       required:
       - permission
@@ -659,24 +667,6 @@ components:
       type: object
       properties:
         username:
-          type: string
-        permission:
-          $ref: '#/components/schemas/PermEnum'
-    PermEnum:
-      type: string
-      enum:
-      - READ
-      - MODIFY
-    FilePermission:
-      type: object
-      properties:
-        tenantId:
-          type: string
-        username:
-          type: string
-        systemId:
-          type: string
-        path:
           type: string
         permission:
           $ref: '#/components/schemas/PermEnum'
@@ -697,6 +687,19 @@ components:
           type: string
         metadata:
           type: object
+    FilePermission:
+      type: object
+      properties:
+        tenantId:
+          type: string
+        username:
+          type: string
+        systemId:
+          type: string
+        path:
+          type: string
+        permission:
+          $ref: '#/components/schemas/PermEnum'
     StringResponse:
       type: object
       properties:
@@ -714,6 +717,11 @@ components:
           type: string
         metadata:
           type: object
+    PermEnum:
+      type: string
+      enum:
+      - READ
+      - MODIFY
   securitySchemes:
     TapisJWT:
       type: apiKey

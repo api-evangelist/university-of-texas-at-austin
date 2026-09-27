@@ -202,73 +202,16 @@ paths:
       x-summary-source: derived
 components:
   schemas:
-    EffectiveUserId:
-      type: string
-      minLength: 1
-      maxLength: 60
-      default: ${apiUserId}
-      description: Username to use when accessing the system. A specific user (such as a service account) or the dynamic user ``${apiUserId}``.
-    IdString:
-      type: string
-      minLength: 1
-      maxLength: 80
     ResultResourceUrl:
       type: object
       properties:
         url:
           type: string
-    RespResourceUrl:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          $ref: '#/components/schemas/ResultResourceUrl'
-        metadata:
-          type: object
-    ReqUnlinkChildren:
-      type: object
-      properties:
-        childSystemIds:
-          type: array
-          description: List containing the IDs of the child systems to unlink from the parent system.
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/IdString'
-    RootDir:
-      type: string
-      maxLength: 4096
-      description: Effective root directory to be used when listing files or moving files to and from the system.
     SysId:
       type: string
       minLength: 1
       maxLength: 80
       description: Short descriptive name for the system that is unique within the tenant.
-    RespChangeCount:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          $ref: '#/components/schemas/ResultChangeCount'
-        metadata:
-          type: object
     RespBasic:
       type: object
       properties:
@@ -286,6 +229,32 @@ components:
           type: object
         metadata:
           type: object
+    ReqUnlinkChildren:
+      type: object
+      properties:
+        childSystemIds:
+          type: array
+          description: List containing the IDs of the child systems to unlink from the parent system.
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/IdString'
+    RespResourceUrl:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultResourceUrl'
+        metadata:
+          type: object
     ReqPostChildSystem:
       type: object
       required:
@@ -298,6 +267,37 @@ components:
           $ref: '#/components/schemas/EffectiveUserId'
         rootDir:
           $ref: '#/components/schemas/RootDir'
+    RespChangeCount:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultChangeCount'
+        metadata:
+          type: object
+    IdString:
+      type: string
+      minLength: 1
+      maxLength: 80
+    RootDir:
+      type: string
+      maxLength: 4096
+      description: Effective root directory to be used when listing files or moving files to and from the system.
+    EffectiveUserId:
+      type: string
+      minLength: 1
+      maxLength: 60
+      default: ${apiUserId}
+      description: Username to use when accessing the system. A specific user (such as a service account) or the dynamic user ``${apiUserId}``.
     ResultChangeCount:
       type: object
       properties:

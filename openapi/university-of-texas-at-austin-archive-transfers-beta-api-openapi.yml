@@ -162,6 +162,47 @@ paths:
       x-summary-source: derived
 components:
   schemas:
+    StringResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    ArchiveTransferRequest:
+      type: object
+      properties:
+        sourceBaseUrl:
+          type: string
+        destinationBaseUrl:
+          type: string
+        relativePaths:
+          type: array
+          items:
+            type: string
+        archiveType:
+          type: string
+          enum:
+          - TAR
+          - TAR_GZIP
+          - TO_TAR_ARCHIVE
+          - TO_GZIP_ARCHIVE
+          - FROM_TAR_ARCHIVE
+          - FROM_GZIP_ARCHIVE
+        srcSharedCtxGrantor:
+          type: string
+        destSharedCtxGrantor:
+          type: string
     ArchiveTransferResult:
       type: object
       properties:
@@ -201,47 +242,6 @@ components:
           type: integer
         errorMessage:
           type: string
-        srcSharedCtxGrantor:
-          type: string
-        destSharedCtxGrantor:
-          type: string
-    StringResponse:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        result:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          type: object
-    ArchiveTransferRequest:
-      type: object
-      properties:
-        sourceBaseUrl:
-          type: string
-        destinationBaseUrl:
-          type: string
-        relativePaths:
-          type: array
-          items:
-            type: string
-        archiveType:
-          type: string
-          enum:
-          - TAR
-          - TAR_GZIP
-          - TO_TAR_ARCHIVE
-          - TO_GZIP_ARCHIVE
-          - FROM_TAR_ARCHIVE
-          - FROM_GZIP_ARCHIVE
         srcSharedCtxGrantor:
           type: string
         destSharedCtxGrantor:

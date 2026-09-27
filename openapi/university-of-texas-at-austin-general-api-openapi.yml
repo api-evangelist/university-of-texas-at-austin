@@ -70,7 +70,7 @@ paths:
     get:
       tags:
       - General
-      operationId: healthCheck
+      operationId: getV3FilesHealthcheck
       responses:
         '200':
           description: Message received.
@@ -82,6 +82,8 @@ paths:
           description: Server error.
       summary: Health check
       x-summary-source: derived
+      x-operation-id-source: normalized
+      x-operation-id-original: healthCheck
     servers:
     - url: http://localhost:8080/
       description: Local test environment
@@ -93,7 +95,7 @@ paths:
     get:
       tags:
       - General
-      operationId: readyCheck
+      operationId: getV3FilesReadycheck
       responses:
         '200':
           description: Service ready.
@@ -105,6 +107,8 @@ paths:
           description: Service unavailable.
       summary: Ready check
       x-summary-source: derived
+      x-operation-id-source: normalized
+      x-operation-id-original: readyCheck
     servers:
     - url: http://localhost:8080/
       description: Local test environment
@@ -173,7 +177,7 @@ paths:
       tags:
       - General
       description: Health check. Lightweight non-authenticated check that service is alive.
-      operationId: healthCheck
+      operationId: getV3NotificationsHealthcheck
       responses:
         '200':
           description: Message received.
@@ -185,6 +189,8 @@ paths:
           description: Server error.
       summary: Health check
       x-summary-source: derived
+      x-operation-id-source: normalized
+      x-operation-id-original: healthCheck
     servers:
     - url: http://localhost:8080/
       description: Local test environment
@@ -197,7 +203,7 @@ paths:
       tags:
       - General
       description: Ready check. Non-authenticated check that service is ready to do work.
-      operationId: readyCheck
+      operationId: getV3NotificationsReadycheck
       responses:
         '200':
           description: Service ready.
@@ -209,6 +215,8 @@ paths:
           description: Service not ready.
       summary: Ready check
       x-summary-source: derived
+      x-operation-id-source: normalized
+      x-operation-id-original: readyCheck
     servers:
     - url: http://localhost:8080/
       description: Local test environment
@@ -221,7 +229,7 @@ paths:
       tags:
       - General
       description: Health check. Lightweight non-authenticated check that service is alive.
-      operationId: healthCheck
+      operationId: getV3SystemsHealthcheck
       responses:
         '200':
           description: Message received.
@@ -233,6 +241,8 @@ paths:
           description: Server error.
       summary: Health check
       x-summary-source: derived
+      x-operation-id-source: normalized
+      x-operation-id-original: healthCheck
     servers:
     - url: http://localhost:8080/
       description: Local test environment
@@ -245,7 +255,7 @@ paths:
       tags:
       - General
       description: Ready check. Non-authenticated check that service is ready to do work.
-      operationId: readyCheck
+      operationId: getV3SystemsReadycheck
       responses:
         '200':
           description: Service ready.
@@ -257,6 +267,8 @@ paths:
           description: Service not ready.
       summary: Ready check
       x-summary-source: derived
+      x-operation-id-source: normalized
+      x-operation-id-original: readyCheck
     servers:
     - url: http://localhost:8080/
       description: Local test environment
