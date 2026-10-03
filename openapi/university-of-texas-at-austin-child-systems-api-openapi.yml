@@ -202,33 +202,6 @@ paths:
       x-summary-source: derived
 components:
   schemas:
-    ResultResourceUrl:
-      type: object
-      properties:
-        url:
-          type: string
-    SysId:
-      type: string
-      minLength: 1
-      maxLength: 80
-      description: Short descriptive name for the system that is unique within the tenant.
-    RespBasic:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          type: object
-        metadata:
-          type: object
     ReqUnlinkChildren:
       type: object
       properties:
@@ -267,6 +240,42 @@ components:
           $ref: '#/components/schemas/EffectiveUserId'
         rootDir:
           $ref: '#/components/schemas/RootDir'
+    ResultResourceUrl:
+      type: object
+      properties:
+        url:
+          type: string
+    IdString:
+      type: string
+      minLength: 1
+      maxLength: 80
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: object
+        metadata:
+          type: object
+    EffectiveUserId:
+      type: string
+      minLength: 1
+      maxLength: 60
+      default: ${apiUserId}
+      description: Username to use when accessing the system. A specific user (such as a service account) or the dynamic user ``${apiUserId}``.
+    RootDir:
+      type: string
+      maxLength: 4096
+      description: Effective root directory to be used when listing files or moving files to and from the system.
     RespChangeCount:
       type: object
       properties:
@@ -284,26 +293,17 @@ components:
           $ref: '#/components/schemas/ResultChangeCount'
         metadata:
           type: object
-    IdString:
-      type: string
-      minLength: 1
-      maxLength: 80
-    RootDir:
-      type: string
-      maxLength: 4096
-      description: Effective root directory to be used when listing files or moving files to and from the system.
-    EffectiveUserId:
-      type: string
-      minLength: 1
-      maxLength: 60
-      default: ${apiUserId}
-      description: Username to use when accessing the system. A specific user (such as a service account) or the dynamic user ``${apiUserId}``.
     ResultChangeCount:
       type: object
       properties:
         changes:
           type: integer
           format: int32
+    SysId:
+      type: string
+      minLength: 1
+      maxLength: 80
+      description: Short descriptive name for the system that is unique within the tenant.
   securitySchemes:
     TapisJWT:
       type: apiKey

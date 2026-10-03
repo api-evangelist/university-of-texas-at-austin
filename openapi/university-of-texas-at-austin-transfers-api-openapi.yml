@@ -236,6 +236,81 @@ paths:
       x-summary-source: derived
 components:
   schemas:
+    TransferTask:
+      type: object
+      properties:
+        username:
+          type: string
+        tenantId:
+          type: string
+        tag:
+          type: string
+        uuid:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/TransferStatusEnum'
+        parentTasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransferTaskParent'
+        estimatedTotalBytes:
+          type: integer
+          format: int64
+        totalBytesTransferred:
+          type: integer
+          format: int64
+        totalTransfers:
+          type: integer
+          format: int32
+        completeTransfers:
+          type: integer
+          format: int32
+        errorMessage:
+          type: string
+        created:
+          type: string
+          format: date-time
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+    StringResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    TransferTaskResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          $ref: '#/components/schemas/TransferTask'
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
     TransferTaskParent:
       type: object
       properties:
@@ -277,6 +352,55 @@ components:
         endTime:
           type: string
           format: date-time
+    TransferTaskListResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransferTask'
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    ReqTransferElement:
+      required:
+      - destinationURI
+      - sourceURI
+      type: object
+      properties:
+        sourceURI:
+          type: string
+        destinationURI:
+          type: string
+        optional:
+          type: boolean
+          default: false
+          description: Allow the full transfer to succeed even if this element fails.
+        transferType:
+          type: string
+          enum:
+          - TRANSFER
+          - SERVICE_MOVE_DIRECTORY_CONTENTS
+          - SERVICE_MOVE_FILE_OR_DIRECTORY
+          default: null
+          description: "If this value is set to anything other than TRANSFER, both the source and target MUST,\nbe on the same tapis system.  If the value is SERVICE_MOVE_DIRECTORY_CONTENTS, the \nsource URI is expected to be a directory, and the contents of that directory will be\ntransfered to the target URI.  The target must be an existing directory or the operation\nwill fail.  If the value is SERVICE_MOVE_FILE_OR_DIRECTORY the file or directory will\nbe moved to the target URI.  If the target already exists, it will be overwritten.\n"
+        srcSharedCtx:
+          $ref: '#/components/schemas/UserNameString'
+        destSharedCtx:
+          $ref: '#/components/schemas/UserNameString'
+    UserNameString:
+      type: string
+      minLength: 1
+      maxLength: 60
     TransferStatusEnum:
       type: string
       description: The status of the task, such as ACCEPTED, IN_PROGRESS, COMPLETED, CANCELLED
@@ -290,10 +414,17 @@ components:
       - FAILED
       - FAILED_OPT
       - PAUSED
-    UserNameString:
-      type: string
-      minLength: 1
-      maxLength: 60
+    ReqTransfer:
+      required:
+      - elements
+      type: object
+      properties:
+        tag:
+          type: string
+        elements:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReqTransferElement'
     TransferTaskChild:
       type: object
       properties:
@@ -339,137 +470,6 @@ components:
         endTime:
           type: string
           format: date-time
-    TransferTaskResponse:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        result:
-          $ref: '#/components/schemas/TransferTask'
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          type: object
-    TransferTaskListResponse:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        result:
-          type: array
-          items:
-            $ref: '#/components/schemas/TransferTask'
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          type: object
-    TransferTask:
-      type: object
-      properties:
-        username:
-          type: string
-        tenantId:
-          type: string
-        tag:
-          type: string
-        uuid:
-          type: string
-          format: uuid
-        status:
-          $ref: '#/components/schemas/TransferStatusEnum'
-        parentTasks:
-          type: array
-          items:
-            $ref: '#/components/schemas/TransferTaskParent'
-        estimatedTotalBytes:
-          type: integer
-          format: int64
-        totalBytesTransferred:
-          type: integer
-          format: int64
-        totalTransfers:
-          type: integer
-          format: int32
-        completeTransfers:
-          type: integer
-          format: int32
-        errorMessage:
-          type: string
-        created:
-          type: string
-          format: date-time
-        startTime:
-          type: string
-          format: date-time
-        endTime:
-          type: string
-          format: date-time
-    ReqTransferElement:
-      required:
-      - destinationURI
-      - sourceURI
-      type: object
-      properties:
-        sourceURI:
-          type: string
-        destinationURI:
-          type: string
-        optional:
-          type: boolean
-          default: false
-          description: Allow the full transfer to succeed even if this element fails.
-        transferType:
-          type: string
-          enum:
-          - TRANSFER
-          - SERVICE_MOVE_DIRECTORY_CONTENTS
-          - SERVICE_MOVE_FILE_OR_DIRECTORY
-          default: null
-          description: "If this value is set to anything other than TRANSFER, both the source and target MUST,\nbe on the same tapis system.  If the value is SERVICE_MOVE_DIRECTORY_CONTENTS, the \nsource URI is expected to be a directory, and the contents of that directory will be\ntransfered to the target URI.  The target must be an existing directory or the operation\nwill fail.  If the value is SERVICE_MOVE_FILE_OR_DIRECTORY the file or directory will\nbe moved to the target URI.  If the target already exists, it will be overwritten.\n"
-        srcSharedCtx:
-          $ref: '#/components/schemas/UserNameString'
-        destSharedCtx:
-          $ref: '#/components/schemas/UserNameString'
-    StringResponse:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        result:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          type: object
-    ReqTransfer:
-      required:
-      - elements
-      type: object
-      properties:
-        tag:
-          type: string
-        elements:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReqTransferElement'
   securitySchemes:
     TapisJWT:
       type: apiKey

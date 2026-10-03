@@ -109,6 +109,10 @@ paths:
       x-summary-source: derived
 components:
   schemas:
+    UserNameString:
+      type: string
+      minLength: 1
+      maxLength: 60
     HeaderByteRange:
       type: object
       properties:
@@ -118,10 +122,6 @@ components:
         max:
           type: integer
           format: int64
-    UserNameString:
-      type: string
-      minLength: 1
-      maxLength: 60
   securitySchemes:
     TapisJWT:
       type: apiKey

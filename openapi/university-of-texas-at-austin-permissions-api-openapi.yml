@@ -601,10 +601,20 @@ paths:
       variables: {}
 components:
   schemas:
-    UserNameString:
+    ReqPerms:
+      type: object
+      required:
+      - permissions
+      properties:
+        permissions:
+          type: array
+          minItems: 1
+          items:
+            type: string
+    IdString:
       type: string
       minLength: 1
-      maxLength: 60
+      maxLength: 80
     RespNameArray:
       type: object
       properties:
@@ -622,6 +632,10 @@ components:
           $ref: '#/components/schemas/ResultNameArray'
         metadata:
           type: object
+    UserNameString:
+      type: string
+      minLength: 1
+      maxLength: 60
     RespBasic:
       type: object
       properties:
@@ -639,10 +653,6 @@ components:
           type: object
         metadata:
           type: object
-    IdString:
-      type: string
-      minLength: 1
-      maxLength: 80
     ResultNameArray:
       type: object
       properties:
@@ -650,27 +660,12 @@ components:
           type: array
           items:
             type: string
-    ReqPerms:
-      type: object
-      required:
-      - permissions
-      properties:
-        permissions:
-          type: array
-          minItems: 1
-          items:
-            type: string
-    CreatePermissionRequest:
-      required:
-      - permission
-      - username
-      type: object
-      properties:
-        username:
-          type: string
-        permission:
-          $ref: '#/components/schemas/PermEnum'
-    FilePermissionResponse:
+    PermEnum:
+      type: string
+      enum:
+      - READ
+      - MODIFY
+    StringResponse:
       type: object
       properties:
         status:
@@ -678,7 +673,7 @@ components:
         message:
           type: string
         result:
-          $ref: '#/components/schemas/FilePermission'
+          type: string
         version:
           type: string
         commit:
@@ -700,7 +695,7 @@ components:
           type: string
         permission:
           $ref: '#/components/schemas/PermEnum'
-    StringResponse:
+    FilePermissionResponse:
       type: object
       properties:
         status:
@@ -708,7 +703,7 @@ components:
         message:
           type: string
         result:
-          type: string
+          $ref: '#/components/schemas/FilePermission'
         version:
           type: string
         commit:
@@ -717,11 +712,16 @@ components:
           type: string
         metadata:
           type: object
-    PermEnum:
-      type: string
-      enum:
-      - READ
-      - MODIFY
+    CreatePermissionRequest:
+      required:
+      - permission
+      - username
+      type: object
+      properties:
+        username:
+          type: string
+        permission:
+          $ref: '#/components/schemas/PermEnum'
   securitySchemes:
     TapisJWT:
       type: apiKey

@@ -1246,180 +1246,6 @@ components:
           $ref: '#/components/schemas/ResultBoolean'
         metadata:
           type: object
-    OperationTypeEnum:
-      type: string
-      enum:
-      - CREATE
-      - READ
-      - MODIFY
-      - EXECUTE
-      - DELETE
-      - UNDELETE
-      - HARD_DELETE
-      - CHANGE_OWNER
-      - ENABLE
-      - DISABLE
-      - LOCK
-      - UNLOCK
-      - GET_PERMS
-      - GRANT_PERMS
-      - REVOKE_PERMS
-    RespApps:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          type: array
-          items:
-            $ref: '#/components/schemas/TapisApp'
-        metadata:
-          type: object
-          properties:
-            recordCount:
-              type: integer
-            recordLimit:
-              type: integer
-            recordsSkipped:
-              type: integer
-            orderBy:
-              type: string
-            startAfter:
-              type: string
-            totalCount:
-              type: integer
-    UserNameApiDefaultString:
-      type: string
-      minLength: 1
-      maxLength: 60
-      default: ${apiUserId}
-    RespResourceUrl:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          $ref: '#/components/schemas/ResultResourceUrl'
-        metadata:
-          type: object
-    ArchiveModeEnum:
-      type: string
-      enum:
-      - ALWAYS
-      - SKIP_ON_FAIL
-      - NEVER
-      default: ALWAYS
-    JobEventCategoryFilter:
-      type: string
-      enum:
-      - ALL
-      - JOB_NEW_STATUS
-      - JOB_INPUT_TRANSACTION_ID
-      - JOB_ARCHIVE_TRANSACTION_ID
-      - JOB_ERROR_MESSAGE
-      - JOB_SUBSCRIPTION
-    RespAppHistory:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/AppHistory'
-        metadata:
-          type: object
-    DescriptionString:
-      type: string
-      maxLength: 2048
-    NotifDeliveryTarget:
-      type: object
-      required:
-      - deliveryMethod
-      - deliveryAddress
-      properties:
-        deliveryMethod:
-          $ref: '#/components/schemas/NotifDeliveryMethod'
-        deliveryAddress:
-          type: string
-    InputNameString:
-      type: string
-      minLength: 1
-      maxLength: 80
-    ResultResourceUrl:
-      type: object
-      properties:
-        url:
-          type: string
-    AppHistory:
-      type: object
-      properties:
-        appVersion:
-          type: string
-        jwtTenant:
-          type: string
-        jwtUser:
-          $ref: '#/components/schemas/UserNameString'
-        oboTenant:
-          type: string
-        oboUser:
-          $ref: '#/components/schemas/UserNameString'
-        operation:
-          $ref: '#/components/schemas/OperationTypeEnum'
-        description:
-          type: string
-        created:
-          type: string
-    AppFileInputArray:
-      type: object
-      required:
-      - name
-      - targetDir
-      properties:
-        name:
-          $ref: '#/components/schemas/InputNameString'
-        description:
-          $ref: '#/components/schemas/ArgDescriptionString'
-        inputMode:
-          $ref: '#/components/schemas/FileInputModeEnum'
-        envKey:
-          type: string
-          minLength: 1
-        notes:
-          type: object
-        sourceUrls:
-          type: array
-          items:
-            type: string
-            minLength: 1
-        targetDir:
-          type: string
-          minLength: 1
     ParameterSet:
       type: object
       properties:
@@ -1465,26 +1291,72 @@ components:
               type: string
             stderrFilename:
               type: string
-    TagString:
+    AppHistory:
+      type: object
+      properties:
+        appVersion:
+          type: string
+        jwtTenant:
+          type: string
+        jwtUser:
+          $ref: '#/components/schemas/UserNameString'
+        oboTenant:
+          type: string
+        oboUser:
+          $ref: '#/components/schemas/UserNameString'
+        operation:
+          $ref: '#/components/schemas/OperationTypeEnum'
+        description:
+          type: string
+        created:
+          type: string
+    OperationTypeEnum:
+      type: string
+      enum:
+      - CREATE
+      - READ
+      - MODIFY
+      - EXECUTE
+      - DELETE
+      - UNDELETE
+      - HARD_DELETE
+      - CHANGE_OWNER
+      - ENABLE
+      - DISABLE
+      - LOCK
+      - UNLOCK
+      - GET_PERMS
+      - GRANT_PERMS
+      - REVOKE_PERMS
+    IdString:
       type: string
       minLength: 1
-      maxLength: 128
-    FileInputModeEnum:
+      maxLength: 80
+    ReqSearchApps:
+      type: object
+      required:
+      - search
+      properties:
+        search:
+          type: array
+          minItems: 1
+          items:
+            type: string
+    ResultBoolean:
+      type: object
+      properties:
+        aBool:
+          type: boolean
+    UserNameApiDefaultString:
       type: string
-      enum:
-      - REQUIRED
-      - OPTIONAL
-      - FIXED
-      default: OPTIONAL
-    ArgInputModeEnum:
+      minLength: 1
+      maxLength: 60
+      default: ${apiUserId}
+    AppVersionString:
       type: string
-      enum:
-      - REQUIRED
-      - FIXED
-      - INCLUDE_ON_DEMAND
-      - INCLUDE_BY_DEFAULT
-      default: INCLUDE_ON_DEMAND
-    ReqPutApp:
+      minLength: 1
+      maxLength: 64
+    ReqPatchApp:
       type: object
       properties:
         description:
@@ -1516,42 +1388,42 @@ components:
             $ref: '#/components/schemas/TagString'
         notes:
           type: object
-    ReqSubscribe:
+    DescriptionString:
+      type: string
+      maxLength: 2048
+    NotifDeliveryMethod:
+      type: string
+      enum:
+      - WEBHOOK
+      - EMAIL
+    RespResourceUrl:
       type: object
-      required:
-      - jobEventCategoryFilter
-      - deliveryTargets
       properties:
-        description:
-          $ref: '#/components/schemas/DescriptionString'
-        enabled:
-          type: boolean
-          default: true
-        jobEventCategoryFilter:
-          $ref: '#/components/schemas/JobEventCategoryFilter'
-        ttlMinutes:
-          type: integer
-          default: 10080
-        deliveryTargets:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/NotifDeliveryTarget'
-    AppVersionString:
-      type: string
-      minLength: 1
-      maxLength: 64
-    ArgDescriptionString:
-      type: string
-      maxLength: 8096
-    KeyValueInputModeEnum:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultResourceUrl'
+        metadata:
+          type: object
+    ArgInputModeEnum:
       type: string
       enum:
       - REQUIRED
       - FIXED
       - INCLUDE_ON_DEMAND
       - INCLUDE_BY_DEFAULT
-      default: INCLUDE_BY_DEFAULT
+      default: INCLUDE_ON_DEMAND
+    ArgDescriptionString:
+      type: string
+      maxLength: 8096
     AppFileInput:
       type: object
       required:
@@ -1578,147 +1450,11 @@ components:
         targetPath:
           type: string
           minLength: 1
-    RuntimeEnum:
-      type: string
-      enum:
-      - SINGULARITY
-      - DOCKER
-      - ZIP
-    TapisApp:
+    ResultResourceUrl:
       type: object
       properties:
-        tenant:
+        url:
           type: string
-        id:
-          $ref: '#/components/schemas/IdString'
-        version:
-          $ref: '#/components/schemas/AppVersionString'
-        description:
-          $ref: '#/components/schemas/DescriptionString'
-        owner:
-          $ref: '#/components/schemas/UserNameApiDefaultString'
-        enabled:
-          type: boolean
-          default: true
-        versionEnabled:
-          type: boolean
-          default: true
-        locked:
-          type: boolean
-          default: false
-        isPublic:
-          type: boolean
-        sharedWithUsers:
-          type: array
-          items:
-            type: string
-        runtime:
-          $ref: '#/components/schemas/RuntimeEnum'
-        runtimeVersion:
-          type: string
-        runtimeOptions:
-          $ref: '#/components/schemas/RuntimeOptions'
-        containerImage:
-          type: string
-        jobType:
-          $ref: '#/components/schemas/JobTypeEnum'
-        maxJobs:
-          type: integer
-          default: -1
-        maxJobsPerUser:
-          type: integer
-          default: -1
-        strictFileInputs:
-          type: boolean
-          default: false
-        jobAttributes:
-          $ref: '#/components/schemas/JobAttributes'
-        tags:
-          type: array
-          items:
-            type: string
-        notes:
-          type: object
-        sharedAppCtx:
-          $ref: '#/components/schemas/UserNameString'
-        uuid:
-          type: string
-          format: uuid
-        deleted:
-          type: boolean
-        created:
-          type: string
-        updated:
-          type: string
-    RespBasic:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          type: object
-        metadata:
-          type: object
-    ListTypeEnum:
-      type: string
-      default: OWNED
-      enum:
-      - OWNED
-      - SHARED_PUBLIC
-      - SHARED_DIRECT
-      - READ_PERM
-      - MINE
-      - ALL
-    RespApp:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          $ref: '#/components/schemas/TapisApp'
-        metadata:
-          type: object
-    RespChangeCount:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          $ref: '#/components/schemas/ResultChangeCount'
-        metadata:
-          type: object
-    DirString:
-      type: string
-      minLength: 1
-      maxLength: 4096
-    RuntimeOptions:
-      type: array
-      items:
-        $ref: '#/components/schemas/RuntimeOptionEnum'
     JobAttributes:
       type: object
       properties:
@@ -1793,6 +1529,313 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TagString'
+    RespApps:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/TapisApp'
+        metadata:
+          type: object
+          properties:
+            recordCount:
+              type: integer
+            recordLimit:
+              type: integer
+            recordsSkipped:
+              type: integer
+            orderBy:
+              type: string
+            startAfter:
+              type: string
+            totalCount:
+              type: integer
+    KeyValuePair:
+      type: object
+      required:
+      - key
+      properties:
+        key:
+          type: string
+          minLength: 1
+        value:
+          type: string
+          default: ''
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        inputMode:
+          $ref: '#/components/schemas/KeyValueInputModeEnum'
+        notes:
+          type: object
+    JobEventCategoryFilter:
+      type: string
+      enum:
+      - ALL
+      - JOB_NEW_STATUS
+      - JOB_INPUT_TRANSACTION_ID
+      - JOB_ARCHIVE_TRANSACTION_ID
+      - JOB_ERROR_MESSAGE
+      - JOB_SUBSCRIPTION
+    RespChangeCount:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultChangeCount'
+        metadata:
+          type: object
+    TapisApp:
+      type: object
+      properties:
+        tenant:
+          type: string
+        id:
+          $ref: '#/components/schemas/IdString'
+        version:
+          $ref: '#/components/schemas/AppVersionString'
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        owner:
+          $ref: '#/components/schemas/UserNameApiDefaultString'
+        enabled:
+          type: boolean
+          default: true
+        versionEnabled:
+          type: boolean
+          default: true
+        locked:
+          type: boolean
+          default: false
+        isPublic:
+          type: boolean
+        sharedWithUsers:
+          type: array
+          items:
+            type: string
+        runtime:
+          $ref: '#/components/schemas/RuntimeEnum'
+        runtimeVersion:
+          type: string
+        runtimeOptions:
+          $ref: '#/components/schemas/RuntimeOptions'
+        containerImage:
+          type: string
+        jobType:
+          $ref: '#/components/schemas/JobTypeEnum'
+        maxJobs:
+          type: integer
+          default: -1
+        maxJobsPerUser:
+          type: integer
+          default: -1
+        strictFileInputs:
+          type: boolean
+          default: false
+        jobAttributes:
+          $ref: '#/components/schemas/JobAttributes'
+        tags:
+          type: array
+          items:
+            type: string
+        notes:
+          type: object
+        sharedAppCtx:
+          $ref: '#/components/schemas/UserNameString'
+        uuid:
+          type: string
+          format: uuid
+        deleted:
+          type: boolean
+        created:
+          type: string
+        updated:
+          type: string
+    AppArgSpec:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          $ref: '#/components/schemas/InputNameString'
+        description:
+          $ref: '#/components/schemas/ArgDescriptionString'
+        inputMode:
+          $ref: '#/components/schemas/ArgInputModeEnum'
+        arg:
+          type: string
+          minLength: 1
+        notes:
+          type: object
+    QueueNameString:
+      type: string
+      minLength: 1
+      maxLength: 128
+    RuntimeOptionEnum:
+      type: string
+      enum:
+      - NONE
+      - SINGULARITY_RUN
+    RespApp:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/TapisApp'
+        metadata:
+          type: object
+    AppFileInputArray:
+      type: object
+      required:
+      - name
+      - targetDir
+      properties:
+        name:
+          $ref: '#/components/schemas/InputNameString'
+        description:
+          $ref: '#/components/schemas/ArgDescriptionString'
+        inputMode:
+          $ref: '#/components/schemas/FileInputModeEnum'
+        envKey:
+          type: string
+          minLength: 1
+        notes:
+          type: object
+        sourceUrls:
+          type: array
+          items:
+            type: string
+            minLength: 1
+        targetDir:
+          type: string
+          minLength: 1
+    UserNameString:
+      type: string
+      minLength: 1
+      maxLength: 60
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: object
+        metadata:
+          type: object
+    FileInputModeEnum:
+      type: string
+      enum:
+      - REQUIRED
+      - OPTIONAL
+      - FIXED
+      default: OPTIONAL
+    InputNameString:
+      type: string
+      minLength: 1
+      maxLength: 80
+    ReqPutApp:
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        runtime:
+          $ref: '#/components/schemas/RuntimeEnum'
+        runtimeVersion:
+          type: string
+        runtimeOptions:
+          $ref: '#/components/schemas/RuntimeOptions'
+        containerImage:
+          type: string
+        jobType:
+          $ref: '#/components/schemas/JobTypeEnum'
+        maxJobs:
+          type: integer
+          default: -1
+        maxJobsPerUser:
+          type: integer
+          default: -1
+        strictFileInputs:
+          type: boolean
+          default: false
+        jobAttributes:
+          $ref: '#/components/schemas/JobAttributes'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagString'
+        notes:
+          type: object
+    ListTypeEnum:
+      type: string
+      default: OWNED
+      enum:
+      - OWNED
+      - SHARED_PUBLIC
+      - SHARED_DIRECT
+      - READ_PERM
+      - MINE
+      - ALL
+    ReqSubscribe:
+      type: object
+      required:
+      - jobEventCategoryFilter
+      - deliveryTargets
+      properties:
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        enabled:
+          type: boolean
+          default: true
+        jobEventCategoryFilter:
+          $ref: '#/components/schemas/JobEventCategoryFilter'
+        ttlMinutes:
+          type: integer
+          default: 10080
+        deliveryTargets:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/NotifDeliveryTarget'
+    RuntimeOptions:
+      type: array
+      items:
+        $ref: '#/components/schemas/RuntimeOptionEnum'
     ReqPostApp:
       type: object
       required:
@@ -1844,119 +1887,76 @@ components:
             $ref: '#/components/schemas/TagString'
         notes:
           type: object
-    ReqSearchApps:
+    KeyValueInputModeEnum:
+      type: string
+      enum:
+      - REQUIRED
+      - FIXED
+      - INCLUDE_ON_DEMAND
+      - INCLUDE_BY_DEFAULT
+      default: INCLUDE_BY_DEFAULT
+    TagString:
+      type: string
+      minLength: 1
+      maxLength: 128
+    RuntimeEnum:
+      type: string
+      enum:
+      - SINGULARITY
+      - DOCKER
+      - ZIP
+    RespAppHistory:
       type: object
-      required:
-      - search
       properties:
-        search:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
           type: array
           minItems: 1
           items:
-            type: string
-    RuntimeOptionEnum:
+            $ref: '#/components/schemas/AppHistory'
+        metadata:
+          type: object
+    ArchiveModeEnum:
       type: string
       enum:
-      - NONE
-      - SINGULARITY_RUN
+      - ALWAYS
+      - SKIP_ON_FAIL
+      - NEVER
+      default: ALWAYS
     ResultChangeCount:
       type: object
       properties:
         changes:
           type: integer
           format: int32
-    UserNameString:
+    DirString:
       type: string
       minLength: 1
-      maxLength: 60
-    ReqPatchApp:
+      maxLength: 4096
+    NotifDeliveryTarget:
       type: object
+      required:
+      - deliveryMethod
+      - deliveryAddress
       properties:
-        description:
-          $ref: '#/components/schemas/DescriptionString'
-        runtime:
-          $ref: '#/components/schemas/RuntimeEnum'
-        runtimeVersion:
+        deliveryMethod:
+          $ref: '#/components/schemas/NotifDeliveryMethod'
+        deliveryAddress:
           type: string
-        runtimeOptions:
-          $ref: '#/components/schemas/RuntimeOptions'
-        containerImage:
-          type: string
-        jobType:
-          $ref: '#/components/schemas/JobTypeEnum'
-        maxJobs:
-          type: integer
-          default: -1
-        maxJobsPerUser:
-          type: integer
-          default: -1
-        strictFileInputs:
-          type: boolean
-          default: false
-        jobAttributes:
-          $ref: '#/components/schemas/JobAttributes'
-        tags:
-          type: array
-          items:
-            $ref: '#/components/schemas/TagString'
-        notes:
-          type: object
     JobTypeEnum:
       type: string
       enum:
       - BATCH
       - FORK
-    NotifDeliveryMethod:
-      type: string
-      enum:
-      - WEBHOOK
-      - EMAIL
-    AppArgSpec:
-      type: object
-      required:
-      - name
-      properties:
-        name:
-          $ref: '#/components/schemas/InputNameString'
-        description:
-          $ref: '#/components/schemas/ArgDescriptionString'
-        inputMode:
-          $ref: '#/components/schemas/ArgInputModeEnum'
-        arg:
-          type: string
-          minLength: 1
-        notes:
-          type: object
-    QueueNameString:
-      type: string
-      minLength: 1
-      maxLength: 128
-    IdString:
-      type: string
-      minLength: 1
-      maxLength: 80
-    KeyValuePair:
-      type: object
-      required:
-      - key
-      properties:
-        key:
-          type: string
-          minLength: 1
-        value:
-          type: string
-          default: ''
-        description:
-          $ref: '#/components/schemas/DescriptionString'
-        inputMode:
-          $ref: '#/components/schemas/KeyValueInputModeEnum'
-        notes:
-          type: object
-    ResultBoolean:
-      type: object
-      properties:
-        aBool:
-          type: boolean
   securitySchemes:
     TapisJWT:
       type: apiKey
