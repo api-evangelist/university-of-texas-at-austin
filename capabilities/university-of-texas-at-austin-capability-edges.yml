@@ -1,0 +1,45 @@
+slug: university-of-texas-at-austin
+provider: University of Texas at Austin
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Software & Technology
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 3
+edges:
+- tag: Credentials
+  spec_file: university-of-texas-at-austin-credentials-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.8
+  evidence: '"Create user credential", "Check user credential", "Use a Globus authorization code + Tapis
+    session Id to generate tokens"'
+  reason: Operations issue, verify, and revoke per-user credentials for systems and federate with Globus
+    OAuth tokens — identity and access management. Not a commercial or financial capability despite the
+    platform context.
+- tag: Permissions
+  spec_file: university-of-texas-at-austin-permissions-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.8
+  evidence: '"Grant user perms", "Revoke user perms", "Get permissions" with schemas PermEnum, FilePermission'
+  reason: Granting and revoking per-user permissions on apps, systems and file paths is authorization
+    administration — identity and access management.
+- tag: Sharing
+  spec_file: university-of-texas-at-austin-sharing-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.7
+  evidence: '"Share an app with one or more users", "Share a path on a system publicly with all users
+    in the tenant", "Remove all shares for a path on a system including public access"'
+  reason: Grant and revocation of access to apps, file paths and jobs for named users or the whole tenant
+    is access control administration, not any form of content distribution or marketing.

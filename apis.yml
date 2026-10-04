@@ -630,6 +630,9 @@ apis:
   - type: Lifecycle
     url: lifecycle/university-of-texas-at-austin-lifecycle.yml
 common:
+  - type: CapabilityMap
+    url: capabilities/university-of-texas-at-austin-capability-edges.yml
+    name: University of Texas at Austin Business Capability Map
   - type: Website
     url: https://www.utexas.edu/
   - type: ResearchComputing
