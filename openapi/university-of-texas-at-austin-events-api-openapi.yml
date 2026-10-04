@@ -250,39 +250,6 @@ paths:
       x-summary-source: derived
 components:
   schemas:
-    EventSeries:
-      type: object
-      required:
-      - source
-      - subject
-      - seriesId
-      properties:
-        source:
-          type: string
-          minLength: 1
-        subject:
-          type: string
-          minLength: 1
-        seriesId:
-          type: string
-          minLength: 1
-    RespBasic:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          type: object
-        metadata:
-          type: object
     Event:
       type: object
       required:
@@ -318,6 +285,39 @@ components:
           type: string
         seriesSeqCount:
           type: integer
+    EventSeries:
+      type: object
+      required:
+      - source
+      - subject
+      - seriesId
+      properties:
+        source:
+          type: string
+          minLength: 1
+        subject:
+          type: string
+          minLength: 1
+        seriesId:
+          type: string
+          minLength: 1
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: object
+        metadata:
+          type: object
   securitySchemes:
     TapisJWT:
       type: apiKey

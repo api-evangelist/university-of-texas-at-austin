@@ -399,6 +399,23 @@ paths:
                 $ref: '#/components/schemas/FileStringResponse'
 components:
   schemas:
+    PostItResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          $ref: '#/components/schemas/PostIt'
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
     PostItListResponse:
       type: object
       properties:
@@ -416,6 +433,44 @@ components:
           type: string
         build:
           type: string
+        metadata:
+          type: object
+    FileStringResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    IdString:
+      type: string
+      minLength: 1
+      maxLength: 80
+    RespChangeCount:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultChangeCount'
         metadata:
           type: object
     PostIt:
@@ -466,82 +521,6 @@ components:
           type: string
           format: date-time
           description: Last update timestamp in UTC
-    IdString:
-      type: string
-      minLength: 1
-      maxLength: 80
-    UpdatePostItRequest:
-      type: object
-      properties:
-        allowedUses:
-          type: integer
-          format: int32
-          description: Number of times that the new PostIt can be redeemed.
-        expiration:
-          type: string
-          format: date-time
-          description: Expiration date of the PostIt.
-        unlimited:
-          type: boolean
-          description: If set to true, this PostIt will have unlimited uses and not expire.
-    FileStringResponse:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        result:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          type: object
-    ResultChangeCount:
-      type: object
-      properties:
-        changes:
-          type: integer
-          format: int32
-          example: 1
-    PostItResponse:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        result:
-          $ref: '#/components/schemas/PostIt'
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          type: object
-    RespChangeCount:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          $ref: '#/components/schemas/ResultChangeCount'
-        metadata:
-          type: object
     CreatePostItRequest:
       type: object
       properties:
@@ -569,6 +548,27 @@ components:
       enum:
       - OWNED
       - ALL
+    UpdatePostItRequest:
+      type: object
+      properties:
+        allowedUses:
+          type: integer
+          format: int32
+          description: Number of times that the new PostIt can be redeemed.
+        expiration:
+          type: string
+          format: date-time
+          description: Expiration date of the PostIt.
+        unlimited:
+          type: boolean
+          description: If set to true, this PostIt will have unlimited uses and not expire.
+    ResultChangeCount:
+      type: object
+      properties:
+        changes:
+          type: integer
+          format: int32
+          example: 1
   securitySchemes:
     TapisJWT:
       type: apiKey

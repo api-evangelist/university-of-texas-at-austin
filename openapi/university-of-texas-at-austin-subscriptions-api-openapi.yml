@@ -1254,32 +1254,7 @@ paths:
       variables: {}
 components:
   schemas:
-    ReqSubscribe:
-      type: object
-      properties:
-        description:
-          type: string
-        enabled:
-          type: boolean
-        eventCategoryFilter:
-          type: string
-          enum:
-          - JOB_NEW_STATUS
-          - JOB_INPUT_TRANSACTION_ID
-          - JOB_ARCHIVE_TRANSACTION_ID
-          - JOB_SUBSCRIPTION
-          - JOB_SHARE_EVENT
-          - JOB_ERROR_MESSAGE
-          - JOB_USER_EVENT
-          - ALL
-        deliveryTargets:
-          type: array
-          items:
-            $ref: '#/components/schemas/NotifDeliveryTarget'
-        ttlminutes:
-          type: integer
-          format: int32
-    RespResourceUrl:
+    RespGetSubscriptions:
       type: object
       properties:
         status:
@@ -1295,17 +1270,9 @@ components:
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
         result:
-          $ref: '#/components/schemas/ResultResourceUrl'
-    DeliveryTarget:
-      type: object
-      properties:
-        deliveryMethod:
-          type: string
-          enum:
-          - WEBHOOK
-          - EMAIL
-        deliveryAddress:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/TapisSubscription'
     TapisSubscription:
       type: object
       properties:
@@ -1338,11 +1305,6 @@ components:
           type: string
         updated:
           type: string
-    ResultResourceUrl:
-      type: object
-      properties:
-        url:
-          type: string
     RespBasic:
       type: object
       properties:
@@ -1360,15 +1322,7 @@ components:
           $ref: '#/components/schemas/ResultMetadata'
         result:
           type: object
-    ResultMetadata:
-      type: object
-    ResultChangeCount:
-      type: object
-      properties:
-        changes:
-          type: integer
-          format: int32
-    RespGetSubscriptions:
+    RespResourceUrl:
       type: object
       properties:
         status:
@@ -1384,9 +1338,39 @@ components:
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
         result:
+          $ref: '#/components/schemas/ResultResourceUrl'
+    ResultResourceUrl:
+      type: object
+      properties:
+        url:
+          type: string
+    ReqSubscribe:
+      type: object
+      properties:
+        description:
+          type: string
+        enabled:
+          type: boolean
+        eventCategoryFilter:
+          type: string
+          enum:
+          - JOB_NEW_STATUS
+          - JOB_INPUT_TRANSACTION_ID
+          - JOB_ARCHIVE_TRANSACTION_ID
+          - JOB_SUBSCRIPTION
+          - JOB_SHARE_EVENT
+          - JOB_ERROR_MESSAGE
+          - JOB_USER_EVENT
+          - ALL
+        deliveryTargets:
           type: array
           items:
-            $ref: '#/components/schemas/TapisSubscription'
+            $ref: '#/components/schemas/NotifDeliveryTarget'
+        ttlminutes:
+          type: integer
+          format: int32
+    ResultMetadata:
+      type: object
     NotifDeliveryTarget:
       type: object
       properties:
@@ -1397,7 +1381,70 @@ components:
           - EMAIL
         deliveryAddress:
           type: string
-    RespBoolean:
+    DeliveryTarget:
+      type: object
+      properties:
+        deliveryMethod:
+          type: string
+          enum:
+          - WEBHOOK
+          - EMAIL
+        deliveryAddress:
+          type: string
+    ResultChangeCount:
+      type: object
+      properties:
+        changes:
+          type: integer
+          format: int32
+    TypeFilterString:
+      type: string
+      minLength: 5
+      maxLength: 128
+    TapisSubscription_2:
+      type: object
+      properties:
+        tenant:
+          type: string
+        name:
+          $ref: '#/components/schemas/NameString'
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        owner:
+          $ref: '#/components/schemas/UserNameApiDefaultString'
+        enabled:
+          type: boolean
+          default: true
+        typeFilter:
+          $ref: '#/components/schemas/TypeFilterString'
+        subjectFilter:
+          $ref: '#/components/schemas/SubjectFilterString'
+        deliveryTargets:
+          $ref: '#/components/schemas/DeliveryTargets'
+        ttlMinutes:
+          type: integer
+        uuid:
+          type: string
+        expiry:
+          type: string
+        created:
+          type: string
+        updated:
+          type: string
+    ResultBoolean:
+      type: object
+      properties:
+        aBool:
+          type: boolean
+    DescriptionString:
+      type: string
+      maxLength: 2048
+    DeliveryMethod:
+      type: string
+      enum:
+      - WEBHOOK
+      - EMAIL
+    RespBasic_2:
       type: object
       properties:
         status:
@@ -1411,23 +1458,68 @@ components:
         build:
           type: string
         result:
-          $ref: '#/components/schemas/ResultBoolean'
+          type: object
         metadata:
           type: object
-    DeliveryTarget_2:
+    ReqSearchSubscriptions:
       type: object
       required:
-      - deliveryMethod
-      - deliveryAddress
+      - search
       properties:
-        deliveryMethod:
-          $ref: '#/components/schemas/DeliveryMethod'
-        deliveryAddress:
+        search:
+          type: array
+          minItems: 1
+          items:
+            type: string
+    ReqPatchSubscription:
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        typeFilter:
+          $ref: '#/components/schemas/TypeFilterString'
+        subjectFilter:
+          $ref: '#/components/schemas/SubjectFilterString'
+        deliveryTargets:
+          $ref: '#/components/schemas/DeliveryTargets'
+    RespSubscription:
+      type: object
+      properties:
+        status:
           type: string
-    SubjectFilterString:
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/TapisSubscription_2'
+        metadata:
+          type: object
+    RespResourceUrl_2:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultResourceUrl'
+        metadata:
+          type: object
+    NameString:
       type: string
       minLength: 1
-      maxLength: 150
+      maxLength: 188
     ReqPostSubscription:
       type: object
       required:
@@ -1452,125 +1544,21 @@ components:
           $ref: '#/components/schemas/DeliveryTargets'
         ttlMinutes:
           type: integer
-    ReqSearchSubscriptions:
-      type: object
-      required:
-      - search
-      properties:
-        search:
-          type: array
-          minItems: 1
-          items:
-            type: string
-    RespSubscription:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          $ref: '#/components/schemas/TapisSubscription_2'
-        metadata:
-          type: object
-    ResultBoolean:
-      type: object
-      properties:
-        aBool:
-          type: boolean
-    TypeFilterString:
-      type: string
-      minLength: 5
-      maxLength: 128
     UserNameApiDefaultString:
       type: string
       minLength: 1
       maxLength: 60
       default: ${apiUserId}
-    DescriptionString:
-      type: string
-      maxLength: 2048
-    RespResourceUrl_2:
+    DeliveryTarget_2:
       type: object
+      required:
+      - deliveryMethod
+      - deliveryAddress
       properties:
-        status:
+        deliveryMethod:
+          $ref: '#/components/schemas/DeliveryMethod'
+        deliveryAddress:
           type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          $ref: '#/components/schemas/ResultResourceUrl'
-        metadata:
-          type: object
-    ReqPatchSubscription:
-      type: object
-      properties:
-        description:
-          $ref: '#/components/schemas/DescriptionString'
-        typeFilter:
-          $ref: '#/components/schemas/TypeFilterString'
-        subjectFilter:
-          $ref: '#/components/schemas/SubjectFilterString'
-        deliveryTargets:
-          $ref: '#/components/schemas/DeliveryTargets'
-    RespChangeCount:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          $ref: '#/components/schemas/ResultChangeCount'
-        metadata:
-          type: object
-    DeliveryMethod:
-      type: string
-      enum:
-      - WEBHOOK
-      - EMAIL
-    UserNameString:
-      type: string
-      minLength: 1
-      maxLength: 60
-    RespBasic_2:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          type: object
-        metadata:
-          type: object
-    DeliveryTargets:
-      type: array
-      items:
-        $ref: '#/components/schemas/DeliveryTarget_2'
     RespSubscriptions:
       type: object
       properties:
@@ -1603,40 +1591,52 @@ components:
               type: string
             totalCount:
               type: integer
-    TapisSubscription_2:
-      type: object
-      properties:
-        tenant:
-          type: string
-        name:
-          $ref: '#/components/schemas/NameString'
-        description:
-          $ref: '#/components/schemas/DescriptionString'
-        owner:
-          $ref: '#/components/schemas/UserNameApiDefaultString'
-        enabled:
-          type: boolean
-          default: true
-        typeFilter:
-          $ref: '#/components/schemas/TypeFilterString'
-        subjectFilter:
-          $ref: '#/components/schemas/SubjectFilterString'
-        deliveryTargets:
-          $ref: '#/components/schemas/DeliveryTargets'
-        ttlMinutes:
-          type: integer
-        uuid:
-          type: string
-        expiry:
-          type: string
-        created:
-          type: string
-        updated:
-          type: string
-    NameString:
+    UserNameString:
       type: string
       minLength: 1
-      maxLength: 188
+      maxLength: 60
+    SubjectFilterString:
+      type: string
+      minLength: 1
+      maxLength: 150
+    RespBoolean:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultBoolean'
+        metadata:
+          type: object
+    RespChangeCount:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultChangeCount'
+        metadata:
+          type: object
+    DeliveryTargets:
+      type: array
+      items:
+        $ref: '#/components/schemas/DeliveryTarget_2'
   securitySchemes:
     TapisJWT:
       type: apiKey

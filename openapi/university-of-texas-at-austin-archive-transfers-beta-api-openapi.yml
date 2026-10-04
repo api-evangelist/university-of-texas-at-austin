@@ -162,30 +162,22 @@ paths:
       x-summary-source: derived
 components:
   schemas:
-    ArchiveTransferRequest:
-      type: object
+    ArchiveTransferResponse:
       properties:
-        sourceBaseUrl:
+        status:
           type: string
-        destinationBaseUrl:
+        message:
           type: string
-        relativePaths:
-          type: array
-          items:
-            type: string
-        archiveType:
+        result:
+          $ref: '#/components/schemas/ArchiveTransferResult'
+        version:
           type: string
-          enum:
-          - TAR
-          - TAR_GZIP
-          - TO_TAR_ARCHIVE
-          - TO_GZIP_ARCHIVE
-          - FROM_TAR_ARCHIVE
-          - FROM_GZIP_ARCHIVE
-        srcSharedCtxGrantor:
+        commit:
           type: string
-        destSharedCtxGrantor:
+        build:
           type: string
+        metadata:
+          type: object
     StringResponse:
       type: object
       properties:
@@ -246,22 +238,30 @@ components:
           type: string
         destSharedCtxGrantor:
           type: string
-    ArchiveTransferResponse:
+    ArchiveTransferRequest:
+      type: object
       properties:
-        status:
+        sourceBaseUrl:
           type: string
-        message:
+        destinationBaseUrl:
           type: string
-        result:
-          $ref: '#/components/schemas/ArchiveTransferResult'
-        version:
+        relativePaths:
+          type: array
+          items:
+            type: string
+        archiveType:
           type: string
-        commit:
+          enum:
+          - TAR
+          - TAR_GZIP
+          - TO_TAR_ARCHIVE
+          - TO_GZIP_ARCHIVE
+          - FROM_TAR_ARCHIVE
+          - FROM_GZIP_ARCHIVE
+        srcSharedCtxGrantor:
           type: string
-        build:
+        destSharedCtxGrantor:
           type: string
-        metadata:
-          type: object
   securitySchemes:
     TapisJWT:
       type: apiKey

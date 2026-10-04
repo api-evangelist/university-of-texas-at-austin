@@ -1051,31 +1051,26 @@ components:
           minItems: 1
           items:
             type: string
-    RespShareInfo:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          $ref: '#/components/schemas/ShareInfo'
-        metadata:
-          type: object
-    IdString:
-      type: string
-      minLength: 1
-      maxLength: 80
     UserNameString:
       type: string
       minLength: 1
       maxLength: 60
+    ShareInfo:
+      type: object
+      required:
+      - public
+      - userList
+      properties:
+        public:
+          type: boolean
+        userList:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserNameString'
+        shareRecords:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkShareRecord'
     RespBasic:
       type: object
       properties:
@@ -1093,22 +1088,27 @@ components:
           type: object
         metadata:
           type: object
-    ShareInfo:
+    IdString:
+      type: string
+      minLength: 1
+      maxLength: 80
+    RespShareInfo:
       type: object
-      required:
-      - public
-      - userList
       properties:
-        public:
-          type: boolean
-        userList:
-          type: array
-          items:
-            $ref: '#/components/schemas/UserNameString'
-        shareRecords:
-          type: array
-          items:
-            $ref: '#/components/schemas/SkShareRecord'
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ShareInfo'
+        metadata:
+          type: object
     SkShareRecord:
       type: object
       properties:
@@ -1203,23 +1203,6 @@ components:
           $ref: '#/components/schemas/ResultMetadata'
         result:
           $ref: '#/components/schemas/JobShareDisplay'
-    RespUnShareJob:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ResultMetadata'
-        result:
-          $ref: '#/components/schemas/JobUnShareDisplay'
     RespGetJobShareList:
       type: object
       properties:
@@ -1239,42 +1222,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/JobShareListDTO'
-    JobShareListDTO:
+    JobShareDisplay:
       type: object
       properties:
-        tenant:
+        message:
           type: string
-        createdby:
-          type: string
-        jobUuid:
-          type: string
-        grantee:
-          type: string
-        jobResource:
-          type: string
-        jobPermission:
-          type: string
-        created:
-          type: string
-          format: date-time
-    ReqShareJob:
-      type: object
-      properties:
-        grantee:
-          type: string
-        jobResource:
-          type: array
-          items:
-            type: string
-            enum:
-            - JOB_HISTORY
-            - JOB_RESUBMIT_REQUEST
-            - JOB_OUTPUT
-            - JOB_INPUT
-        jobPermission:
-          type: string
-          enum:
-          - READ
     RespName:
       type: object
       properties:
@@ -1314,18 +1266,66 @@ components:
       properties:
         name:
           type: string
-    ResultMetadata:
+    ReqShareJob:
       type: object
+      properties:
+        grantee:
+          type: string
+        jobResource:
+          type: array
+          items:
+            type: string
+            enum:
+            - JOB_HISTORY
+            - JOB_RESUBMIT_REQUEST
+            - JOB_OUTPUT
+            - JOB_INPUT
+        jobPermission:
+          type: string
+          enum:
+          - READ
     JobUnShareDisplay:
       type: object
       properties:
         message:
           type: string
-    JobShareDisplay:
+    JobShareListDTO:
       type: object
       properties:
+        tenant:
+          type: string
+        createdby:
+          type: string
+        jobUuid:
+          type: string
+        grantee:
+          type: string
+        jobResource:
+          type: string
+        jobPermission:
+          type: string
+        created:
+          type: string
+          format: date-time
+    RespUnShareJob:
+      type: object
+      properties:
+        status:
+          type: string
         message:
           type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/JobUnShareDisplay'
+    ResultMetadata:
+      type: object
   securitySchemes:
     TapisJWT:
       type: apiKey
