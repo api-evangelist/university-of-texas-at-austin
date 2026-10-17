@@ -1041,74 +1041,6 @@ paths:
       variables: {}
 components:
   schemas:
-    ReqShareUpdate:
-      type: object
-      required:
-      - users
-      properties:
-        users:
-          type: array
-          minItems: 1
-          items:
-            type: string
-    UserNameString:
-      type: string
-      minLength: 1
-      maxLength: 60
-    ShareInfo:
-      type: object
-      required:
-      - public
-      - userList
-      properties:
-        public:
-          type: boolean
-        userList:
-          type: array
-          items:
-            $ref: '#/components/schemas/UserNameString'
-        shareRecords:
-          type: array
-          items:
-            $ref: '#/components/schemas/SkShareRecord'
-    RespBasic:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          type: object
-        metadata:
-          type: object
-    IdString:
-      type: string
-      minLength: 1
-      maxLength: 80
-    RespShareInfo:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          $ref: '#/components/schemas/ShareInfo'
-        metadata:
-          type: object
     SkShareRecord:
       type: object
       properties:
@@ -1132,6 +1064,93 @@ components:
           type: string
         createdByTenant:
           type: string
+    UserNameString:
+      type: string
+      minLength: 1
+      maxLength: 60
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: object
+        metadata:
+          type: object
+    ReqShareUpdate:
+      type: object
+      required:
+      - users
+      properties:
+        users:
+          type: array
+          minItems: 1
+          items:
+            type: string
+    ShareInfo:
+      type: object
+      required:
+      - public
+      - userList
+      properties:
+        public:
+          type: boolean
+        userList:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserNameString'
+        shareRecords:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkShareRecord'
+    IdString:
+      type: string
+      minLength: 1
+      maxLength: 80
+    RespShareInfo:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ShareInfo'
+        metadata:
+          type: object
+    ResultShareInfo:
+      type: object
+      properties:
+        isPublic:
+          type: boolean
+          description: Indicates given path is shared publicly
+        isPublicPath:
+          type: string
+          description: Path that resulted in specified path being shared publicly
+        userSet:
+          type: array
+          description: Set of users with whom the path is shared.
+          items:
+            $ref: '#/components/schemas/UserNameString'
+        userShareInfoSet:
+          type: array
+          description: List of additional share information for each user.
+          items:
+            $ref: '#/components/schemas/UserShareInfo'
     ReqShareUpdate_2:
       type: object
       required:
@@ -1167,25 +1186,50 @@ components:
           $ref: '#/components/schemas/ResultShareInfo'
         metadata:
           type: object
-    ResultShareInfo:
+    RespName:
       type: object
       properties:
-        isPublic:
-          type: boolean
-          description: Indicates given path is shared publicly
-        isPublicPath:
+        status:
           type: string
-          description: Path that resulted in specified path being shared publicly
-        userSet:
-          type: array
-          description: Set of users with whom the path is shared.
-          items:
-            $ref: '#/components/schemas/UserNameString'
-        userShareInfoSet:
-          type: array
-          description: List of additional share information for each user.
-          items:
-            $ref: '#/components/schemas/UserShareInfo'
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/ResultName'
+    JobUnShareDisplay:
+      type: object
+      properties:
+        message:
+          type: string
+    RespBasic_2:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          type: object
+    ResultName:
+      type: object
+      properties:
+        name:
+          type: string
     RespShareJob:
       type: object
       properties:
@@ -1203,6 +1247,61 @@ components:
           $ref: '#/components/schemas/ResultMetadata'
         result:
           $ref: '#/components/schemas/JobShareDisplay'
+    RespUnShareJob:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/JobUnShareDisplay'
+    JobShareListDTO:
+      type: object
+      properties:
+        tenant:
+          type: string
+        createdby:
+          type: string
+        jobUuid:
+          type: string
+        grantee:
+          type: string
+        jobResource:
+          type: string
+        jobPermission:
+          type: string
+        created:
+          type: string
+          format: date-time
+    ResultMetadata:
+      type: object
+    ReqShareJob:
+      type: object
+      properties:
+        grantee:
+          type: string
+        jobResource:
+          type: array
+          items:
+            type: string
+            enum:
+            - JOB_HISTORY
+            - JOB_RESUBMIT_REQUEST
+            - JOB_OUTPUT
+            - JOB_INPUT
+        jobPermission:
+          type: string
+          enum:
+          - READ
     RespGetJobShareList:
       type: object
       properties:
@@ -1227,105 +1326,6 @@ components:
       properties:
         message:
           type: string
-    RespName:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ResultMetadata'
-        result:
-          $ref: '#/components/schemas/ResultName'
-    RespBasic_2:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ResultMetadata'
-        result:
-          type: object
-    ResultName:
-      type: object
-      properties:
-        name:
-          type: string
-    ReqShareJob:
-      type: object
-      properties:
-        grantee:
-          type: string
-        jobResource:
-          type: array
-          items:
-            type: string
-            enum:
-            - JOB_HISTORY
-            - JOB_RESUBMIT_REQUEST
-            - JOB_OUTPUT
-            - JOB_INPUT
-        jobPermission:
-          type: string
-          enum:
-          - READ
-    JobUnShareDisplay:
-      type: object
-      properties:
-        message:
-          type: string
-    JobShareListDTO:
-      type: object
-      properties:
-        tenant:
-          type: string
-        createdby:
-          type: string
-        jobUuid:
-          type: string
-        grantee:
-          type: string
-        jobResource:
-          type: string
-        jobPermission:
-          type: string
-        created:
-          type: string
-          format: date-time
-    RespUnShareJob:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ResultMetadata'
-        result:
-          $ref: '#/components/schemas/JobUnShareDisplay'
-    ResultMetadata:
-      type: object
   securitySchemes:
     TapisJWT:
       type: apiKey

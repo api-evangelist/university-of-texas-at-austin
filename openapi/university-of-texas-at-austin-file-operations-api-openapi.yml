@@ -700,90 +700,6 @@ paths:
       x-summary-source: derived
 components:
   schemas:
-    NativeLinuxOpRequest:
-      required:
-      - argument
-      - operation
-      type: object
-      properties:
-        operation:
-          type: string
-          enum:
-          - CHMOD
-          - CHOWN
-          - CHGRP
-        argument:
-          type: string
-          description: Argument for native linux operation
-    NativeLinuxSetFaclResult:
-      type: object
-      properties:
-        command:
-          type: string
-        exitCode:
-          type: integer
-          format: int32
-        stdOut:
-          type: string
-        stdErr:
-          type: string
-    NativeLinuxSetFaclResponse:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        result:
-          $ref: '#/components/schemas/NativeLinuxSetFaclResult'
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          type: object
-    UserNameString:
-      type: string
-      minLength: 1
-      maxLength: 60
-    FileStringResponse:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        result:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          type: object
-    AclEntryInfo:
-      type: object
-      properties:
-        defaultAcl:
-          type: boolean
-        type:
-          type: string
-        principal:
-          type: string
-        permissions:
-          type: string
-    FileTypeEnum:
-      type: string
-      enum:
-      - file
-      - dir
-      - symbolic_link
-      - other
-      - unknown
     MoveCopyRequest:
       required:
       - newPath
@@ -798,7 +714,11 @@ components:
         newPath:
           type: string
           description: Paths must be absolute, ../.. is not allowed
-    NativeLinuxOpResultResponse:
+    UserNameString:
+      type: string
+      minLength: 1
+      maxLength: 60
+    NativeLinuxSetFaclResult:
       type: object
       properties:
         command:
@@ -810,119 +730,17 @@ components:
           type: string
         stdErr:
           type: string
-    FileStatInfoResponse:
+    NativeLinuxOpResultResponse:
       type: object
       properties:
-        status:
+        command:
           type: string
-        message:
-          type: string
-        result:
-          $ref: '#/components/schemas/FileStatInfo'
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          type: object
-    NativeLinuxGetFaclResponse:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        result:
-          items:
-            $ref: '#/components/schemas/AclEntryInfo'
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          type: object
-    FileInfo:
-      type: object
-      properties:
-        mimeType:
-          type: string
-        type:
-          $ref: '#/components/schemas/FileTypeEnum'
-        owner:
-          type: string
-        group:
-          type: string
-        nativePermissions:
-          type: string
-        url:
-          type: string
-        lastModified:
-          type: string
-          format: date-time
-        name:
-          type: string
-        path:
-          type: string
-        size:
-          type: integer
-          description: size in kB
-          format: int64
-    FileStatInfo:
-      type: object
-      properties:
-        absolutePath:
-          type: string
-        uid:
+        exitCode:
           type: integer
           format: int32
-        gid:
-          type: integer
-          format: int32
-        size:
-          type: integer
-          format: int64
-        perms:
+        stdOut:
           type: string
-        accessTime:
-          type: integer
-          format: int64
-        modifyTime:
-          type: integer
-          format: int64
-        dir:
-          type: boolean
-        link:
-          type: boolean
-    FileListingResponse:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        result:
-          type: array
-          items:
-            $ref: '#/components/schemas/FileInfo'
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          type: object
-    MkdirRequest:
-      required:
-      - path
-      type: object
-      properties:
-        path:
-          pattern: ^(?!.*\.\.).*
+        stdErr:
           type: string
     NativeLinuxSetFaclRequest:
       required:
@@ -952,6 +770,188 @@ components:
         aclString:
           type: string
           description: "specifies the actual acl string to set.  Multiple acls may be separated by \ncommas.\nExamples - user:myuser:rwx,group \n           group:mygroup:rw \n           user:myuser:rwx,group,group:mygroup:rw \n"
+    AclEntryInfo:
+      type: object
+      properties:
+        defaultAcl:
+          type: boolean
+        type:
+          type: string
+        principal:
+          type: string
+        permissions:
+          type: string
+    FileStringResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    FileTypeEnum:
+      type: string
+      enum:
+      - file
+      - dir
+      - symbolic_link
+      - other
+      - unknown
+    FileListingResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileInfo'
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    FileStatInfoResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          $ref: '#/components/schemas/FileStatInfo'
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    NativeLinuxOpRequest:
+      required:
+      - argument
+      - operation
+      type: object
+      properties:
+        operation:
+          type: string
+          enum:
+          - CHMOD
+          - CHOWN
+          - CHGRP
+        argument:
+          type: string
+          description: Argument for native linux operation
+    FileInfo:
+      type: object
+      properties:
+        mimeType:
+          type: string
+        type:
+          $ref: '#/components/schemas/FileTypeEnum'
+        owner:
+          type: string
+        group:
+          type: string
+        nativePermissions:
+          type: string
+        url:
+          type: string
+        lastModified:
+          type: string
+          format: date-time
+        name:
+          type: string
+        path:
+          type: string
+        size:
+          type: integer
+          description: size in kB
+          format: int64
+    NativeLinuxSetFaclResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          $ref: '#/components/schemas/NativeLinuxSetFaclResult'
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    MkdirRequest:
+      required:
+      - path
+      type: object
+      properties:
+        path:
+          pattern: ^(?!.*\.\.).*
+          type: string
+    FileStatInfo:
+      type: object
+      properties:
+        absolutePath:
+          type: string
+        uid:
+          type: integer
+          format: int32
+        gid:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int64
+        perms:
+          type: string
+        accessTime:
+          type: integer
+          format: int64
+        modifyTime:
+          type: integer
+          format: int64
+        dir:
+          type: boolean
+        link:
+          type: boolean
+    NativeLinuxGetFaclResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          items:
+            $ref: '#/components/schemas/AclEntryInfo'
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
   securitySchemes:
     TapisJWT:
       type: apiKey

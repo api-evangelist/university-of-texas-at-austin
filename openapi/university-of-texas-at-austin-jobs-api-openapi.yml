@@ -1286,159 +1286,66 @@ paths:
       x-summary-source: derived
 components:
   schemas:
-    RespGetResubmit:
+    ArchiveModeEnum:
+      type: string
+      enum:
+      - ALWAYS
+      - SKIP_ON_FAIL
+      - NEVER
+      default: ALWAYS
+    KeyValuePair:
       type: object
       properties:
-        status:
+        key:
           type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ResultMetadata'
-        result:
-          $ref: '#/components/schemas/ReqSubmitJob'
-    ReqSubmitJob:
-      required:
-      - appId
-      - appVersion
-      - name
-      type: object
-      properties:
-        name:
-          type: string
-        owner:
-          type: string
-        tenant:
+        value:
           type: string
         description:
           type: string
-        appId:
-          type: string
-        appVersion:
-          type: string
-        jobType:
-          type: string
-        archiveOnAppError:
+        include:
           type: boolean
-          deprecated: true
-        archiveMode:
-          $ref: '#/components/schemas/ArchiveModeEnum'
-        dynamicExecSystem:
+        notes:
+          type: object
+    JobFileInput:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        envKey:
+          type: string
+        autoMountLocal:
           type: boolean
-        execSystemId:
+        sourceUrl:
           type: string
-        execSystemExecDir:
-          type: string
-        execSystemInputDir:
-          type: string
-        execSystemOutputDir:
-          type: string
-        execSystemLogicalQueue:
-          type: string
-        archiveSystemId:
-          type: string
-        archiveSystemDir:
-          type: string
-        dtnSystemInputDir:
-          type: string
-        dtnSystemOutputDir:
-          type: string
-        nodeCount:
-          type: integer
-          format: int32
-        coresPerNode:
-          type: integer
-          format: int32
-        memoryMB:
-          type: integer
-          format: int32
-        maxMinutes:
-          type: integer
-          format: int32
-        fileInputs:
-          type: array
-          items:
-            $ref: '#/components/schemas/JobFileInput'
-        fileInputArrays:
-          type: array
-          items:
-            $ref: '#/components/schemas/JobFileInputArray'
-        parameterSet:
-          $ref: '#/components/schemas/JobParameterSet'
-        execSystemConstraints:
-          type: array
-          items:
-            type: string
-        tags:
-          type: array
-          items:
-            type: string
-        subscriptions:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReqSubscribe'
-        isMpi:
-          type: boolean
-        mpiCmd:
-          type: string
-        cmdPrefix:
+        targetPath:
           type: string
         notes:
           type: object
-    FileInfo:
+    JobParameterSet:
       type: object
       properties:
-        mimeType:
-          type: string
-        type:
-          type: string
-          enum:
-          - file
-          - dir
-          - symbolic_link
-          - other
-          - unknown
-        owner:
-          type: string
-        group:
-          type: string
-        nativePermissions:
-          type: string
-        url:
-          type: string
-        lastModified:
-          type: string
-          format: date-time
-        name:
-          type: string
-        path:
-          type: string
-        size:
-          type: integer
-          format: int64
-    RespName:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ResultMetadata'
-        result:
-          $ref: '#/components/schemas/ResultName'
+        appArgs:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobArgSpec'
+        containerArgs:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobArgSpec'
+        schedulerOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobArgSpec'
+        envVariables:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        archiveFilter:
+          $ref: '#/components/schemas/IncludeExcludeFilter'
+        logConfig:
+          $ref: '#/components/schemas/LogConfig'
     RespGetJobList:
       type: object
       properties:
@@ -1458,164 +1365,80 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/JobListDTO'
-    JobListDTO:
+    JobHideDisplay:
+      type: object
+      properties:
+        message:
+          type: string
+    RespSubmitJob:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/Job'
+    JobCancelDisplay:
+      type: object
+      properties:
+        message:
+          type: string
+    RespGetJobOutputList:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileInfo'
+    RespGetJobStatus:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/JobStatusDisplay'
+    JobAnnotationDisplay:
       type: object
       properties:
         uuid:
           type: string
-        name:
-          type: string
-        owner:
-          type: string
-        appId:
-          type: string
-        created:
-          type: string
-          format: date-time
-        status:
-          type: string
-          enum:
-          - PENDING
-          - PROCESSING_INPUTS
-          - STAGING_INPUTS
-          - STAGING_JOB
-          - SUBMITTING_JOB
-          - QUEUED
-          - RUNNING
-          - ARCHIVING
-          - BLOCKED
-          - PAUSED
-          - FINISHED
-          - CANCELLED
-          - FAILED
-        condition:
-          type: string
-          enum:
-          - CANCELLED_BY_USER
-          - JOB_ARCHIVING_FAILED
-          - JOB_DATABASE_ERROR
-          - JOB_EXECUTION_MONITORING_ERROR
-          - JOB_EXECUTION_MONITORING_ERROR_TIMEOUT
-          - JOB_EXECUTION_MONITORING_TIMEOUT
-          - JOB_FILES_SERVICE_ERROR
-          - JOB_INTERNAL_ERROR
-          - JOB_INVALID_DEFINITION
-          - JOB_LAUNCH_FAILURE
-          - JOB_QUEUE_MONITORING_ERROR
-          - JOB_RECOVERY_FAILURE
-          - JOB_RECOVERY_TIMEOUT
-          - JOB_REMOTE_ACCESS_ERROR
-          - JOB_REMOTE_OUTCOME_ERROR
-          - JOB_UNABLE_TO_STAGE_INPUTS
-          - JOB_UNABLE_TO_STAGE_JOB
-          - JOB_TRANSFER_FAILED_OR_CANCELLED
-          - JOB_TRANSFER_MONITORING_TIMEOUT
-          - NORMAL_COMPLETION
-          - SCHEDULER_CANCELLED
-          - SCHEDULER_DEADLINE
-          - SCHEDULER_OUT_OF_MEMORY
-          - SCHEDULER_STOPPED
-          - SCHEDULER_TIMEOUT
-          - SCHEDULER_TERMINATED
-        remoteStarted:
-          type: string
-          format: date-time
-        ended:
-          type: string
-          format: date-time
-        tenant:
-          type: string
-        execSystemId:
-          type: string
-        archiveSystemId:
-          type: string
-        appVersion:
-          type: string
-        lastUpdated:
-          type: string
-          format: date-time
-    RespBasic:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ResultMetadata'
-        result:
+        tags:
+          type: array
+          items:
+            type: string
+        notes:
           type: object
-    RespHideJob:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ResultMetadata'
-        result:
-          $ref: '#/components/schemas/JobHideDisplay'
-    RespJobHistory:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ResultMetadata'
-        result:
-          type: array
-          items:
-            $ref: '#/components/schemas/JobHistoryDisplayDTO'
-    JobHistoryDisplayDTO:
-      type: object
-      properties:
-        event:
-          type: string
-        created:
-          type: string
-          format: date-time
-        eventDetail:
-          type: string
-        description:
-          type: string
-        transferTaskUuid:
-          type: string
-    IncludeExcludeFilter:
-      type: object
-      properties:
-        includes:
-          type: array
-          items:
-            type: string
-        excludes:
-          type: array
-          items:
-            type: string
-        includeLaunchFiles:
-          type: boolean
-    ResultMetadata:
-      type: object
     ReqSubscribe:
       type: object
       properties:
@@ -1641,6 +1464,25 @@ components:
         ttlminutes:
           type: integer
           format: int32
+    RespJobHistory:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobHistoryDisplayDTO'
     RespGetJob:
       type: object
       properties:
@@ -1658,156 +1500,6 @@ components:
           $ref: '#/components/schemas/ResultMetadata'
         result:
           $ref: '#/components/schemas/Job'
-    RespGetJobStatus:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ResultMetadata'
-        result:
-          $ref: '#/components/schemas/JobStatusDisplay'
-    JobHideDisplay:
-      type: object
-      properties:
-        message:
-          type: string
-    JobCancelDisplay:
-      type: object
-      properties:
-        message:
-          type: string
-    JobArgSpec:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        include:
-          type: boolean
-        arg:
-          type: string
-        notes:
-          type: object
-    RespJobAnnotations:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ResultMetadata'
-        result:
-          $ref: '#/components/schemas/JobAnnotationDisplay'
-    JobAnnotationDisplay:
-      type: object
-      properties:
-        uuid:
-          type: string
-        tags:
-          type: array
-          items:
-            type: string
-        notes:
-          type: object
-    RespJobSearchAllAttributes:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ResultMetadata'
-        result:
-          type: array
-          items:
-            $ref: '#/components/schemas/Job'
-    ReqUserEvent:
-      required:
-      - eventData
-      type: object
-      properties:
-        eventData:
-          type: string
-        eventDetail:
-          type: string
-    KeyValuePair:
-      type: object
-      properties:
-        key:
-          type: string
-        value:
-          type: string
-        description:
-          type: string
-        include:
-          type: boolean
-        notes:
-          type: object
-    ArchiveModeEnum:
-      type: string
-      enum:
-      - ALWAYS
-      - SKIP_ON_FAIL
-      - NEVER
-      default: ALWAYS
-    NotifDeliveryTarget:
-      type: object
-      properties:
-        deliveryMethod:
-          type: string
-          enum:
-          - WEBHOOK
-          - EMAIL
-        deliveryAddress:
-          type: string
-    RespCancelJob:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ResultMetadata'
-        result:
-          $ref: '#/components/schemas/JobCancelDisplay'
-    LogConfig:
-      type: object
-      properties:
-        stdoutFilename:
-          type: string
-        stderrFilename:
-          type: string
     Job:
       type: object
       properties:
@@ -2025,34 +1717,56 @@ components:
           type: object
         mpi:
           type: boolean
-    ResultName:
+    FileInfo:
       type: object
       properties:
+        mimeType:
+          type: string
+        type:
+          type: string
+          enum:
+          - file
+          - dir
+          - symbolic_link
+          - other
+          - unknown
+        owner:
+          type: string
+        group:
+          type: string
+        nativePermissions:
+          type: string
+        url:
+          type: string
+        lastModified:
+          type: string
+          format: date-time
         name:
           type: string
-    JobParameterSet:
+        path:
+          type: string
+        size:
+          type: integer
+          format: int64
+    RespJobAnnotations:
       type: object
       properties:
-        appArgs:
-          type: array
-          items:
-            $ref: '#/components/schemas/JobArgSpec'
-        containerArgs:
-          type: array
-          items:
-            $ref: '#/components/schemas/JobArgSpec'
-        schedulerOptions:
-          type: array
-          items:
-            $ref: '#/components/schemas/JobArgSpec'
-        envVariables:
-          type: array
-          items:
-            $ref: '#/components/schemas/KeyValuePair'
-        archiveFilter:
-          $ref: '#/components/schemas/IncludeExcludeFilter'
-        logConfig:
-          $ref: '#/components/schemas/LogConfig'
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/JobAnnotationDisplay'
+    ResultMetadata:
+      type: object
     JobStatusDisplay:
       type: object
       properties:
@@ -2060,7 +1774,33 @@ components:
           type: string
         condition:
           type: string
-    RespSubmitJob:
+    IncludeExcludeFilter:
+      type: object
+      properties:
+        includes:
+          type: array
+          items:
+            type: string
+        excludes:
+          type: array
+          items:
+            type: string
+        includeLaunchFiles:
+          type: boolean
+    JobArgSpec:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        include:
+          type: boolean
+        arg:
+          type: string
+        notes:
+          type: object
+    RespCancelJob:
       type: object
       properties:
         status:
@@ -2076,8 +1816,110 @@ components:
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
         result:
-          $ref: '#/components/schemas/Job'
-    RespGetJobOutputList:
+          $ref: '#/components/schemas/JobCancelDisplay'
+    JobListDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+        name:
+          type: string
+        owner:
+          type: string
+        appId:
+          type: string
+        created:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum:
+          - PENDING
+          - PROCESSING_INPUTS
+          - STAGING_INPUTS
+          - STAGING_JOB
+          - SUBMITTING_JOB
+          - QUEUED
+          - RUNNING
+          - ARCHIVING
+          - BLOCKED
+          - PAUSED
+          - FINISHED
+          - CANCELLED
+          - FAILED
+        condition:
+          type: string
+          enum:
+          - CANCELLED_BY_USER
+          - JOB_ARCHIVING_FAILED
+          - JOB_DATABASE_ERROR
+          - JOB_EXECUTION_MONITORING_ERROR
+          - JOB_EXECUTION_MONITORING_ERROR_TIMEOUT
+          - JOB_EXECUTION_MONITORING_TIMEOUT
+          - JOB_FILES_SERVICE_ERROR
+          - JOB_INTERNAL_ERROR
+          - JOB_INVALID_DEFINITION
+          - JOB_LAUNCH_FAILURE
+          - JOB_QUEUE_MONITORING_ERROR
+          - JOB_RECOVERY_FAILURE
+          - JOB_RECOVERY_TIMEOUT
+          - JOB_REMOTE_ACCESS_ERROR
+          - JOB_REMOTE_OUTCOME_ERROR
+          - JOB_UNABLE_TO_STAGE_INPUTS
+          - JOB_UNABLE_TO_STAGE_JOB
+          - JOB_TRANSFER_FAILED_OR_CANCELLED
+          - JOB_TRANSFER_MONITORING_TIMEOUT
+          - NORMAL_COMPLETION
+          - SCHEDULER_CANCELLED
+          - SCHEDULER_DEADLINE
+          - SCHEDULER_OUT_OF_MEMORY
+          - SCHEDULER_STOPPED
+          - SCHEDULER_TIMEOUT
+          - SCHEDULER_TERMINATED
+        remoteStarted:
+          type: string
+          format: date-time
+        ended:
+          type: string
+          format: date-time
+        tenant:
+          type: string
+        execSystemId:
+          type: string
+        archiveSystemId:
+          type: string
+        appVersion:
+          type: string
+        lastUpdated:
+          type: string
+          format: date-time
+    RespGetResubmit:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/ReqSubmitJob'
+    ReqUserEvent:
+      required:
+      - eventData
+      type: object
+      properties:
+        eventData:
+          type: string
+        eventDetail:
+          type: string
+    RespJobSearchAllAttributes:
       type: object
       properties:
         status:
@@ -2095,24 +1937,177 @@ components:
         result:
           type: array
           items:
-            $ref: '#/components/schemas/FileInfo'
-    JobFileInput:
+            $ref: '#/components/schemas/Job'
+    RespHideJob:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/JobHideDisplay'
+    ReqSubmitJob:
+      required:
+      - appId
+      - appVersion
+      - name
       type: object
       properties:
         name:
           type: string
+        owner:
+          type: string
+        tenant:
+          type: string
         description:
           type: string
-        envKey:
+        appId:
           type: string
-        autoMountLocal:
+        appVersion:
+          type: string
+        jobType:
+          type: string
+        archiveOnAppError:
           type: boolean
-        sourceUrl:
+          deprecated: true
+        archiveMode:
+          $ref: '#/components/schemas/ArchiveModeEnum'
+        dynamicExecSystem:
+          type: boolean
+        execSystemId:
           type: string
-        targetPath:
+        execSystemExecDir:
+          type: string
+        execSystemInputDir:
+          type: string
+        execSystemOutputDir:
+          type: string
+        execSystemLogicalQueue:
+          type: string
+        archiveSystemId:
+          type: string
+        archiveSystemDir:
+          type: string
+        dtnSystemInputDir:
+          type: string
+        dtnSystemOutputDir:
+          type: string
+        nodeCount:
+          type: integer
+          format: int32
+        coresPerNode:
+          type: integer
+          format: int32
+        memoryMB:
+          type: integer
+          format: int32
+        maxMinutes:
+          type: integer
+          format: int32
+        fileInputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobFileInput'
+        fileInputArrays:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobFileInputArray'
+        parameterSet:
+          $ref: '#/components/schemas/JobParameterSet'
+        execSystemConstraints:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+        subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReqSubscribe'
+        isMpi:
+          type: boolean
+        mpiCmd:
+          type: string
+        cmdPrefix:
           type: string
         notes:
           type: object
+    RespName:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/ResultName'
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          type: object
+    ResultName:
+      type: object
+      properties:
+        name:
+          type: string
+    NotifDeliveryTarget:
+      type: object
+      properties:
+        deliveryMethod:
+          type: string
+          enum:
+          - WEBHOOK
+          - EMAIL
+        deliveryAddress:
+          type: string
+    ReqJobAnnotation:
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            type: string
+        notes:
+          type: object
+    LogConfig:
+      type: object
+      properties:
+        stdoutFilename:
+          type: string
+        stderrFilename:
+          type: string
     JobFileInputArray:
       type: object
       properties:
@@ -2130,15 +2125,20 @@ components:
           type: string
         notes:
           type: object
-    ReqJobAnnotation:
+    JobHistoryDisplayDTO:
       type: object
       properties:
-        tags:
-          type: array
-          items:
-            type: string
-        notes:
-          type: object
+        event:
+          type: string
+        created:
+          type: string
+          format: date-time
+        eventDetail:
+          type: string
+        description:
+          type: string
+        transferTaskUuid:
+          type: string
   securitySchemes:
     TapisJWT:
       type: apiKey

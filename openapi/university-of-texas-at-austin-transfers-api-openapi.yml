@@ -236,54 +236,7 @@ paths:
       x-summary-source: derived
 components:
   schemas:
-    ReqTransferElement:
-      required:
-      - destinationURI
-      - sourceURI
-      type: object
-      properties:
-        sourceURI:
-          type: string
-        destinationURI:
-          type: string
-        optional:
-          type: boolean
-          default: false
-          description: Allow the full transfer to succeed even if this element fails.
-        transferType:
-          type: string
-          enum:
-          - TRANSFER
-          - SERVICE_MOVE_DIRECTORY_CONTENTS
-          - SERVICE_MOVE_FILE_OR_DIRECTORY
-          default: null
-          description: "If this value is set to anything other than TRANSFER, both the source and target MUST,\nbe on the same tapis system.  If the value is SERVICE_MOVE_DIRECTORY_CONTENTS, the \nsource URI is expected to be a directory, and the contents of that directory will be\ntransfered to the target URI.  The target must be an existing directory or the operation\nwill fail.  If the value is SERVICE_MOVE_FILE_OR_DIRECTORY the file or directory will\nbe moved to the target URI.  If the target already exists, it will be overwritten.\n"
-        srcSharedCtx:
-          $ref: '#/components/schemas/UserNameString'
-        destSharedCtx:
-          $ref: '#/components/schemas/UserNameString'
-    UserNameString:
-      type: string
-      minLength: 1
-      maxLength: 60
-    TransferTaskResponse:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        result:
-          $ref: '#/components/schemas/TransferTask'
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          type: object
-    TransferTaskParent:
+    TransferTaskChild:
       type: object
       properties:
         tenantId:
@@ -303,12 +256,16 @@ components:
         taskId:
           type: integer
           format: int32
-        children:
-          type: array
-          items:
-            $ref: '#/components/schemas/TransferTaskChild'
         errorMessage:
           type: string
+        parentTaskId:
+          type: integer
+          format: int32
+        retries:
+          type: integer
+          format: int32
+        dir:
+          type: boolean
         uuid:
           type: string
           description: Unique ID of the task.
@@ -324,6 +281,21 @@ components:
         endTime:
           type: string
           format: date-time
+    UserNameString:
+      type: string
+      minLength: 1
+      maxLength: 60
+    ReqTransfer:
+      required:
+      - elements
+      type: object
+      properties:
+        tag:
+          type: string
+        elements:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReqTransferElement'
     StringResponse:
       type: object
       properties:
@@ -333,6 +305,23 @@ components:
           type: string
         result:
           type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+    TransferTaskResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          $ref: '#/components/schemas/TransferTask'
         version:
           type: string
         commit:
@@ -354,17 +343,6 @@ components:
       - FAILED
       - FAILED_OPT
       - PAUSED
-    ReqTransfer:
-      required:
-      - elements
-      type: object
-      properties:
-        tag:
-          type: string
-        elements:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReqTransferElement'
     TransferTask:
       type: object
       properties:
@@ -425,7 +403,33 @@ components:
           type: string
         metadata:
           type: object
-    TransferTaskChild:
+    ReqTransferElement:
+      required:
+      - destinationURI
+      - sourceURI
+      type: object
+      properties:
+        sourceURI:
+          type: string
+        destinationURI:
+          type: string
+        optional:
+          type: boolean
+          default: false
+          description: Allow the full transfer to succeed even if this element fails.
+        transferType:
+          type: string
+          enum:
+          - TRANSFER
+          - SERVICE_MOVE_DIRECTORY_CONTENTS
+          - SERVICE_MOVE_FILE_OR_DIRECTORY
+          default: null
+          description: "If this value is set to anything other than TRANSFER, both the source and target MUST,\nbe on the same tapis system.  If the value is SERVICE_MOVE_DIRECTORY_CONTENTS, the \nsource URI is expected to be a directory, and the contents of that directory will be\ntransfered to the target URI.  The target must be an existing directory or the operation\nwill fail.  If the value is SERVICE_MOVE_FILE_OR_DIRECTORY the file or directory will\nbe moved to the target URI.  If the target already exists, it will be overwritten.\n"
+        srcSharedCtx:
+          $ref: '#/components/schemas/UserNameString'
+        destSharedCtx:
+          $ref: '#/components/schemas/UserNameString'
+    TransferTaskParent:
       type: object
       properties:
         tenantId:
@@ -445,16 +449,12 @@ components:
         taskId:
           type: integer
           format: int32
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransferTaskChild'
         errorMessage:
           type: string
-        parentTaskId:
-          type: integer
-          format: int32
-        retries:
-          type: integer
-          format: int32
-        dir:
-          type: boolean
         uuid:
           type: string
           description: Unique ID of the task.

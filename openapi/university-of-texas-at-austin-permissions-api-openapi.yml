@@ -605,6 +605,13 @@ components:
       type: string
       minLength: 1
       maxLength: 60
+    ResultNameArray:
+      type: object
+      properties:
+        names:
+          type: array
+          items:
+            type: string
     RespBasic:
       type: object
       properties:
@@ -622,17 +629,6 @@ components:
           type: object
         metadata:
           type: object
-    IdString:
-      type: string
-      minLength: 1
-      maxLength: 80
-    ResultNameArray:
-      type: object
-      properties:
-        names:
-          type: array
-          items:
-            type: string
     RespNameArray:
       type: object
       properties:
@@ -660,19 +656,10 @@ components:
           minItems: 1
           items:
             type: string
-    FilePermission:
-      type: object
-      properties:
-        tenantId:
-          type: string
-        username:
-          type: string
-        systemId:
-          type: string
-        path:
-          type: string
-        permission:
-          $ref: '#/components/schemas/PermEnum'
+    IdString:
+      type: string
+      minLength: 1
+      maxLength: 80
     FilePermissionResponse:
       type: object
       properties:
@@ -722,6 +709,19 @@ components:
       enum:
       - READ
       - MODIFY
+    FilePermission:
+      type: object
+      properties:
+        tenantId:
+          type: string
+        username:
+          type: string
+        systemId:
+          type: string
+        path:
+          type: string
+        permission:
+          $ref: '#/components/schemas/PermEnum'
   securitySchemes:
     TapisJWT:
       type: apiKey

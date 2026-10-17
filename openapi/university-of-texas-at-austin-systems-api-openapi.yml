@@ -1210,28 +1210,6 @@ paths:
       x-summary-source: derived
 components:
   schemas:
-    OperationTypeEnum:
-      type: string
-      enum:
-      - CREATE
-      - READ
-      - MODIFY
-      - EXECUTE
-      - DELETE
-      - UNDELETE
-      - CHANGE_OWNER
-      - ENABLE
-      - DISABLE
-      - GET_PERMS
-      - REVOKE_PERMS
-      - SET_CRED
-      - REMOVE_CRED
-      - GET_CRED
-    ResultBoolean:
-      type: object
-      properties:
-        aBool:
-          type: boolean
     RespSystem:
       type: object
       properties:
@@ -1249,176 +1227,23 @@ components:
           $ref: '#/components/schemas/TapisSystem'
         metadata:
           type: object
-    SysId:
-      type: string
-      minLength: 1
-      maxLength: 80
-      description: Short descriptive name for the system that is unique within the tenant.
-    AuthnEnum:
-      type: string
-      enum:
-      - PASSWORD
-      - PKI_KEYS
-      - ACCESS_KEY
-      - TOKEN
-      - TMS_KEYS
-      - CERT
-    Credential:
+    KeyValuePair:
       type: object
+      required:
+      - key
       properties:
-        authnMethod:
-          $ref: '#/components/schemas/AuthnEnum'
-        loginUser:
-          $ref: '#/components/schemas/UserNameString'
-        password:
-          type: string
-        privateKey:
-          type: string
-        publicKey:
-          type: string
-        accessKey:
-          type: string
-        accessSecret:
-          type: string
-        accessToken:
-          type: string
-        refreshToken:
-          type: string
-        tmsPrivateKey:
-          type: string
-        tmsPublicKey:
-          type: string
-        tmsFingerprint:
-          type: string
-        certificate:
-          type: string
-    DescriptionString:
-      type: string
-      maxLength: 2048
-      description: Optional more verbose description.
-    QueueNameString:
-      type: string
-      minLength: 1
-      maxLength: 128
-    Enabled:
-      type: boolean
-      default: true
-      description: Indicates if system is currently considered active and available for use.
-    ReqPutSystem:
-      type: object
-      properties:
-        description:
-          $ref: '#/components/schemas/DescriptionString'
-        host:
-          $ref: '#/components/schemas/SysHost'
-        defaultAuthnMethod:
-          $ref: '#/components/schemas/AuthnEnum'
-        port:
-          type: integer
-          format: int32
-        useProxy:
-          type: boolean
-          default: false
-        proxyHost:
-          $ref: '#/components/schemas/HostString'
-        proxyPort:
-          type: integer
-          format: int32
-        dtnSystemId:
-          $ref: '#/components/schemas/DtnSysId'
-        canRunBatch:
-          type: boolean
-          description: Indicates if system supports running jobs using a batch scheduler.
-        enableCmdPrefix:
-          type: boolean
-          default: false
-        allowChildren:
-          type: boolean
-          default: false
-          description: Indicates if system allows for the creation of child systems.
-        mpiCmd:
+        key:
           type: string
           minLength: 1
-          maxLength: 126
-        jobRuntimes:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/JobRuntime'
-        jobWorkingDir:
-          $ref: '#/components/schemas/DirString'
-        jobEnvVariables:
-          type: array
-          items:
-            $ref: '#/components/schemas/KeyValuePair'
-        jobMaxJobs:
-          type: integer
-        jobMaxJobsPerUser:
-          type: integer
-        batchScheduler:
-          $ref: '#/components/schemas/SchedulerTypeEnum'
-        batchLogicalQueues:
-          type: array
-          items:
-            $ref: '#/components/schemas/LogicalQueue'
-        batchDefaultLogicalQueue:
-          $ref: '#/components/schemas/QueueNameString'
-        batchSchedulerProfile:
-          $ref: '#/components/schemas/IdString'
-        jobCapabilities:
-          type: array
-          items:
-            $ref: '#/components/schemas/Capability'
-        tags:
-          type: array
-          items:
-            $ref: '#/components/schemas/TagString'
+        value:
+          type: string
+          default: ''
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        inputMode:
+          $ref: '#/components/schemas/KeyValueInputModeEnum'
         notes:
           type: object
-    ListTypeEnum:
-      type: string
-      default: OWNED
-      enum:
-      - OWNED
-      - SHARED_PUBLIC
-      - ALL
-    RespName:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          type: object
-        result:
-          $ref: '#/components/schemas/ResultName'
-    EffectiveUserId:
-      type: string
-      minLength: 1
-      maxLength: 60
-      default: ${apiUserId}
-      description: Username to use when accessing the system. A specific user (such as a service account) or the dynamic user ``${apiUserId}``.
-    TagString:
-      type: string
-      minLength: 1
-      maxLength: 128
-    ResultChangeCount:
-      type: object
-      properties:
-        changes:
-          type: integer
-          format: int32
-    HostString:
-      type: string
-      minLength: 1
-      maxLength: 256
     Capability:
       type: object
       required:
@@ -1436,12 +1261,7 @@ components:
           type: integer
         value:
           type: string
-    DtnSysId:
-      type: string
-      minLength: 1
-      maxLength: 80
-      description: An alternate system to use as a Data Transfer Node (DTN) during job execution.
-    RespBasic:
+    RespChangeCount:
       type: object
       properties:
         status:
@@ -1455,13 +1275,94 @@ components:
         build:
           type: string
         result:
-          type: object
+          $ref: '#/components/schemas/ResultChangeCount'
         metadata:
           type: object
-    DirString:
+    Enabled:
+      type: boolean
+      default: true
+      description: Indicates if system is currently considered active and available for use.
+    SchedulerTypeEnum:
+      type: string
+      enum:
+      - SLURM
+      - CONDOR
+      - PBS
+      - SGE
+      - UGE
+      - TORQUE
+    ListTypeEnum:
+      type: string
+      default: OWNED
+      enum:
+      - OWNED
+      - SHARED_PUBLIC
+      - ALL
+    ResultResourceUrl:
+      type: object
+      properties:
+        url:
+          type: string
+    ResultChangeCount:
+      type: object
+      properties:
+        changes:
+          type: integer
+          format: int32
+    RuntimeTypeEnum:
+      type: string
+      enum:
+      - DOCKER
+      - SINGULARITY
+      - ZIP
+    DatatypeEnum:
+      type: string
+      enum:
+      - STRING
+      - INTEGER
+      - BOOLEAN
+      - NUMBER
+      - TIMESTAMP
+    TagString:
       type: string
       minLength: 1
-      maxLength: 4096
+      maxLength: 128
+    SysId:
+      type: string
+      minLength: 1
+      maxLength: 80
+      description: Short descriptive name for the system that is unique within the tenant.
+    ReqSearchSystems:
+      type: object
+      required:
+      - search
+      properties:
+        search:
+          type: array
+          minItems: 1
+          items:
+            type: string
+    JobRuntime:
+      type: object
+      required:
+      - runtimeType
+      properties:
+        runtimeType:
+          $ref: '#/components/schemas/RuntimeTypeEnum'
+        version:
+          type: string
+    InputNameString:
+      type: string
+      minLength: 1
+      maxLength: 80
+    SystemTypeEnum:
+      type: string
+      description: Type of system
+      enum:
+      - LINUX
+      - S3
+      - IRODS
+      - GLOBUS
     TapisSystem:
       type: object
       properties:
@@ -1578,59 +1479,6 @@ components:
           type: array
           items:
             type: string
-    ParentSysId:
-      type: string
-      minLength: 1
-      maxLength: 80
-      description: Parent system associated with this child system.
-    RuntimeTypeEnum:
-      type: string
-      enum:
-      - DOCKER
-      - SINGULARITY
-      - ZIP
-    RespSystemHistory:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/SystemHistory'
-        metadata:
-          type: object
-    SysHost:
-      type: string
-      minLength: 1
-      maxLength: 256
-      description: FQDN, IP address, Globus endpoint ID or Globus collection ID.
-    JobRuntime:
-      type: object
-      required:
-      - runtimeType
-      properties:
-        runtimeType:
-          $ref: '#/components/schemas/RuntimeTypeEnum'
-        version:
-          type: string
-    SystemTypeEnum:
-      type: string
-      description: Type of system
-      enum:
-      - LINUX
-      - S3
-      - IRODS
-      - GLOBUS
     RespResourceUrl:
       type: object
       properties:
@@ -1648,12 +1496,6 @@ components:
           $ref: '#/components/schemas/ResultResourceUrl'
         metadata:
           type: object
-    BucketName:
-      type: string
-      description: Name of the bucket for an S3 type system.
-    EnvVarNameString:
-      type: string
-      minLength: 1
     CategoryEnum:
       type: string
       enum:
@@ -1665,75 +1507,92 @@ components:
       - CONTAINER
       - MISC
       - CUSTOM
-    ReqSearchSystems:
+    ReqMatchConstraints:
       type: object
       required:
-      - search
+      - match
       properties:
-        search:
+        match:
           type: array
           minItems: 1
           items:
             type: string
-    ResultResourceUrl:
-      type: object
-      properties:
-        url:
-          type: string
-    KeyValueInputModeEnum:
+    EnvVarNameString:
       type: string
-      enum:
-      - REQUIRED
-      - FIXED
-      - INCLUDE_ON_DEMAND
-      - INCLUDE_BY_DEFAULT
-      default: INCLUDE_BY_DEFAULT
-    SysArgSpec:
-      type: object
-      required:
-      - name
-      properties:
-        name:
-          $ref: '#/components/schemas/InputNameString'
-        description:
-          $ref: '#/components/schemas/ArgDescriptionString'
-        inputMode:
-          $ref: '#/components/schemas/SysArgInputModeEnum'
-        arg:
-          type: string
-          minLength: 1
-        notes:
-          type: object
-    InputNameString:
+      minLength: 1
+    DirString:
+      type: string
+      minLength: 1
+      maxLength: 4096
+    BucketName:
+      type: string
+      description: Name of the bucket for an S3 type system.
+    IdString:
       type: string
       minLength: 1
       maxLength: 80
-    KeyValuePair:
+    ReqPostPutCredential:
+      type: object
+      properties:
+        password:
+          type: string
+        privateKey:
+          type: string
+        publicKey:
+          type: string
+        accessKey:
+          type: string
+        accessSecret:
+          type: string
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        certificate:
+          type: string
+    LogicalQueue:
       type: object
       required:
-      - key
+      - name
+      - hpcQueueName
       properties:
-        key:
-          type: string
-          minLength: 1
-        value:
-          type: string
-          default: ''
+        name:
+          $ref: '#/components/schemas/QueueNameString'
         description:
           $ref: '#/components/schemas/DescriptionString'
-        inputMode:
-          $ref: '#/components/schemas/KeyValueInputModeEnum'
-        notes:
-          type: object
-    SchedulerTypeEnum:
+        hpcQueueName:
+          $ref: '#/components/schemas/QueueNameString'
+        maxJobs:
+          type: integer
+          default: 2147483647
+        maxJobsPerUser:
+          type: integer
+          default: 2147483647
+        minNodeCount:
+          type: integer
+        maxNodeCount:
+          type: integer
+        minCoresPerNode:
+          type: integer
+        maxCoresPerNode:
+          type: integer
+        minMemoryMB:
+          type: integer
+        maxMemoryMB:
+          type: integer
+        minMinutes:
+          type: integer
+        maxMinutes:
+          type: integer
+        schedulerOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SysArgSpec'
+    SysHost:
       type: string
-      enum:
-      - SLURM
-      - CONDOR
-      - PBS
-      - SGE
-      - UGE
-      - TORQUE
+      minLength: 1
+      maxLength: 256
+      description: FQDN, IP address, Globus endpoint ID or Globus collection ID.
     ReqPatchSystem:
       type: object
       properties:
@@ -1804,6 +1663,160 @@ components:
             $ref: '#/components/schemas/TagString'
         notes:
           type: object
+    RespSystemHistory:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/SystemHistory'
+        metadata:
+          type: object
+    SysArgSpec:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          $ref: '#/components/schemas/InputNameString'
+        description:
+          $ref: '#/components/schemas/ArgDescriptionString'
+        inputMode:
+          $ref: '#/components/schemas/SysArgInputModeEnum'
+        arg:
+          type: string
+          minLength: 1
+        notes:
+          type: object
+    ResultBoolean:
+      type: object
+      properties:
+        aBool:
+          type: boolean
+    UserNameString:
+      type: string
+      minLength: 1
+      maxLength: 60
+    RespBoolean:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultBoolean'
+        metadata:
+          type: object
+    AuthnEnum:
+      type: string
+      enum:
+      - PASSWORD
+      - PKI_KEYS
+      - ACCESS_KEY
+      - TOKEN
+      - TMS_KEYS
+      - CERT
+    ReqPutSystem:
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/DescriptionString'
+        host:
+          $ref: '#/components/schemas/SysHost'
+        defaultAuthnMethod:
+          $ref: '#/components/schemas/AuthnEnum'
+        port:
+          type: integer
+          format: int32
+        useProxy:
+          type: boolean
+          default: false
+        proxyHost:
+          $ref: '#/components/schemas/HostString'
+        proxyPort:
+          type: integer
+          format: int32
+        dtnSystemId:
+          $ref: '#/components/schemas/DtnSysId'
+        canRunBatch:
+          type: boolean
+          description: Indicates if system supports running jobs using a batch scheduler.
+        enableCmdPrefix:
+          type: boolean
+          default: false
+        allowChildren:
+          type: boolean
+          default: false
+          description: Indicates if system allows for the creation of child systems.
+        mpiCmd:
+          type: string
+          minLength: 1
+          maxLength: 126
+        jobRuntimes:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/JobRuntime'
+        jobWorkingDir:
+          $ref: '#/components/schemas/DirString'
+        jobEnvVariables:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        jobMaxJobs:
+          type: integer
+        jobMaxJobsPerUser:
+          type: integer
+        batchScheduler:
+          $ref: '#/components/schemas/SchedulerTypeEnum'
+        batchLogicalQueues:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogicalQueue'
+        batchDefaultLogicalQueue:
+          $ref: '#/components/schemas/QueueNameString'
+        batchSchedulerProfile:
+          $ref: '#/components/schemas/IdString'
+        jobCapabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Capability'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagString'
+        notes:
+          type: object
+    KeyValueInputModeEnum:
+      type: string
+      enum:
+      - REQUIRED
+      - FIXED
+      - INCLUDE_ON_DEMAND
+      - INCLUDE_BY_DEFAULT
+      default: INCLUDE_BY_DEFAULT
+    DescriptionString:
+      type: string
+      maxLength: 2048
+      description: Optional more verbose description.
     ReqPostSystem:
       type: object
       required:
@@ -1906,75 +1919,23 @@ components:
         notes:
           type: object
           description: Metadata in the form of a Json object. Not used by Tapis.
-    UserNameApiDefaultString:
-      type: string
-      minLength: 1
-      maxLength: 60
-      default: ${apiUserId}
-    ReqPostPutCredential:
+    RespName:
       type: object
       properties:
-        password:
+        status:
           type: string
-        privateKey:
+        message:
           type: string
-        publicKey:
+        version:
           type: string
-        accessKey:
+        commit:
           type: string
-        accessSecret:
+        build:
           type: string
-        accessToken:
-          type: string
-        refreshToken:
-          type: string
-        certificate:
-          type: string
-    SystemHistory:
-      type: object
-      properties:
-        jwtTenant:
-          type: string
-        jwtUser:
-          $ref: '#/components/schemas/UserNameString'
-        oboTenant:
-          type: string
-        oboUser:
-          $ref: '#/components/schemas/UserNameString'
-        operation:
-          $ref: '#/components/schemas/OperationTypeEnum'
-        description:
-          type: string
-        created:
-          type: string
-    UserNameString:
-      type: string
-      minLength: 1
-      maxLength: 60
-    RootDir:
-      type: string
-      maxLength: 4096
-      description: Effective root directory to be used when listing files or moving files to and from the system.
-    DatatypeEnum:
-      type: string
-      enum:
-      - STRING
-      - INTEGER
-      - BOOLEAN
-      - NUMBER
-      - TIMESTAMP
-    ResultName:
-      type: object
-      properties:
-        name:
-          type: string
-    IdString:
-      type: string
-      minLength: 1
-      maxLength: 80
-    ArgDescriptionString:
-      type: string
-      maxLength: 8096
+        metadata:
+          type: object
+        result:
+          $ref: '#/components/schemas/ResultName'
     SysArgInputModeEnum:
       type: string
       enum:
@@ -1983,7 +1944,7 @@ components:
       - INCLUDE_ON_DEMAND
       - INCLUDE_BY_DEFAULT
       default: INCLUDE_BY_DEFAULT
-    RespBoolean:
+    RespBasic:
       type: object
       properties:
         status:
@@ -1997,9 +1958,30 @@ components:
         build:
           type: string
         result:
-          $ref: '#/components/schemas/ResultBoolean'
+          type: object
         metadata:
           type: object
+    ResultName:
+      type: object
+      properties:
+        name:
+          type: string
+    ArgDescriptionString:
+      type: string
+      maxLength: 8096
+    QueueNameString:
+      type: string
+      minLength: 1
+      maxLength: 128
+    DtnSysId:
+      type: string
+      minLength: 1
+      maxLength: 80
+      description: An alternate system to use as a Data Transfer Node (DTN) during job execution.
+    HostString:
+      type: string
+      minLength: 1
+      maxLength: 256
     RespSystems:
       type: object
       properties:
@@ -2032,71 +2014,89 @@ components:
               type: string
             totalCount:
               type: integer
-    RespChangeCount:
+    UserNameApiDefaultString:
+      type: string
+      minLength: 1
+      maxLength: 60
+      default: ${apiUserId}
+    SystemHistory:
       type: object
       properties:
-        status:
+        jwtTenant:
           type: string
-        message:
+        jwtUser:
+          $ref: '#/components/schemas/UserNameString'
+        oboTenant:
           type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        result:
-          $ref: '#/components/schemas/ResultChangeCount'
-        metadata:
-          type: object
-    LogicalQueue:
-      type: object
-      required:
-      - name
-      - hpcQueueName
-      properties:
-        name:
-          $ref: '#/components/schemas/QueueNameString'
+        oboUser:
+          $ref: '#/components/schemas/UserNameString'
+        operation:
+          $ref: '#/components/schemas/OperationTypeEnum'
         description:
-          $ref: '#/components/schemas/DescriptionString'
-        hpcQueueName:
-          $ref: '#/components/schemas/QueueNameString'
-        maxJobs:
-          type: integer
-          default: 2147483647
-        maxJobsPerUser:
-          type: integer
-          default: 2147483647
-        minNodeCount:
-          type: integer
-        maxNodeCount:
-          type: integer
-        minCoresPerNode:
-          type: integer
-        maxCoresPerNode:
-          type: integer
-        minMemoryMB:
-          type: integer
-        maxMemoryMB:
-          type: integer
-        minMinutes:
-          type: integer
-        maxMinutes:
-          type: integer
-        schedulerOptions:
-          type: array
-          items:
-            $ref: '#/components/schemas/SysArgSpec'
-    ReqMatchConstraints:
+          type: string
+        created:
+          type: string
+    RootDir:
+      type: string
+      maxLength: 4096
+      description: Effective root directory to be used when listing files or moving files to and from the system.
+    OperationTypeEnum:
+      type: string
+      enum:
+      - CREATE
+      - READ
+      - MODIFY
+      - EXECUTE
+      - DELETE
+      - UNDELETE
+      - CHANGE_OWNER
+      - ENABLE
+      - DISABLE
+      - GET_PERMS
+      - REVOKE_PERMS
+      - SET_CRED
+      - REMOVE_CRED
+      - GET_CRED
+    ParentSysId:
+      type: string
+      minLength: 1
+      maxLength: 80
+      description: Parent system associated with this child system.
+    Credential:
       type: object
-      required:
-      - match
       properties:
-        match:
-          type: array
-          minItems: 1
-          items:
-            type: string
+        authnMethod:
+          $ref: '#/components/schemas/AuthnEnum'
+        loginUser:
+          $ref: '#/components/schemas/UserNameString'
+        password:
+          type: string
+        privateKey:
+          type: string
+        publicKey:
+          type: string
+        accessKey:
+          type: string
+        accessSecret:
+          type: string
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tmsPrivateKey:
+          type: string
+        tmsPublicKey:
+          type: string
+        tmsFingerprint:
+          type: string
+        certificate:
+          type: string
+    EffectiveUserId:
+      type: string
+      minLength: 1
+      maxLength: 60
+      default: ${apiUserId}
+      description: Username to use when accessing the system. A specific user (such as a service account) or the dynamic user ``${apiUserId}``.
   securitySchemes:
     TapisJWT:
       type: apiKey

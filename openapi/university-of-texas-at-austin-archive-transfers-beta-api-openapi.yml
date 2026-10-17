@@ -178,23 +178,6 @@ components:
           type: string
         metadata:
           type: object
-    StringResponse:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        result:
-          type: string
-        version:
-          type: string
-        commit:
-          type: string
-        build:
-          type: string
-        metadata:
-          type: object
     ArchiveTransferResult:
       type: object
       properties:
@@ -238,6 +221,23 @@ components:
           type: string
         destSharedCtxGrantor:
           type: string
+    StringResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
     ArchiveTransferRequest:
       type: object
       properties:
